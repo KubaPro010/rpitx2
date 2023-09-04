@@ -1,8 +1,10 @@
 ![rpitx banner](/doc/rpitxlogo.png)
-# About rpitx
-**rpitx** is a general radio frequency transmitter for Raspberry Pi which doesn't require any other hardware unless filter to avoid intererence. It can handle frequencies from 5 KHz up to 1500 MHz.
+# About rpitx2
+**rpitx2** is a general radio frequency transmitter for Raspberry Pi which doesn't require any other hardware unless filter to avoid intererence. It can handle frequencies from 5 KHz up to 1500 MHz.
 
-Rpitx is a software made for educational on RF system. It has not been tested for compliance with regulations governing transmission of radio signals. You are responsible for using your Raspberry Pi legally.
+Rpitx2 is a software made for educational on RF system. It has not been tested for compliance with regulations governing transmission of radio signals. You are responsible for using your Raspberry Pi legally.
+
+RPITX2 IS BASED ON RPITX
 
 A forum is available : https://groups.io/g/rpitx
 
@@ -20,11 +22,11 @@ sudo apt-get install git
 You can now clone the repository. A script (install.sh) is there for easy installation. You could inspect it and make steps manualy in case of any doubt. You can note that /boot/config.txt should be prompt to be modified during the installation. If it is not accepted, **rpitx** will be unstable.  
 
 ```sh
-git clone https://github.com/F5OEO/rpitx
+git clone https://github.com/KubaPro010/rpitx2
 cd rpitx
 ./install.sh
 ```
-Make a reboot in order to use **rpitx** in a stable state.
+Make a reboot in order to use **rpitx2** in a stable state.
 That's it !
 ```sh
 sudo reboot
@@ -43,6 +45,7 @@ sudo reboot
 | P2B|OK|
 | Pi3B|OK|
 | Pi3B+|OK|
+| Pi3A+|OK|
 | Pi4|In beta mode|
 
 Plug a wire on GPIO 4, means Pin 7 of the GPIO header ([header P1](http://elinux.org/RPi_Low-level_peripherals#General_Purpose_Input.2FOutput_.28GPIO.29)). This acts as the antenna. The optimal length of the wire depends the frequency you want to transmit on, but it works with a few centimeters for local testing.
