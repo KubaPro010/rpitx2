@@ -1,0 +1,54 @@
+# Compiled Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Precompiled Headers
+*.gch
+
+# Generated files
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+Testing/
+
+# Dependency files
+Makefile
+CMakeLists.txt.user
+CMakeLists.txt.user.*
+
+# User-specific files
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln
+*.sdf
+*.opensdf
+*.xcodeproj/
+*.xcworkspace/
+
+# Editor-specific files
+*~
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# System files
+Thumbs.db
+.DS_Store
+
+# Libraries
+lib/
+lib64/
