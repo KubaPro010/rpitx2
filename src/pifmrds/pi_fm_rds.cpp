@@ -1,94 +1,3 @@
-/*
- * PiFmRds - FM/RDS transmitter for the Raspberry Pi
- * Copyright (C) 2018 Evariste Courjaud, F5OEO	
- * Copyright (C) 2014, 2015 Christophe Jacquet, F8FTK
- * Copyright (C) 2012, 2015 Richard Hirst
- * Copyright (C) 2012 Oliver Mattos and Oskar Weigl
- *
- * See https://github.com/ChristopheJacquet/PiFmRds
- *
- * PI-FM-RDS: RaspberryPi FM transmitter, with RDS. 
- *
- * This file contains the VHF FM modulator. All credit goes to the original
- * authors, Oliver Mattos and Oskar Weigl for the original idea, and to
- * Richard Hirst for using the Pi's DMA engine, which reduced CPU usage
- * dramatically.
- *
- * I (Christophe Jacquet) have adapted their idea to transmitting samples
- * at 228 kHz, allowing to build the 57 kHz subcarrier for RDS BPSK data.
- *
- * To make it work on the Raspberry Pi 2, I used a fix by Richard Hirst
- * (again) to request memory using Broadcom's mailbox interface. This fix
- * was published for ServoBlaster here:
- * https://www.raspberrypi.org/forums/viewtopic.php?p=699651#p699651
- *
- * Never use this to transmit VHF-FM data through an antenna, as it is
- * illegal in most countries. This code is for testing purposes only.
- * Always connect a shielded transmission line from the RaspberryPi directly
- * to a radio receiver, so as *not* to emit radio waves.
- *
- * ---------------------------------------------------------------------------
- * These are the comments from Richard Hirst's version:
- *
- * RaspberryPi based FM transmitter.  For the original idea, see:
- *
- * http://www.icrobotics.co.uk/wiki/index.php/Turning_the_Raspberry_Pi_Into_an_FM_Transmitter
- *
- * All credit to Oliver Mattos and Oskar Weigl for creating the original code.
- * 
- * I have taken their idea and reworked it to use the Pi DMA engine, so
- * reducing the CPU overhead for playing a .wav file from 100% to about 1.6%.
- *
- * I have implemented this in user space, using an idea I picked up from Joan
- * on the Raspberry Pi forums - credit to Joan for the DMA from user space
- * idea.
- *
- * The idea of feeding the PWM FIFO in order to pace DMA control blocks comes
- * from ServoBlaster, and I take credit for that :-)
- *
- * This code uses DMA channel 5 and the PWM hardware, with no regard for
- * whether something else might be trying to use it at the same time (such as
- * the 3.5mm jack audio driver).
- *
- * I know nothing much about sound, subsampling, or FM broadcasting, so it is
- * quite likely the sound quality produced by this code can be improved by
- * someone who knows what they are doing.  There may be issues realting to
- * caching, as the user space process just writes to its virtual address space,
- * and expects the DMA controller to see the data; it seems to work for me
- * though.
- *
- * NOTE: THIS CODE MAY WELL CRASH YOUR PI, TRASH YOUR FILE SYSTEMS, AND
- * POTENTIALLY EVEN DAMAGE YOUR HARDWARE.  THIS IS BECAUSE IT STARTS UP THE DMA
- * CONTROLLER USING MEMORY OWNED BY A USER PROCESS.  IF THAT USER PROCESS EXITS
- * WITHOUT STOPPING THE DMA CONTROLLER, ALL HELL COULD BREAK LOOSE AS THE
- * MEMORY GETS REALLOCATED TO OTHER PROCESSES WHILE THE DMA CONTROLLER IS STILL
- * USING IT.  I HAVE ATTEMPTED TO MINIMISE ANY RISK BY CATCHING SIGNALS AND
- * RESETTING THE DMA CONTROLLER BEFORE EXITING, BUT YOU HAVE BEEN WARNED.  I
- * ACCEPT NO LIABILITY OR RESPONSIBILITY FOR ANYTHING THAT HAPPENS AS A RESULT
- * OF YOU RUNNING THIS CODE.  IF IT BREAKS, YOU GET TO KEEP ALL THE PIECES.
- *
- * NOTE ALSO:  THIS MAY BE ILLEGAL IN YOUR COUNTRY.  HERE ARE SOME COMMENTS
- * FROM MORE KNOWLEDGEABLE PEOPLE ON THE FORUM:
- *
- * "Just be aware that in some countries FM broadcast and especially long
- * distance FM broadcast could get yourself into trouble with the law, stray FM
- * broadcasts over Airband aviation is also strictly forbidden."
- *
- * "A low pass filter is really really required for this as it has strong
- * harmonics at the 3rd, 5th 7th and 9th which sit in licensed and rather
- * essential bands, ie GSM, HAM, emergency services and others. Polluting these
- * frequencies is immoral and dangerous, whereas "breaking in" on FM bands is
- * just plain illegal."
- *
- * "Don't get caught, this GPIO use has the potential to exceed the legal
- * limits by about 2000% with a proper aerial."
- *
- *
- * As for the original code, this code is released under the GPL.
- *
- * Richard Hirst <richardghirst@gmail.com>  December 2012
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -116,20 +25,43 @@ extern "C"
 
 ngfmdmasync *fmmod;
 // The deviation specifies how wide the signal is. 
-// Use 75kHz for WBFM (broadcast radio) 
-// and about 2.5kHz for NBFM (walkie-talkie style radio)
+// Use 75kHz for WFM (broadcast radio) 
+// and about 2.5kHz for NFM (walkie-talkie style radio)
 #define DEVIATION        75000
-//FOR NBFM
+//FOR NFM
 //#define DEVIATION        2500 
+static volatile uint32_t *pad_reg;
+#define GPIO_PAD_0_27                   (0x2C/4)
+#define GPIO_PAD_28_45                  (0x30/4)
+#define PI 3
+
+#if (PI) == 1 //Original
+#define PERIPH_VIRT_BASE                0x20000000
+#elif (PI) == 2
+#define PERIPH_VIRT_BASE                0x3f000000
+#elif (PI) == 3
+#define PERIPH_VIRT_BASE                0x3f000000
+#elif (PI) == 4
+#define PERIPH_VIRT_BASE                0xfe000000
+#else
+#error Unknown Raspberry Pi version (variable PI)
+#endif
+
+#define SUBSIZE 512
+#define DATA_SIZE 5000
+
+#define PAD_LEN                         (0x40/4) //0x64
+#define PAD_BASE_OFFSET                 0x00100000
+#define PAD_VIRT_BASE                   (PERIPH_VIRT_BASE + PAD_BASE_OFFSET)
 
 static void
 terminate(int num)
 {
     delete fmmod;
+    pad_reg[GPIO_PAD_0_27] = 0x5a000018 + 7; //Set origial power, just in case
+    pad_reg[GPIO_PAD_28_45] = 0x5a000018 + 7;
     fm_mpx_close();
     close_control_pipe();
-
-    
     exit(num);
 }
 
@@ -137,21 +69,25 @@ static void
 fatal(char *fmt, ...)
 {
     va_list ap;
-
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
     terminate(0);
 }
 
-
-
-
-#define SUBSIZE 512
-#define DATA_SIZE 5000
-
-
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw) {
+static volatile void *map_peripheral(uint32_t base, uint32_t len)
+{
+    int fd = open("/dev/mem", O_RDWR | O_SYNC);
+    void * vaddr;
+    if (fd < 0)
+        fatal("Failed to open /dev/mem: %m.\n");
+    vaddr = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, base);
+    if (vaddr == MAP_FAILED)
+        fatal("Failed to map peripheral at 0x%08x: %m.\n", base);
+    close(fd);
+    return vaddr;
+}
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels) {
     // Catch all signals possible - it is vital we kill the DMA engine
     // on process exit!
     for (int i = 0; i < 64; i++) {
@@ -161,8 +97,11 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
         sa.sa_handler = terminate;
         sigaction(i, &sa, NULL);
     }
-        
-   
+
+    //Set the Power
+    pad_reg = (volatile uint32_t *)map_peripheral(PAD_VIRT_BASE, PAD_LEN);
+    pad_reg[GPIO_PAD_0_27] = 0x5a000018 + power;
+    pad_reg[GPIO_PAD_28_45] = 0x5a000018 + power;
 
     // Data structures for baseband data
     float data[DATA_SIZE];
@@ -171,7 +110,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     int data_index = 0;
 
     // Initialize the baseband generator
-    if(fm_mpx_open(audio_file, DATA_SIZE, raw) < 0) return 1;
+    if(fm_mpx_open(audio_file, DATA_SIZE, raw, preemp, rawSampleRate, rawChannels) < 0) return 1;
     
     // Initialize the RDS modulator
     char myps[9] = {0};
@@ -185,69 +124,72 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     uint16_t count = 0;
     uint16_t count2 = 0;
     int varying_ps = 0;
-    
-    if(ps) {
-        set_rds_ps(ps);
-        printf("PI: %04X, PS: \"%s\".\n", pi, ps);
-    } else {
-        printf("PI: %04X, PS: <Varying>.\n", pi);
-        varying_ps = 1;
-    }
-    printf("RT: \"%s\"\n", rt);
 
-    if(af_array[0]) {
-        set_rds_af(af_array);
-        printf("AF: ");
-        int f;
-        for(f = 1; f < af_array[0]+1; f++) {
-            printf("%f Mhz ", (float)(af_array[f]+875)/10);
-        }
-        printf("\n");
-    }
-    
-    // Initialize the control pipe reader
-    if(control_pipe) {
-        if(open_control_pipe(control_pipe) == 0) {
-            printf("Reading control commands on %s.\n", control_pipe);
+    if(drds == 1) {
+        printf("RDS Disabled (control pipe too)\n");
+    } else {
+        if(ps) {
+            set_rds_ps(ps);
+            printf("PI: %04X, PS: \"%s\".\n", pi, ps);
         } else {
-            printf("Failed to open control pipe: %s.\n", control_pipe);
-            control_pipe = NULL;
+            printf("PI: %04X, PS: <Varying>.\n", pi);
+            varying_ps = 1;
+        }
+        printf("RT: \"%s\"\n", rt);
+
+        if(af_array[0]) {
+            set_rds_af(af_array);
+            printf("AF: ");
+            int f;
+            for(f = 1; f < af_array[0]+1; f++) {
+                printf("%f Mhz ", (float)(af_array[f]+875)/10);
+            }
+            printf("\n");
+        }
+
+        // Initialize the control pipe reader
+        if(control_pipe) {
+            if(open_control_pipe(control_pipe) == 0) {
+                printf("Reading control commands on %s.\n", control_pipe);
+            } else {
+                printf("Failed to open control pipe: %s.\n", control_pipe);
+                control_pipe = NULL;
+            }
         }
     }
     
     
     printf("Starting to transmit on %3.1f MHz.\n", carrier_freq/1e6);
 
-	
     float deviation_scale_factor;
     //if( divider ) // PLL modulation
     {   // note samples are [-10:10]
         deviation_scale_factor=  0.1 * (DEVIATION ) ; // todo PPM
     }
     
-
-
     for (;;) 
 	{
-        // Default (varying) PS
-        if(varying_ps) {
-            if(count == 512) {
-                snprintf(myps, 9, "%08d", count2);
-                set_rds_ps(myps);
-                count2++;
+        if(drds == 0) {
+            // Default (varying) PS
+            if(varying_ps) {
+                if(count == 512) {
+                    snprintf(myps, 9, "%08d", count2);
+                    set_rds_ps(myps);
+                    count2++;
+                }
+                if(count == 1024) {
+                    set_rds_ps("RPi-Live");
+                    count = 0;
+                }
+                count++;
             }
-            if(count == 1024) {
-                set_rds_ps("RPi-Live");
-                count = 0;
-            }
-            count++;
         }
         
         if(control_pipe && poll_control_pipe() == CONTROL_PIPE_PS_SET) {
             varying_ps = 0;
         }
         
-			if( fm_mpx_get_samples(data) < 0 ) {
+			if( fm_mpx_get_samples(data, drds) < 0 ) {
                     terminate(0);
                 }
                 data_len = DATA_SIZE;
@@ -266,16 +208,20 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
 
 
 int main(int argc, char **argv) {
-    printf("THIS IS R27'S MODIFIED BROADCAST SOFTWARE, USE ONLY INSIDE ONLY FOR NewPie\n");
     char *audio_file = NULL;
     char *control_pipe = NULL;
-    uint32_t carrier_freq = 891000000;
-    char *ps = "Radio 27";
-    char *rt = "Test Nadajnika";
-    uint16_t pi = 0x9AF7;
+    uint32_t carrier_freq = 100000000;
+    char *ps = "Pi-FmSa";
+    char *rt = "Broadcasting on a Raspberry Pi: Simply Advanced";
+    uint16_t pi = 0x1234;
     int pty = 0;
     int af_size = 0;
     int raw = 0;
+    int drds = 0;
+    int power = 7;
+    int rawSampleRate = 44100;
+    int rawChannels = 2;
+    double preemp = 50e-6;
     int alternative_freq[100] = {};
    
     float ppm = 0;
@@ -288,14 +234,14 @@ int main(int argc, char **argv) {
         
         if(arg[0] == '-' && i+1 < argc) param = argv[i+1];
         
-        if((strcmp("-wav", arg)==0 || strcmp("-audio", arg)==0) && param != NULL) {
+        if((strcmp("-audio", arg)==0) && param != NULL) {
             i++;
             audio_file = param;
         } else if(strcmp("-freq", arg)==0 && param != NULL) {
             i++;
             carrier_freq = 1e6 * atof(param);
-            if(carrier_freq < 40e6 || carrier_freq > 108e6)
-               fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 76 and 108.\n");
+            if(carrier_freq < 64e6 || carrier_freq > 108e6)
+               fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (for UKF radios, such as the Jowita)\n");
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
             pi = (uint16_t) strtol(param, NULL, 16);
@@ -314,9 +260,25 @@ int main(int argc, char **argv) {
         } else if(strcmp("-ctl", arg)==0 && param != NULL) {
             i++;
             control_pipe = param;
+        } else if(strcmp("-power", arg)==0 && param != NULL) {
+            i++;
+            int tpower = atoi(param);
+            if(tpower > 7 || tpower < 0) {
+                fatal("Power can be between 0 and 7");
+            } else {
+                power = tpower;
+            }
         } else if(strcmp("-raw", arg)==0) {
             i++;
             raw = 1;
+        } else if(strcmp("-disablerds", arg)==0) {
+            i++;
+            drds = 1;
+        } else if(strcmp("-preemphasis", arg)==0 && param != NULL) {
+            i++;
+            if(strcmp("us", param)==0) {
+                preemp = 75e-6;
+            }
         } else if(strcmp("-af", arg)==0 && param != NULL) {
             i++;
             af_size++;
@@ -328,12 +290,11 @@ int main(int argc, char **argv) {
         else {
             fatal("Unrecognised argument: %s.\n"
             "Syntax: pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code]\n"
-            "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-af alt freq]\n", arg);
+            "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us]\n", arg);
         }
     }
 	int FifoSize=DATA_SIZE*2;
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize);
-    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw);
-    
+    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels);
     terminate(errcode);
 }

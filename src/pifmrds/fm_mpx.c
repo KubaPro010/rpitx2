@@ -81,7 +81,7 @@ float *alloc_empty_buffer(size_t length) {
 }
 
 
-int fm_mpx_open(char *filename, size_t len, int raw) {
+int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels) {
     length = len;
     raw_ = raw;
 
@@ -91,8 +91,8 @@ int fm_mpx_open(char *filename, size_t len, int raw) {
 
         if(raw) {
             sfinfo.format = SF_FORMAT_RAW | SF_FORMAT_PCM_16;
-            sfinfo.samplerate = 44100;
-            sfinfo.channels = 2;
+            sfinfo.samplerate = rawSampleRate;
+            sfinfo.channels = rawChannels;
         }
  
         // stdin or file on the filesystem?
@@ -126,7 +126,7 @@ int fm_mpx_open(char *filename, size_t len, int raw) {
     
         // Choose a cutoff frequency for the low-pass FIR filter
         float cutoff_freq = 15700;
-		//float cutoff_freq = 3000; //For NBFM
+		//float cutoff_freq = 3000; //For NFM
         if(in_samplerate/2 < cutoff_freq) cutoff_freq = in_samplerate/2 * .8;
    
 
@@ -136,7 +136,7 @@ int fm_mpx_open(char *filename, size_t len, int raw) {
 
         // IIR pre-emphasis filter
         // Reference material:    http://jontio.zapto.org/hda1/preempiir.pdf
-        double tau=50e-6;
+        double tau=preemphasis;
         double delta=1.96e-6;
         double taup, deltap, bp, ap, a0, a1, b1;
         taup=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*tau*(in_samplerate*FIR_PHASES) ));
@@ -196,8 +196,8 @@ int fm_mpx_open(char *filename, size_t len, int raw) {
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer) {
-    get_rds_samples(mpx_buffer, length);
+int fm_mpx_get_samples(float *mpx_buffer, int drds) {
+    if(!drds) get_rds_samples(mpx_buffer, length);
 
     if(inf == NULL) return 0; // if there is no audio, stop here
     
@@ -311,6 +311,8 @@ int fm_mpx_get_samples(float *mpx_buffer) {
           out_right=out_right/(right_max+compressor_max_gain_recip);
         }
         out_left= out_left/(left_max+compressor_max_gain_recip); // Adjust volume with limited maximum gain
+
+        if(drds) mpx_buffer[i] = 0;
  
         // Generate the stereo mpx
         if( channels > 1 ) {

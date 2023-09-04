@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     char *in_file = argv[1];
     if(strcmp("NONE", argv[1]) == 0) in_file = NULL;
     
-    if(fm_mpx_open(in_file, LENGTH, 0) != 0) {
+    if(fm_mpx_open(in_file, LENGTH, 0, 0, 44100, 2) != 0) {
         printf("Could not setup FM mulitplex generator.\n");
         return EXIT_FAILURE;
     }
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
     float mpx_buffer[LENGTH];
 
     for(int j=0; j<40; j++) {
-        if( fm_mpx_get_samples(mpx_buffer) < 0 ) break;
+        if( fm_mpx_get_samples(mpx_buffer, 0) < 0 ) break;
         
         // scale samples
         for(int i=0; i<LENGTH; i++) {
