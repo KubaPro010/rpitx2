@@ -27,7 +27,7 @@ ngfmdmasync *fmmod;
 // The deviation specifies how wide the signal is. 
 // Use 75kHz for WFM (broadcast radio) 
 // and about 2.5kHz for NFM (walkie-talkie style radio)
-#define DEVIATION        75000
+//#define DEVIATION        75000
 //FOR NFM
 //#define DEVIATION        2500 
 static volatile uint32_t *pad_reg;
@@ -58,7 +58,7 @@ static void
 terminate(int num)
 {
     delete fmmod;
-    pad_reg[GPIO_PAD_0_27] = 0x5a000018 + 7; //Set origial power, just in case
+    pad_reg[GPIO_PAD_0_27] = 0x5a000018 + 7; //Set original power, just in case
     pad_reg[GPIO_PAD_28_45] = 0x5a000018 + 7;
     fm_mpx_close();
     close_control_pipe();
@@ -87,7 +87,7 @@ static volatile void *map_peripheral(uint32_t base, uint32_t len)
     close(fd);
     return vaddr;
 }
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels) {
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation) {
     // Catch all signals possible - it is vital we kill the DMA engine
     // on process exit!
     for (int i = 0; i < 64; i++) {
@@ -164,7 +164,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     float deviation_scale_factor;
     //if( divider ) // PLL modulation
     {   // note samples are [-10:10]
-        deviation_scale_factor=  0.1 * (DEVIATION ) ; // todo PPM
+        deviation_scale_factor=  0.1 * (deviation ) ; // todo PPM
     }
     
     for (;;) 
@@ -222,18 +222,18 @@ int main(int argc, char **argv) {
     int rawSampleRate = 44100;
     int rawChannels = 2;
     double preemp = 50e-6;
+    int deviation = 75000;
     int alternative_freq[100] = {};
    
     float ppm = 0;
-    
+
+    int custom_deviation = 0;
     
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
         char *arg = argv[i];
         char *param = NULL;
-        
         if(arg[0] == '-' && i+1 < argc) param = argv[i+1];
-        
         if((strcmp("-audio", arg)==0) && param != NULL) {
             i++;
             audio_file = param;
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
             i++;
             carrier_freq = 1e6 * atof(param);
             if(carrier_freq < 64e6 || carrier_freq > 108e6)
-               fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (for UKF radios, such as the Jowita)\n");
+               fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for UKF radios, such as the UNITRA Jowita or other old band FM Radios)\n");
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
             pi = (uint16_t) strtol(param, NULL, 16);
@@ -260,6 +260,23 @@ int main(int argc, char **argv) {
         } else if(strcmp("-ctl", arg)==0 && param != NULL) {
             i++;
             control_pipe = param;
+        } else if(strcmp("-deviation", arg)==0 && param != NULL) {
+            i++;
+            custom_deviation = 1;
+            if(strcmp("ukf", param)==0) {
+                deviation = 65000; //i don't know the original bandwidht, but when testing on an UNITRA LIZA R-203, the sound doesn't sound out of order, correct this if im wrong
+            } else if(strcmp("nfm", param)==0) {
+                deviation = 2500;
+            } 
+            else {
+                deviation = atoi(param);
+            }
+        } else if(strcmp("-rawchannels", arg)==0 && param != NULL) {
+            i++;
+            rawChannels = atoi(param);
+        } else if(strcmp("-rawsamplerate", arg)==0 && param != NULL) {
+            i++;
+            rawSampleRate = atoi(param);
         } else if(strcmp("-power", arg)==0 && param != NULL) {
             i++;
             int tpower = atoi(param);
@@ -290,11 +307,14 @@ int main(int argc, char **argv) {
         else {
             fatal("Unrecognised argument: %s.\n"
             "Syntax: pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code]\n"
-            "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us]\n", arg);
+            "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm]\n", arg);
         }
+    }
+    if(custom_deviation == 1) { //dont hurt me, ik this may be not important, but im a python dev, not a c or c++, forgive (notice how i said "may")
+        printf("You've set a custom deviation (like not the default one), the RDS may be broken, just a warning");
     }
 	int FifoSize=DATA_SIZE*2;
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize);
-    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels);
+    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation);
     terminate(errcode);
 }
