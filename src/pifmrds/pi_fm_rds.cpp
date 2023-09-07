@@ -49,7 +49,6 @@ static volatile uint32_t *pad_reg;
 
 #define SUBSIZE 512
 #define DATA_SIZE 5000
-
 #define PAD_LEN                         (0x40/4) //0x64
 #define PAD_BASE_OFFSET                 0x00100000
 #define PAD_VIRT_BASE                   (PERIPH_VIRT_BASE + PAD_BASE_OFFSET)
@@ -87,6 +86,7 @@ static volatile void *map_peripheral(uint32_t base, uint32_t len)
     close(fd);
     return vaddr;
 }
+
 int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation) {
     // Catch all signals possible - it is vital we kill the DMA engine
     // on process exit!
@@ -98,7 +98,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
         sigaction(i, &sa, NULL);
     }
 
-    //Set the Power
+    //Set the power
     pad_reg = (volatile uint32_t *)map_peripheral(PAD_VIRT_BASE, PAD_LEN);
     pad_reg[GPIO_PAD_0_27] = 0x5a000018 + power;
     pad_reg[GPIO_PAD_28_45] = 0x5a000018 + power;
@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
     int power = 7;
     int rawSampleRate = 44100;
     int rawChannels = 2;
-    double preemp = 50e-6;
+    double preemp = 50e-6; //eu
     int deviation = 75000;
     int alternative_freq[100] = {};
    
@@ -267,6 +267,8 @@ int main(int argc, char **argv) {
                 deviation = 65000; //i don't know the original bandwidht, but when testing on an UNITRA LIZA R-203, the sound doesn't sound out of order, correct this if im wrong
             } else if(strcmp("nfm", param)==0) {
                 deviation = 2500;
+                drds = 1;
+                custom_deviation = 2;
             } 
             else {
                 deviation = atoi(param);
@@ -294,14 +296,14 @@ int main(int argc, char **argv) {
         } else if(strcmp("-preemphasis", arg)==0 && param != NULL) {
             i++;
             if(strcmp("us", param)==0) {
-                preemp = 75e-6;
+                preemp = 75e-6; //usa
             }
         } else if(strcmp("-af", arg)==0 && param != NULL) {
             i++;
             af_size++;
             alternative_freq[af_size] = (int)(10*atof(optarg))-875;
             if(alternative_freq[af_size] < 1 || alternative_freq[af_size] > 204)
-                fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n");
+                fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n"); //honestly i have no idea why 87.5 and 108 isn't in here, i copied this code, okay?
             break;
         }
         else {
@@ -310,8 +312,10 @@ int main(int argc, char **argv) {
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm]\n", arg);
         }
     }
-    if(custom_deviation == 1) { //dont hurt me, ik this may be not important, but im a python dev, not a c or c++, forgive (notice how i said "may")
+    if(custom_deviation == 1) {
         printf("You've set a custom deviation (like not the default one), the RDS may be broken, just a warning");
+    } else if(custom_deviation == 2) { //there came the reason, if you dont know why this is here, dont ask
+        printf("RDS is gonna be disabled for NFM, because you know, nothing will decode the rds from a nfm signal anyway");
     }
 	int FifoSize=DATA_SIZE*2;
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize);
