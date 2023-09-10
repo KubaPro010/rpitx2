@@ -304,7 +304,6 @@ int main(int argc, char **argv) {
             alternative_freq[af_size] = (int)(10*atof(optarg))-875;
             if(alternative_freq[af_size] < 1 || alternative_freq[af_size] > 204)
                 fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n"); //honestly i have no idea why 87.5 and 108 isn't in here, i copied this code, okay?
-            break;
         }
         else {
             fatal("Unrecognised argument: %s.\n"
@@ -317,6 +316,7 @@ int main(int argc, char **argv) {
     } else if(custom_deviation == 2) { //there came the reason, if you dont know why this is here, dont ask
         printf("RDS is gonna be disabled for NFM, because you know, nothing will decode the rds from a nfm signal anyway");
     }
+    alternative_freq[0] = af_size;
 	int FifoSize=DATA_SIZE*2;
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize);
     int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation);
