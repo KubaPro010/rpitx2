@@ -328,7 +328,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds) {
         else
         {
             mpx_buffer[i] =  
-                mpx_buffer[i] +    // RDS data samples are currently in mpx_buffer :to be Remove in NBFM
+                mpx_buffer[i] +    // RDS data samples are currently in mpx_buffer :to be Remove in NFM
                 9.0*out_left;      // Unmodulated monophonic signal
         } 
             

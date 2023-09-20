@@ -118,7 +118,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     set_rds_rt(rt);
     set_rds_pty(pty);
     set_rds_ab(0);
-    set_rds_ms(0);
+    set_rds_ms(1);
     set_rds_tp(0);
     set_rds_ta(0);
     uint16_t count = 0;
@@ -149,7 +149,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
 
         // Initialize the control pipe reader
         if(control_pipe) {
-            if(open_control_pipe(control_pipe) == 0) {
+            if(open_control_pipe(control_pipe, pad_reg) == 0) {
                 printf("Reading control commands on %s.\n", control_pipe);
             } else {
                 printf("Failed to open control pipe: %s.\n", control_pipe);
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
         } else if(strcmp("-af", arg)==0 && param != NULL) {
             i++;
             af_size++;
-            alternative_freq[af_size] = (int)(10*atof(optarg))-875;
+            alternative_freq[af_size] = (int)(10*atof(param))-875;
             if(alternative_freq[af_size] < 1 || alternative_freq[af_size] > 204)
                 fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n"); //honestly i have no idea why 87.5 and 108 isn't in here, i copied this code, okay?
         }

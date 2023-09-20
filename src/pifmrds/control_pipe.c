@@ -7,7 +7,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
@@ -16,6 +15,10 @@
 #include "control_pipe.h"
 
 #define CTL_BUFFER_SIZE 70
+#define GPIO_PAD_0_27                   (0x2C/4)
+#define GPIO_PAD_28_45                  (0x30/4)
+
+static volatile uint32_t *pad_reg;
 
 int fd;
 FILE *f_ctl;
@@ -23,7 +26,9 @@ FILE *f_ctl;
 /*
  * Opens a file (pipe) to be used to control the RDS coder, in non-blocking mode.
  */
-int open_control_pipe(char *filename) {
+int open_control_pipe(char *filename, volatile uint32_t *padreg)
+{
+	pad_reg = padreg;
 	fd = open(filename, O_RDWR | O_NONBLOCK);
 	if(fd == -1) return -1;
 
@@ -37,7 +42,20 @@ int open_control_pipe(char *filename) {
 
 	return 0;
 }
-
+//for bad rds, as most rds decoders won't decode these
+void removeDiacritics(char *str) {
+    char diacritics[] = "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ";
+    char replacements[] = "acelnoszzACELNOSZZ";
+    
+    for (size_t i = 0; i < strlen(str); i++) {
+        for (size_t j = 0; j < strlen(diacritics); j++) {
+            if (str[i] == diacritics[j]) {
+                str[i] = replacements[j];
+                break;
+            }
+        }
+    }
+}
 
 /*
  * Polls the control file (pipe), non-blockingly, and if a command is received,
@@ -119,6 +137,18 @@ int poll_control_pipe() {
 				printf("Wrong PTY identifier! The PTY range is 0 - 31.\n");
 			}
 			res = CONTROL_PIPE_PTY_SET;
+		} else if(fifo[0] == 'U' && fifo[1] == 'R' && fifo[2] == 'T') {
+			arg[64] = 0;
+			removeDiacritics(arg);
+			set_rds_rt(arg);
+			printf("RT set to: \"%s\"\n", arg);
+			res = CONTROL_PIPE_RT_SET;
+		} else if(fifo[0] == 'P' && fifo[1] == 'W' && fifo[2] == 'R') {
+			arg[1] = 0;
+			pad_reg[GPIO_PAD_0_27] = 0x5a000018 + atoi(arg);
+    		pad_reg[GPIO_PAD_28_45] = 0x5a000018 + atoi(arg);
+			printf("POWER set to: \"%s\"\n", arg);
+			res = CONTROL_PIPE_PWR_SET;
 		}
 	}
 
