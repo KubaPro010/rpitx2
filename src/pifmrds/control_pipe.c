@@ -42,20 +42,6 @@ int open_control_pipe(char *filename, volatile uint32_t *padreg)
 
 	return 0;
 }
-//for bad rds, as most rds decoders won't decode these
-void removeDiacritics(char *str) {
-    char diacritics[] = "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ";
-    char replacements[] = "acelnoszzACELNOSZZ";
-    
-    for (size_t i = 0; i < strlen(str); i++) {
-        for (size_t j = 0; j < strlen(diacritics); j++) {
-            if (str[i] == diacritics[j]) {
-                str[i] = replacements[j];
-                break;
-            }
-        }
-    }
-}
 
 /*
  * Polls the control file (pipe), non-blockingly, and if a command is received,
@@ -137,12 +123,6 @@ int poll_control_pipe() {
 				printf("Wrong PTY identifier! The PTY range is 0 - 31.\n");
 			}
 			res = CONTROL_PIPE_PTY_SET;
-		} else if(fifo[0] == 'U' && fifo[1] == 'R' && fifo[2] == 'T') {
-			arg[64] = 0;
-			removeDiacritics(arg);
-			set_rds_rt(arg);
-			printf("RT set to: \"%s\"\n", arg);
-			res = CONTROL_PIPE_RT_SET;
 		} else if(fifo[0] == 'P' && fifo[1] == 'W' && fifo[2] == 'R') {
 			arg[1] = 0;
 			pad_reg[GPIO_PAD_0_27] = 0x5a000018 + atoi(arg);
