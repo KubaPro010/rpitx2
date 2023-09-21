@@ -68,8 +68,9 @@ int poll_control_pipe() {
 		}
 		else if(fifo[0] == 'R' && fifo[1] == 'T') {
 			arg[64] = 0;
+			set_rds_ab(0);
 			set_rds_rt(arg);
-			printf("RT set to: \"%s\"\n", arg);
+			printf("RT A set to: \"%s\"\n", arg);
 			res = CONTROL_PIPE_RT_SET;
 		}
         else if(fifo[0] == 'P' && fifo[1] == 'I') {
@@ -129,6 +130,12 @@ int poll_control_pipe() {
     		pad_reg[GPIO_PAD_28_45] = 0x5a000018 + atoi(arg);
 			printf("POWER set to: \"%s\"\n", arg);
 			res = CONTROL_PIPE_PWR_SET;
+		} else if(fifo[0] == 'R' && fifo[1] == 'T' && fifo[2] == 'B') {
+			arg[64] = 0;
+			set_rds_ab(1);
+			set_rds_rt(arg);
+			printf("RT B set to: \"%s\"\n", arg);
+			res = CONTROL_PIPE_RT_SET;
 		}
 	}
 
