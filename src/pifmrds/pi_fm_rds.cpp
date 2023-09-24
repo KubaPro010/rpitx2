@@ -261,10 +261,10 @@ int main(int argc, char **argv) {
             pty = atoi(param);
         } else if(strcmp("-ta", arg)==0) {
             i++;
-            pty = 1;
+            ta = 1;
         } else if(strcmp("-tp", arg)==0) {
             i++;
-            pty = 1;
+            tp = 1;
         } else if(strcmp("-ctl", arg)==0 && param != NULL) {
             i++;
             control_pipe = param;
