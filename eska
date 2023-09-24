@@ -1,0 +1,1 @@
+curl -sS http://ic1.smcdn.pl/2140-1.mp3 | ffmpeg -i - -f s16le -acodec pcm_s16le -ar 44100 -ac 2 -hide_banner -loglevel quiet - | sudo ./pifmrds -freq 93 -ps '> ESKA <' -rt 'ESKA Poznan 93 FM - Hity Na Czasie' -ctl rds_ctl -raw blud_angry -audio - -power 7 -pi 3293 -af 90.1 -af 102 -af 105.6 -af 93.8 -af 94.4 -af 105.7
