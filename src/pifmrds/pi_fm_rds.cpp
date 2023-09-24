@@ -87,7 +87,7 @@ static volatile void *map_peripheral(uint32_t base, uint32_t len)
     return vaddr;
 }
 
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation) {
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp) {
     // Catch all signals possible - it is vital we kill the DMA engine
     // on process exit!
     for (int i = 0; i < 64; i++) {
@@ -119,8 +119,8 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     set_rds_pty(pty);
     set_rds_ab(0);
     set_rds_ms(1);
-    set_rds_tp(0);
-    set_rds_ta(0);
+    set_rds_tp(tp);
+    set_rds_ta(ta);
     uint16_t count = 0;
     uint16_t count2 = 0;
     int varying_ps = 0;
@@ -327,6 +327,6 @@ int main(int argc, char **argv) {
     alternative_freq[0] = af_size;
 	int FifoSize=DATA_SIZE*2;
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize);
-    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation);
+    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp);
     terminate(errcode);
 }
