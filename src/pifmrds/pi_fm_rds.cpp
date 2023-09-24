@@ -215,6 +215,8 @@ int main(int argc, char **argv) {
     char *rt = "Broadcasting on a Raspberry Pi: Simply Advanced";
     uint16_t pi = 0x1234;
     int pty = 0;
+    int ta = 0;
+    int tp = 0;
     int af_size = 0;
     int raw = 0;
     int drds = 0;
@@ -257,6 +259,12 @@ int main(int argc, char **argv) {
         } else if(strcmp("-pty", arg)==0 && param != NULL) {
             i++;
             pty = atoi(param);
+        } else if(strcmp("-ta", arg)==0) {
+            i++;
+            pty = 1;
+        } else if(strcmp("-tp", arg)==0) {
+            i++;
+            pty = 1;
         } else if(strcmp("-ctl", arg)==0 && param != NULL) {
             i++;
             control_pipe = param;
@@ -308,13 +316,13 @@ int main(int argc, char **argv) {
         else {
             fatal("Unrecognised argument: %s.\n"
             "Syntax: pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code]\n"
-            "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm]\n", arg);
+            "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm] [-tp] [-ta]\n", arg);
         }
     }
     if(custom_deviation == 1) {
-        printf("You've set a custom deviation (like not the default one), the RDS may be broken, just a warning");
+        printf("You've set a custom deviation (like not the default one), the RDS may be broken, just a warning\n");
     } else if(custom_deviation == 2) { //there came the reason, if you dont know why this is here, dont ask
-        printf("RDS is gonna be disabled for NFM, because you know, nothing will decode the rds from a nfm signal anyway");
+        printf("RDS is gonna be disabled for NFM, because you know, nothing will decode the rds from a nfm signal anyway\n");
     }
     alternative_freq[0] = af_size;
 	int FifoSize=DATA_SIZE*2;
