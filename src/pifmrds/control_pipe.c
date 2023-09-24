@@ -125,11 +125,12 @@ int poll_control_pipe() {
 			}
 			res = CONTROL_PIPE_PTY_SET;
 		} else if(fifo[0] == 'P' && fifo[1] == 'W' && fifo[2] == 'R') {
-			arg[1] = 0;
-			pad_reg[GPIO_PAD_0_27] = 0x5a000018 + atoi(arg);
-    		pad_reg[GPIO_PAD_28_45] = 0x5a000018 + atoi(arg);
+			int power_level = atoi(arg);
+			pad_reg[GPIO_PAD_0_27] = 0x5a000018 + power_level;
+			pad_reg[GPIO_PAD_28_45] = 0x5a000018 + power_level;
 			printf("POWER set to: \"%s\"\n", arg);
 			res = CONTROL_PIPE_PWR_SET;
+		}
 		} else if(fifo[0] == 'R' && fifo[1] == 'T' && fifo[2] == 'B') {
 			arg[64] = 0;
 			set_rds_ab(1);
