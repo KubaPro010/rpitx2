@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
     int ta = 0;
     int tp = 0;
     int af_size = 0;
-    int gpiopin = 0;
+    int gpiopin = 4;
     int raw = 0;
     int drds = 0;
     int power = 7;
