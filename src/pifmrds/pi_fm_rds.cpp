@@ -126,7 +126,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     int varying_ps = 0;
 
     if(drds == 1) {
-        printf("RDS Disabled (control pipe too)\n");
+        printf("RDS Disabled\n");
     } else {
         if(ps) {
             set_rds_ps(ps);
@@ -146,15 +146,15 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             }
             printf("\n");
         }
+    }
 
-        // Initialize the control pipe reader
-        if(control_pipe) {
-            if(open_control_pipe(control_pipe, pad_reg) == 0) {
-                printf("Reading control commands on %s.\n", control_pipe);
-            } else {
-                printf("Failed to open control pipe: %s.\n", control_pipe);
-                control_pipe = NULL;
-            }
+    // Initialize the control pipe reader
+    if(control_pipe) {
+        if(open_control_pipe(control_pipe, pad_reg) == 0) {
+            printf("Reading control commands on %s.\n", control_pipe);
+        } else {
+            printf("Failed to open control pipe: %s.\n", control_pipe);
+            control_pipe = NULL;
         }
     }
     
@@ -218,6 +218,7 @@ int main(int argc, char **argv) {
     int ta = 0;
     int tp = 0;
     int af_size = 0;
+    int gpiopin = 0;
     int raw = 0;
     int drds = 0;
     int power = 7;
@@ -259,6 +260,14 @@ int main(int argc, char **argv) {
         } else if(strcmp("-pty", arg)==0 && param != NULL) {
             i++;
             pty = atoi(param);
+        } else if(strcmp("-gpiopin", arg)==0 && param != NULL) {
+            i++;
+            int pinnum = atoi(param);
+            if(!pinnum == 4 || !pinnum == 20 || !pinnum == 32 || !pinnum == 34 || !pinnum == 6) {
+                fatal("Invalid gpio pin, allowed: 4,20,32,34");
+            } else {
+                gpiopin = pinnum;
+            }
         } else if(strcmp("-ta", arg)==0) {
             i++;
             ta = 1;
@@ -326,7 +335,7 @@ int main(int argc, char **argv) {
     }
     alternative_freq[0] = af_size;
 	int FifoSize=DATA_SIZE*2;
-    fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize);
+    fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin);
     int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp);
     terminate(errcode);
 }

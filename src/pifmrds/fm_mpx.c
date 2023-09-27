@@ -312,7 +312,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds) {
         }
         out_left= out_left/(left_max+compressor_max_gain_recip); // Adjust volume with limited maximum gain
 
-        if(drds) mpx_buffer[i] = 0;
+        if(drds) mpx_buffer[i] = 0; //do not remove this, the bandwidht will go nuts
  
         // Generate the stereo mpx
         if( channels > 1 ) {
