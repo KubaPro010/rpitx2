@@ -263,8 +263,8 @@ int main(int argc, char **argv) {
         } else if(strcmp("-gpiopin", arg)==0 && param != NULL) {
             i++;
             int pinnum = atoi(param);
-            if(!pinnum == 4 || !pinnum == 20 || !pinnum == 32 || !pinnum == 34 || !pinnum == 6) {
-                fatal("Invalid gpio pin, allowed: 4,20,32,34");
+            if (!(pinnum == 4 || pinnum == 20 || pinnum == 32 || pinnum == 34 || pinnum == 6)) {
+                fatal("Invalid gpio pin, allowed: 4, 20, 32, 34, 6");
             } else {
                 gpiopin = pinnum;
             }
