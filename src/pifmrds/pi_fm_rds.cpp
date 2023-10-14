@@ -46,7 +46,7 @@ static volatile uint32_t *pad_reg;
 #else
 #error Unknown Raspberry Pi version (variable PI)
 #endif
-
+//i dunno it for pi 5, but rp1 is gonna steer the io: https://datasheets.raspberrypi.com/rp1/rp1-peripherals.pdf
 #define SUBSIZE 512
 #define DATA_SIZE 5000
 #define PAD_LEN                         (0x40/4) //0x64
@@ -111,7 +111,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
 
     // Initialize the baseband generator
     if(fm_mpx_open(audio_file, DATA_SIZE, raw, preemp, rawSampleRate, rawChannels) < 0) return 1;
-    
+
     // Initialize the RDS modulator
     char myps[9] = {0};
     set_rds_pi(pi);
@@ -157,8 +157,8 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             control_pipe = NULL;
         }
     }
-    
-    
+
+
     printf("Starting to transmit on %3.1f MHz.\n", carrier_freq/1e6);
 
     float deviation_scale_factor;
@@ -166,8 +166,8 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     {   // note samples are [-10:10]
         deviation_scale_factor=  0.1 * (deviation ) ; // todo PPM
     }
-    
-    for (;;) 
+
+    for (;;)
 	{
         if(drds == 0) {
             // Default (varying) PS
@@ -184,24 +184,24 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 count++;
             }
         }
-        
+
         if(control_pipe && poll_control_pipe() == CONTROL_PIPE_PS_SET) {
             varying_ps = 0;
         }
-        
+
 			if( fm_mpx_get_samples(data, drds) < 0 ) {
                     terminate(0);
                 }
                 data_len = DATA_SIZE;
 				for(int i=0;i< data_len;i++)
 			{
-			
+
             	devfreq[i] = data[i]*deviation_scale_factor;
-				
-				
-            }	
+
+
+            }
 			fmmod->SetFrequencySamples(devfreq,data_len);
-	}    
+	}
 
     return 0;
 }
@@ -227,11 +227,8 @@ int main(int argc, char **argv) {
     double preemp = 50e-6; //eu
     int deviation = 75000;
     int alternative_freq[100] = {};
-   
     float ppm = 0;
-
     int custom_deviation = 0;
-    
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
         char *arg = argv[i];
@@ -286,7 +283,7 @@ int main(int argc, char **argv) {
                 deviation = 2500;
                 drds = 1;
                 custom_deviation = 2;
-            } 
+            }
             else {
                 deviation = atoi(param);
             }
@@ -334,7 +331,7 @@ int main(int argc, char **argv) {
         printf("RDS is gonna be disabled for NFM, because you know, nothing will decode the rds from a nfm signal anyway\n");
     }
     alternative_freq[0] = af_size;
-	int FifoSize=DATA_SIZE*2;
+    int FifoSize=DATA_SIZE*2;
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin);
     int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp);
     terminate(errcode);
