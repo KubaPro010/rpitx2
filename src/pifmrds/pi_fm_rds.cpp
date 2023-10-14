@@ -57,8 +57,8 @@ static void
 terminate(int num)
 {
     delete fmmod;
-    pad_reg[GPIO_PAD_0_27] = 0x5a000018 + 7; //Set original power, just in case
-    pad_reg[GPIO_PAD_28_45] = 0x5a000018 + 7;
+    pad_reg[GPIO_PAD_0_27] = 0x5a000018 + 1; //Set original power, just in case
+    pad_reg[GPIO_PAD_28_45] = 0x5a000018 + 1;
     fm_mpx_close();
     close_control_pipe();
     exit(num);
