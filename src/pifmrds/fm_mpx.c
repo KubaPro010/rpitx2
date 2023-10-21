@@ -81,7 +81,7 @@ float *alloc_empty_buffer(size_t length) {
 }
 
 
-int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels) {
+int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels, float cutoff_freq) {
     length = len;
     raw_ = raw;
 
@@ -125,7 +125,6 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
         }
     
         // Choose a cutoff frequency for the low-pass FIR filter
-        float cutoff_freq = 15700;
 		//float cutoff_freq = 3000; //For NFM
         if(in_samplerate/2 < cutoff_freq) cutoff_freq = in_samplerate/2 * .8;
    
