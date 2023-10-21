@@ -137,13 +137,13 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
         // IIR pre-emphasis filter
         // Reference material:    http://jontio.zapto.org/hda1/preempiir.pdf
         double tau=preemphasis;
-        double delta=1.96e-6;
+        double delta=1/(2*PI*20000);//double delta=1.96e-6;
         double taup, deltap, bp, ap, a0, a1, b1;
         taup=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*tau*(in_samplerate*FIR_PHASES) ));
         deltap=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*delta*(in_samplerate*FIR_PHASES) ));
         bp=sqrt( -taup*taup + sqrt(taup*taup*taup*taup + 8.0*taup*taup*deltap*deltap) ) / 2.0 ;
         ap=sqrt( 2*bp*bp + taup*taup );
-        a0=( 2.0*ap + 1/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1/(in_samplerate*FIR_PHASES) );
+        a0=( 2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
         // a1=(-2.0*ap + 1/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1/(in_samplerate*FIR_PHASES) ); //ORI
         // b1=( 2.0*bp + 1/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1/(in_samplerate*FIR_PHASES) ); //ORI
         a1=(-2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );

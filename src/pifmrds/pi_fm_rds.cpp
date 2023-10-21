@@ -228,6 +228,7 @@ int main(int argc, char **argv) {
     int deviation = 75000;
     int alternative_freq[100] = {};
     float ppm = 0;
+    int bypassfreqrange = 0;
     int custom_deviation = 0;
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
@@ -240,7 +241,7 @@ int main(int argc, char **argv) {
         } else if(strcmp("-freq", arg)==0 && param != NULL) {
             i++;
             carrier_freq = 1e6 * atof(param);
-            if(carrier_freq < 64e6 || carrier_freq > 108e6)
+            if((carrier_freq < 64e6 || carrier_freq > 108e6) && bypassfreqrange == 0)
                fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for UKF radios, such as the UNITRA Jowita or other old band FM Radios)\n");
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
@@ -268,6 +269,9 @@ int main(int argc, char **argv) {
         } else if(strcmp("-ta", arg)==0) {
             i++;
             ta = 1;
+        } else if(strcmp("-bfr", arg)==0) {
+            i++;
+            bypassfreqrange = 1;
         } else if(strcmp("-tp", arg)==0) {
             i++;
             tp = 1;
@@ -311,6 +315,8 @@ int main(int argc, char **argv) {
             i++;
             if(strcmp("us", param)==0) {
                 preemp = 75e-6; //usa
+            } else if(strcmp("22", param)==0) {
+                preemp = 22e-6; //22
             }
         } else if(strcmp("-af", arg)==0 && param != NULL) {
             i++;
