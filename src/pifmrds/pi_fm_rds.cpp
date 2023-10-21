@@ -335,7 +335,7 @@ int main(int argc, char **argv) {
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm] [-tp] [-ta]\n", arg);
         }
     }
-    if(custom_deviation == 1) {
+    if(custom_deviation == 1 && drds == 0) {
         printf("You've set a custom deviation (like not the default one), the RDS may be broken, just a warning\n");
     } else if(custom_deviation == 2) { //there came the reason, if you dont know why this is here, dont ask
         printf("RDS is gonna be disabled for NFM, because you know, nothing will decode the rds from a nfm signal anyway\n");
