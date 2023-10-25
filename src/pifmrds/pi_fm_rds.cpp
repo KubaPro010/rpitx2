@@ -87,7 +87,7 @@ static volatile void *map_peripheral(uint32_t base, uint32_t len)
     return vaddr;
 }
 
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq) {
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim) {
     // Catch all signals possible - it is vital we kill the DMA engine
     // on process exit!
     for (int i = 0; i < 64; i++) {
@@ -110,7 +110,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     int data_index = 0;
 
     // Initialize the baseband generator
-    if(fm_mpx_open(audio_file, DATA_SIZE, raw, preemp, rawSampleRate, rawChannels, cutoff_freq) < 0) return 1;
+    if(fm_mpx_open(audio_file, DATA_SIZE, raw, preemp, rawSampleRate, rawChannels, cutoff_freq, gaim) < 0) return 1;
 
     // Initialize the RDS modulator
     char myps[9] = {0};
@@ -222,6 +222,7 @@ int main(int argc, char **argv) {
     int raw = 0;
     int drds = 0;
     int power = 7;
+    float gain = 1;
     int rawSampleRate = 44100;
     int rawChannels = 2;
     double preemp = 50e-6; //eu
@@ -298,9 +299,12 @@ int main(int argc, char **argv) {
         } else if(strcmp("-rawsamplerate", arg)==0 && param != NULL) {
             i++;
             rawSampleRate = atoi(param);
-	} else if(strcmp("-cutofffreq", arg)==0 && param != NULL) {
+        } else if(strcmp("-cutofffreq", arg)==0 && param != NULL) {
+                i++;
+                cutofffreq = atoi(param);
+        } else if(strcmp("-audiogain", arg)==0 && param != NULL) {
             i++;
-            cutofffreq = atoi(param);
+            gain = atoi(param);
         } else if(strcmp("-power", arg)==0 && param != NULL) {
             i++;
             int tpower = atoi(param);
@@ -343,6 +347,6 @@ int main(int argc, char **argv) {
     alternative_freq[0] = af_size;
     int FifoSize=DATA_SIZE*2;
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin);
-    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq);
+    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain);
     terminate(errcode);
 }

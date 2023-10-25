@@ -81,7 +81,7 @@ float *alloc_empty_buffer(size_t length) {
 }
 
 
-int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels, float cutoff_freq) {
+int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels, float cutoff_freq, float gain) {
     length = len;
     raw_ = raw;
 
@@ -131,7 +131,6 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
         // Create the low-pass FIR filter, with pre-emphasis
         double window, firlowpass, firpreemph , sincpos;
-        double gain=FIR_PHASES/25.0; // Why??? Maybe gain adjustment for preemphais
 
         // IIR pre-emphasis filter
         // Reference material:    http://jontio.zapto.org/hda1/preempiir.pdf
@@ -166,7 +165,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
           }
         }
     
-        printf("Created low-pass FIR filter for audio channels, with cutoff at %.1f Hz\n", cutoff_freq);
+        printf("Created low-pass FIR filter for audio channels, with cutoff at %.1f Hz (gain: %.f\n", cutoff_freq, gain);
     
         if( 0 )
         {
