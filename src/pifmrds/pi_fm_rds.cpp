@@ -24,12 +24,6 @@ extern "C"
 #include <librpitx/librpitx.h>
 
 ngfmdmasync *fmmod;
-// The deviation specifies how wide the signal is. 
-// Use 75kHz for WFM (broadcast radio) 
-// and about 2.5kHz for NFM (walkie-talkie style radio)
-//#define DEVIATION        75000
-//FOR NFM
-//#define DEVIATION        2500 
 static volatile uint32_t *pad_reg;
 #define GPIO_PAD_0_27                   (0x2C/4)
 #define GPIO_PAD_28_45                  (0x30/4)
@@ -164,6 +158,10 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     float deviation_scale_factor;
     //if( divider ) // PLL modulation
     {   // note samples are [-10:10]
+
+        // The deviation specifies how wide the signal is (from its lowest bandwidht to its highest). 
+        // Use 75kHz for WFM (broadcast radio, or 50khz can be used)
+        // and about 2.5kHz for NFM (walkie-talkie style radio)
         deviation_scale_factor=  0.1 * (deviation ) ; // todo PPM
     }
 
@@ -230,7 +228,6 @@ int main(int argc, char **argv) {
     int alternative_freq[100] = {};
     float ppm = 0;
     int bypassfreqrange = 0;
-    int custom_deviation = 0;
     float cutofffreq = 15700;
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
@@ -282,13 +279,10 @@ int main(int argc, char **argv) {
             control_pipe = param;
         } else if(strcmp("-deviation", arg)==0 && param != NULL) {
             i++;
-            custom_deviation = 1;
             if(strcmp("ukf", param)==0) {
                 deviation = 65000; //i don't know the original bandwidht, but when testing on an UNITRA LIZA R-203, the sound doesn't sound out of order, correct this if im wrong
             } else if(strcmp("nfm", param)==0) {
                 deviation = 2500;
-                drds = 1;
-                custom_deviation = 2;
             }
             else {
                 deviation = atoi(param);
@@ -338,11 +332,6 @@ int main(int argc, char **argv) {
             "Syntax: pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code]\n"
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm] [-tp] [-ta]\n", arg);
         }
-    }
-    if(custom_deviation == 1 && drds == 0) {
-        printf("You've set a custom deviation (like not the default one), the RDS may be broken, just a warning\n");
-    } else if(custom_deviation == 2) { //there came the reason, if you dont know why this is here, dont ask
-        printf("RDS is gonna be disabled for NFM, because you know, nothing will decode the rds from a nfm signal anyway\n");
     }
     alternative_freq[0] = af_size;
     int FifoSize=DATA_SIZE*2;
