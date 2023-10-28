@@ -159,7 +159,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     //if( divider ) // PLL modulation
     {   // note samples are [-10:10]
 
-        // The deviation specifies how wide the signal is (from its lowest bandwidht to its highest). 
+        // The deviation specifies how wide the signal is (from its lowest bandwidht to its highest, but not including sub-carriers). 
         // Use 75kHz for WFM (broadcast radio, or 50khz can be used)
         // and about 2.5kHz for NFM (walkie-talkie style radio)
         deviation_scale_factor=  0.1 * (deviation ) ; // todo PPM
