@@ -194,7 +194,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds) {
+int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip) {
     if(!drds) get_rds_samples(mpx_buffer, length);
 
     if(inf == NULL) return 0; // if there is no audio, stop here
@@ -274,10 +274,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds) {
         // Don't expect this simple code to match the 
         // performance of commercial broadcast equipment. 
         float left_abs, right_abs;
-        float compressor_decay=0.999995; 
-        float compressor_attack=1.0;
         // Setting attack to anything other than 1.0 could cause overshoot.
-        float compressor_max_gain_recip=0.01;
         left_abs=fabsf(out_left);
         if( left_abs>left_max ) 
         {
