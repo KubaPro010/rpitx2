@@ -144,7 +144,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
 
     // Initialize the control pipe reader
     if(control_pipe) {
-        if(open_control_pipe(control_pipe, pad_reg) == 0) {
+        if(open_control_pipe(control_pipe, pad_reg, drds) == 0) {
             printf("Reading control commands on %s.\n", control_pipe);
         } else {
             printf("Failed to open control pipe: %s.\n", control_pipe);
