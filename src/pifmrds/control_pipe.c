@@ -21,15 +21,13 @@
 static volatile uint32_t *pad_reg;
 
 int fd;
-int drds_;
 FILE *f_ctl;
 
 /*
  * Opens a file (pipe) to be used to control the RDS coder, in non-blocking mode.
  */
-int open_control_pipe(char *filename, volatile uint32_t *padreg, int drds)
+int open_control_pipe(char *filename, volatile uint32_t *padreg)
 {
-	drds_ = drds;
 	pad_reg = padreg;
 	fd = open(filename, O_RDWR | O_NONBLOCK);
 	if(fd == -1) return -1;
@@ -139,16 +137,6 @@ int poll_control_pipe() {
 			printf("RT B set to: \"%s\"\n", arg);
 			res = CONTROL_PIPE_RT_SET;
 		}
-		} else if(strlen(fifo) > 5 && fifo[4] == ' ') {
-			char *arg = fifo+5;
-			if(arg[strlen(arg)-1] == '\n') arg[strlen(arg)-1] = 0;
-			if(fifo[0] == 'D' && fifo[1] == 'R' && fifo[2] == 'D' && fifo[3] == 'S') {
-				int drds = ( strcmp(arg, "ON") == 0 );
-				drds_ = drds;
-				printf("Set DRDS to ");
-				if(drds) printf("ON\n"); else printf("OFF\n");
-				res = CONTROL_PIPE_DRDS_SET;
-			}
 	}
 
 	return res;

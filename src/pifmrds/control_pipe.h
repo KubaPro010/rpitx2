@@ -14,8 +14,7 @@
 #define CONTROL_PIPE_AB_SET 7
 #define CONTROL_PIPE_PI_SET 8
 #define CONTROL_PIPE_PWR_SET 9
-#define CONTROL_PIPE_DRDS_SET 10
 
-extern int open_control_pipe(char *filename, volatile uint32_t *padreg, int drds);
+extern int open_control_pipe(char *filename, volatile uint32_t *padreg);
 extern int close_control_pipe();
 extern int poll_control_pipe();
