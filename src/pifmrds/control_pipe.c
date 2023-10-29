@@ -140,7 +140,7 @@ int poll_control_pipe() {
 			res = CONTROL_PIPE_RT_SET;
 		}
 		} else if(strlen(fifo) > 5 && fifo[4] == ' ') {
-			char *arg = fifo+4;
+			char *arg = fifo+5;
 			if(arg[strlen(arg)-1] == '\n') arg[strlen(arg)-1] = 0;
 			if(fifo[0] == 'D' && fifo[1] == 'R' && fifo[2] == 'D' && fifo[3] == 'S') {
 				int drds = ( strcmp(arg, "ON") == 0 );
