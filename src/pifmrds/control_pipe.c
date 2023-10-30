@@ -140,7 +140,7 @@ ResultAndArg poll_control_pipe() {
 			printf("RT B set to: \"%s\"\n", arg);
 			resarg.res = CONTROL_PIPE_RT_SET;
 		} else if(fifo[0] == 'R' && fifo[1] == 'D' && fifo[2] == 'S') {
-			int rds = ( strcmp(arg, "ON") == 1 );
+			int rds = ( strcmp(arg, "OFF") == 0 );
 			printf("Set RDS to ");
 			if(rds) printf("ON\n"); else printf("OFF\n");
 			resarg.res = CONTROL_PIPE_RDS_SET;
