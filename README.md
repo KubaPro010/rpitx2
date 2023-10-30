@@ -134,6 +134,17 @@ We assume that input frequency is tuned on FM station. It is demodulated and mod
 # Range
 It has been mostly untested, but i've tested it on 95 mhz, with a 79 cm antenna, the signal depending on the directionality, transmitter elavation, it can reach about 300 meters
 
+# Transmitter Power
+By default the Raspberry Pi outputs 4 mA on a gpio pin, but here it gets overriden to max, which is about 16 mA, some apps have a setting to change the power, here is a sheet of the power levels and their correspondent radiated power: (NOTE: RADIATED POWER, NOT ERP, TO HAVE THE EXACT TX POWER OF A TRANSMITTER, THE ANTENNA EFFIECENCY AND GAIN WOULD NEED TO BE COUNTED IN THE CALCULATION)
+0 = 6.6 mW
+1 = 13.2 mW
+2 = 19.8 mW
+3 = 26.4 mW
+4 = 33.0 mW
+5 = 39.6 mW
+6 = 46.2 mW
+7 = 52.8 mW
+
 # To continue
 **rpitx2** is a generic RF transmitter. There is a lot of modulation to do with it and also documentation to make all that easy to contribute. This will be the next step ! Feel free to inspect scripts, change parameters (frequencies, audio input, pictures...). 
 
