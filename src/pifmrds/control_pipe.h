@@ -17,7 +17,7 @@
 
 typedef struct {
     int res;
-    char* arg[70];
+    char arg[70];
 } ResultAndArg;
 
 extern int open_control_pipe(char *filename, volatile uint32_t *padreg);
