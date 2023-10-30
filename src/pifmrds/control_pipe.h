@@ -21,6 +21,6 @@ typedef struct {
     char *arg;
 } ResultAndArg;
 
-extern int open_control_pipe(char *filename, volatile uint32_t *padreg);
+extern int open_control_pipe(char *filename);
 extern int close_control_pipe();
 extern ResultAndArg poll_control_pipe();

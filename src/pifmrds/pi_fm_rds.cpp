@@ -96,7 +96,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     pad_reg = (volatile uint32_t *)map_peripheral(PAD_VIRT_BASE, PAD_LEN);
     pad_reg[GPIO_PAD_0_27] = 0x5a000018 + power;
     pad_reg[GPIO_PAD_28_45] = 0x5a000018 + power;
-
+    
     // Data structures for baseband data
     float data[DATA_SIZE];
 	float devfreq[DATA_SIZE];
@@ -189,6 +189,9 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 varying_ps = 0;
             } else if(pollResult.res == CONTROL_PIPE_RDS_SET) {
                 drds = (int)pollResult.arg;
+            } else if(pollResult.res == CONTROL_PIPE_PWR_SET) {
+                pad_reg[GPIO_PAD_0_27] = 0x5a000018 + (int)pollResult.arg;
+                pad_reg[GPIO_PAD_28_45] = 0x5a000018 + (int)pollResult.arg;
             }
         }
 

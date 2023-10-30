@@ -15,10 +15,6 @@
 #include "control_pipe.h"
 
 #define CTL_BUFFER_SIZE 70
-#define GPIO_PAD_0_27                   (0x2C/4)
-#define GPIO_PAD_28_45                  (0x30/4)
-
-static volatile uint32_t *pad_reg;
 
 int fd;
 FILE *f_ctl;
@@ -26,9 +22,8 @@ FILE *f_ctl;
 /*
  * Opens a file (pipe) to be used to control the RDS coder, in non-blocking mode.
  */
-int open_control_pipe(char *filename, volatile uint32_t *padreg)
+int open_control_pipe(char *filename)
 {
-	pad_reg = padreg;
 	fd = open(filename, O_RDWR | O_NONBLOCK);
 	if(fd == -1) return -1;
 
@@ -129,8 +124,7 @@ ResultAndArg poll_control_pipe() {
 			resarg.res = CONTROL_PIPE_PTY_SET;
 		} else if(fifo[0] == 'P' && fifo[1] == 'W' && fifo[2] == 'R') {
 			int power_level = atoi(arg);
-			pad_reg[GPIO_PAD_0_27] = 0x5a000018 + power_level;
-			pad_reg[GPIO_PAD_28_45] = 0x5a000018 + power_level;
+			resarg.arg = (char)power_level;
 			printf("POWER set to: \"%s\"\n", arg);
 			resarg.res = CONTROL_PIPE_PWR_SET;
 		} else if(fifo[0] == 'R' && fifo[1] == 'T' && fifo[2] == 'B') {
