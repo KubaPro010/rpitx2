@@ -19,7 +19,7 @@ Be sure to have git package installed :
 sudo apt-get update
 sudo apt-get install git
 ```
-You can now clone the repository. A script (install.sh) is there for easy installation. You could inspect it and make steps manualy in case of any doubt. You can note that /boot/config.txt should be prompt to be modified during the installation. If it is not accepted, **rpitx** will be unstable.  
+You can now clone the repository. A script (install.sh) is there for easy installation. You could inspect it and make steps manualy in case of any doubt. You can note that /boot/config.txt should be prompt to be modified during the installation. If it is not accepted, **rpitx2** will be unstable.  
 
 ```sh
 git clone https://github.com/KubaPro010/rpitx2
@@ -48,7 +48,7 @@ sudo reboot
 | Pi3A+|OK|
 | Pi4|In beta mode|
 
-Plug a wire on GPIO 4, means Pin 7 of the GPIO header ([header P1](http://elinux.org/RPi_Low-level_peripherals#General_Purpose_Input.2FOutput_.28GPIO.29)). This acts as the antenna. The optimal length of the wire depends the frequency you want to transmit on, but it works with a few centimeters for local testing.
+Plug a wire on GPIO 4, means Pin 7 of the GPIO header ([header P1](http://elinux.org/RPi_Low-level_peripherals#General_Purpose_Input.2FOutput_.28GPIO.29)). This acts as the antenna. The optimal length of the wire depends the frequency you want to transmit on, but it works with a few centimeters for local testing. (Use https://www.southwestantennas.com/calculator/antenna-wavelength to calculate the lenght, make sure to use the 1/4 wave setting, as for 1/2 wave you'd need a impedance transformator, and these are not cheap [also yes, i learned it the hard way after having to cut my antenna])
 
 # How to use it
 ![easymenu](/doc/easymenu.png)
@@ -94,7 +94,7 @@ This is a picture transmission mode using audio modulation (USB mode). You need 
 
 ### Pocsag (pager mode) ###
 ![pocsag](/doc/pocsagrpitx.JPG)
-This is a mode used by pagers. You need an extra software to decode. Set your SDR in NBFM mode.
+This is a mode used by pagers. You need an extra software to decode. Set your SDR in NFM mode.
 
 ### Freedv (digital voice) ###
 ![freedv](/doc/freedvrpitx.JPG)
@@ -107,12 +107,12 @@ This a beacon mode which sound like Morse. You need opera in mode 0.5 to decode.
 ## Rpitx and low cost RTL-SDR dongle ##
 ![rtlmenu](/doc/rlsdrmenu.png)
 
-**rtlmenu** allows to use rtl-sdr receiver dongle and **rpitx** together. This combine receiver and transmission for experimenting. 
+**rtlmenu** allows to use rtl-sdr receiver dongle and **rpitx2** together. This combine receiver and transmission for experimenting. 
 To launch it, go to rpitx folder and launch rtlmenu.sh :
 ```sh
 ./rtlmenu.sh
 ```
-You have first to set receiver frequency and gain of rtl-sdr. Warning about gain, you should ensure that you have enough gain to receive the signal but not to strong which could saturate it and will not be usefull by **rpitx**.
+You have first to set receiver frequency and gain of rtl-sdr. Warning about gain, you should ensure that you have enough gain to receive the signal but not to strong which could saturate it and will not be usefull by **rpitx2**.
 
 Choose your choice with arrows and enter to start it.**Don't forget, some test are made in loop, you have to press CTRL^C to exit and back to menu.**
 
@@ -132,9 +132,8 @@ We assume that input frequency is tuned on FM station. It is demodulated and mod
 
 
 # To continue
-**rpitx** is a generic RF transmitter. There is a lot of modulation to do with it and also documentation to make all that easy to contribute. This will be the next step ! Feel free to inspect scripts, change parameters (frequencies, audio input, pictures...). 
+**rpitx2** is a generic RF transmitter. There is a lot of modulation to do with it and also documentation to make all that easy to contribute. This will be the next step ! Feel free to inspect scripts, change parameters (frequencies, audio input, pictures...). 
 
 # Credits
 All rights of the original authors reserved.
 I try to include all licences and authors in sourcecode. Need to write all references in this section.  
-# rpitx2
