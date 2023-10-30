@@ -69,7 +69,7 @@ Easy way to monitor what you are doing is by using a SDR software and a SDR rece
 A simple carrier generated at 434MHZ. 
 
 ### Chirp ### 
-![Chirp](/doc/chirprpitx.png)
+![Chirp](/doc/chirp.png)
 A carrier which move around 434MHZ.
 
 ### Spectrum ###
