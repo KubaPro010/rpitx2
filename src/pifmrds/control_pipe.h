@@ -14,6 +14,7 @@
 #define CONTROL_PIPE_AB_SET 7
 #define CONTROL_PIPE_PI_SET 8
 #define CONTROL_PIPE_PWR_SET 9
+#define CONTROL_PIPE_RDS_SET 10
 
 typedef struct {
     int res;
