@@ -131,6 +131,8 @@ We can also live transmitting a received band frequency. Here the input frequenc
 ### Relay with transmodulation ###
 We assume that input frequency is tuned on FM station. It is demodulated and modulate to SSB on 434MHZ. SSB is not HiFi, so prefere to choose a talk radio, music sounds like bit weird !
 
+# Range
+It has been mostly untested, but i've tested it on 95 mhz, with a 79 cm antenna, the signal depending on the directionality, transmitter elavation, it can reach about 300 meters
 
 # To continue
 **rpitx2** is a generic RF transmitter. There is a lot of modulation to do with it and also documentation to make all that easy to contribute. This will be the next step ! Feel free to inspect scripts, change parameters (frequencies, audio input, pictures...). 
