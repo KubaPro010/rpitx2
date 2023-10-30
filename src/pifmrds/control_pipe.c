@@ -144,7 +144,7 @@ ResultAndArg poll_control_pipe() {
 			printf("Set RDS to ");
 			if(rds) printf("ON\n"); else printf("OFF\n");
 			resarg.res = CONTROL_PIPE_RDS_SET;
-			resarg.arg = rds;
+			resarg.arg = (char)rds;
 		}
 	}
 	return resarg;

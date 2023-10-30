@@ -188,7 +188,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             if(pollResult.res == CONTROL_PIPE_PS_SET) {
                 varying_ps = 0;
             } else if(pollResult.res == CONTROL_PIPE_RDS_SET) {
-                drds = pollResult.arg;
+                drds = (int)pollResult.arg;
             }
         }
 
