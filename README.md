@@ -65,7 +65,7 @@ Choose your choice with arrows and enter to start it.**Don't forget, some test a
 Easy way to monitor what you are doing is by using a SDR software and a SDR receiver like a rtl-sdr one and set the frequency to 434MHZ.
 
 ### Carrier ### 
-![Carrier](/doc/Tunerpitx.png)
+![Carrier](/doc/image.png)
 A simple carrier generated at 434MHZ. 
 
 ### Chirp ### 
