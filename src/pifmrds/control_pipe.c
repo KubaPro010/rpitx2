@@ -47,18 +47,21 @@ int open_control_pipe(char *filename, volatile uint32_t *padreg)
  * Polls the control file (pipe), non-blockingly, and if a command is received,
  * processes it and updates the RDS data.
  */
-int poll_control_pipe() {
+ResultAndArg poll_control_pipe() {
+	ResultAndArg resarg;
 	int res = -1;
 	static char buf[CTL_BUFFER_SIZE];
 
 	char *fifo = fgets(buf, CTL_BUFFER_SIZE, f_ctl);
 
 	if(fifo == NULL) {
-		return res;
+		resarg.res = -1;
+		return resarg;
 	}
 
 	if(strlen(fifo) > 3 && fifo[2] == ' ') {
 		char *arg = fifo+3;
+		resarg.arg = arg;
 		if(arg[strlen(arg)-1] == '\n') arg[strlen(arg)-1] = 0;
 		if(fifo[0] == 'P' && fifo[1] == 'S') {
 			arg[8] = 0;
@@ -109,6 +112,7 @@ int poll_control_pipe() {
 		}
 	} else if(strlen(fifo) > 4 && fifo[3] == ' ') {
 		char *arg = fifo+4;
+		resarg.arg = arg;
 		if(arg[strlen(arg)-1] == '\n') arg[strlen(arg)-1] = 0;
 		if(fifo[0] == 'P' && fifo[1] == 'T' && fifo[2] == 'Y') {
 			int pty = atoi(arg);
@@ -138,8 +142,8 @@ int poll_control_pipe() {
 			res = CONTROL_PIPE_RT_SET;
 		}
 	}
-
-	return res;
+	resarg.res = res;
+	return resarg;
 }
 
 int close_control_pipe() {

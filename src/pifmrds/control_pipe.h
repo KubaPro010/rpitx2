@@ -15,6 +15,11 @@
 #define CONTROL_PIPE_PI_SET 8
 #define CONTROL_PIPE_PWR_SET 9
 
+typedef struct {
+    int res;
+    char arg[70];
+} ResultAndArg;
+
 extern int open_control_pipe(char *filename, volatile uint32_t *padreg);
 extern int close_control_pipe();
-extern int poll_control_pipe();
+extern ResultAndArg poll_control_pipe();

@@ -183,8 +183,11 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             }
         }
 
-        if(control_pipe && poll_control_pipe() == CONTROL_PIPE_PS_SET) {
-            varying_ps = 0;
+        if(control_pipe) {
+            ResultAndArg pollResult = poll_control_pipe();
+            if(pollResult.res == CONTROL_PIPE_PS_SET) {
+                varying_ps = 0;
+            }
         }
 
 			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip) < 0 ) {
@@ -226,6 +229,7 @@ int main(int argc, char **argv) {
     float gain = 1;
     int rawSampleRate = 44100;
     int rawChannels = 2;
+    int compressorchanges = 0;
     double preemp = 50e-6; //eu
     int deviation = 75000;
     int alternative_freq[100] = {};
@@ -260,12 +264,15 @@ int main(int argc, char **argv) {
         } else if(strcmp("-compressordecay", arg)==0 && param != NULL) {
             i++;
             compressor_decay = atof(param);
+            compressorchanges = 1;
         } else if(strcmp("-compressorattack", arg)==0 && param != NULL) {
             i++;
             compressor_attack = atof(param);
+            compressorchanges = 1;
         } else if(strcmp("-compressormaxgainrecip", arg)==0 && param != NULL) {
             i++;
             compressor_max_gain_recip = atof(param);
+            compressorchanges = 1;
         } else if(strcmp("-pty", arg)==0 && param != NULL) {
             i++;
             pty = atoi(param);
@@ -344,6 +351,9 @@ int main(int argc, char **argv) {
             "Syntax: pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code]\n"
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm] [-tp] [-ta]\n", arg);
         }
+    }
+    if(compressorchanges) {
+        printf("You've changed the compressor settings, just don't set it too low, so the deviation won't go crazy\n");
     }
     alternative_freq[0] = af_size;
     int FifoSize=DATA_SIZE*2;
