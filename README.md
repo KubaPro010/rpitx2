@@ -34,6 +34,7 @@ sudo reboot
 
 # Hardware
 ![bpf](/doc/bpf-warning.png)
+###### note: you don't need it, i've been transmitting since summer 2023 without it, and no one knocked at my door, but your country laws can be stricter
 
 | Raspberry Model      | Status  |
 | ---------------------|:-------:|
