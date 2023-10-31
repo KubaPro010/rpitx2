@@ -141,7 +141,7 @@ ResultAndArg poll_control_pipe() {
 			resarg.arg = (char)rds;
 		} else if(fifo[0] == 'D' && fifo[1] == 'E' && fifo[2] == 'V') {
 			resarg.res = CONTROL_PIPE_DEVIATION_SET;
-			resarg.arg = atoi(arg);
+			resarg.arg = arg;
 		}
 	}
 	return resarg;
