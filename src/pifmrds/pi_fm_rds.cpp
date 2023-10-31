@@ -103,6 +103,8 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     int data_len = 0;
     int data_index = 0;
 
+    int disablestereo = 0;
+
     // Initialize the baseband generator
     if(fm_mpx_open(audio_file, DATA_SIZE, raw, preemp, rawSampleRate, rawChannels, cutoff_freq, gaim) < 0) return 1;
 
@@ -195,10 +197,12 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             } else if(pollResult.res == CONTROL_PIPE_DEVIATION_SET) {
                 deviation = atoi(pollResult.arg);
                 deviation_scale_factor=  0.1 * (deviation );
+            } else if(pollResult.res == CONTROL_PIPE_STEREO_SET) {
+                disablestereo = (int)pollResult.arg;
             }
         }
 
-			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip) < 0 ) {
+			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, disablestereo) < 0 ) {
                     terminate(0);
                 }
                 data_len = DATA_SIZE;

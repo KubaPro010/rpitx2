@@ -125,7 +125,6 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
         }
     
         // Choose a cutoff frequency for the low-pass FIR filter
-		//float cutoff_freq = 3000; //For NFM
         if(in_samplerate/2 < cutoff_freq) cutoff_freq = in_samplerate/2 * .8;
    
 
@@ -194,7 +193,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip) {
+int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo) {
     if(!drds) get_rds_samples(mpx_buffer, length);
 
     if(inf == NULL) return 0; // if there is no audio, stop here
@@ -311,14 +310,20 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
  
         // Generate the stereo mpx
         if( channels > 1 ) {
-            mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
-                4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
-                .9*carrier_19[phase_19];                  // Stereo pilot tone
+            if(!disablestereo) {
+                mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
+                    4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
+                    .9*carrier_19[phase_19];                  // Stereo pilot tone
 
-            phase_19++;
-            phase_38++;
-            if(phase_19 >= 12) phase_19 = 0;
-            if(phase_38 >= 6) phase_38 = 0;
+                phase_19++;
+                phase_38++;
+                if(phase_19 >= 12) phase_19 = 0;
+                if(phase_38 >= 6) phase_38 = 0;
+            } else {
+                mpx_buffer[i] =  
+                    mpx_buffer[i] +    // RDS data samples are currently in mpx_buffer :to be Remove in NFM
+                    9.0*(out_left+out_right);      // Unmodulated monophonic signal
+            }
         }
         else
         {

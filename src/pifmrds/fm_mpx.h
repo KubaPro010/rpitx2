@@ -22,5 +22,5 @@
 */
 
 extern int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels, float cutoff_freq, float gain);
-extern int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip);
+extern int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo);
 extern int fm_mpx_close();
