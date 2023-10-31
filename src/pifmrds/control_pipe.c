@@ -139,6 +139,9 @@ ResultAndArg poll_control_pipe() {
 			if(rds) printf("OFF\n"); else printf("ON\n");
 			resarg.res = CONTROL_PIPE_RDS_SET;
 			resarg.arg = (char)rds;
+		} else if(fifo[0] == 'D' && fifo[1] == 'E' && fifo[2] == 'V') {
+			resarg.res = CONTROL_PIPE_DEVIATION_SET;
+			resarg.arg = atoi(arg);
 		}
 	}
 	return resarg;
