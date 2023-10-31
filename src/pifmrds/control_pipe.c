@@ -140,6 +140,9 @@ ResultAndArg poll_control_pipe() {
 			resarg.res = CONTROL_PIPE_RDS_SET;
 			resarg.arg = (char)rds;
 		} else if(fifo[0] == 'D' && fifo[1] == 'E' && fifo[2] == 'V') {
+			printf("Set Deviation to ");
+			printf(arg);
+			printf("\n");
 			resarg.res = CONTROL_PIPE_DEVIATION_SET;
 			resarg.arg = arg;
 		}
