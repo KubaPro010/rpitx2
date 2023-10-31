@@ -136,7 +136,7 @@ ResultAndArg poll_control_pipe() {
 		} else if(fifo[0] == 'R' && fifo[1] == 'D' && fifo[2] == 'S') {
 			int rds = ( strcmp(arg, "OFF") == 0 );
 			printf("Set RDS to ");
-			if(rds) printf("ON\n"); else printf("OFF\n");
+			if(rds) printf("OFF\n"); else printf("ON\n");
 			resarg.res = CONTROL_PIPE_RDS_SET;
 			resarg.arg = (char)rds;
 		}
