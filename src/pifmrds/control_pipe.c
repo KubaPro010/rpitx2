@@ -145,7 +145,7 @@ ResultAndArg poll_control_pipe() {
 			printf("\n");
 			resarg.res = CONTROL_PIPE_DEVIATION_SET;
 			resarg.arg = arg;
-		 else if(fifo[0] == 'G' && fifo[1] == 'A' && fifo[2] == 'I') {
+		} else if(fifo[0] == 'G' && fifo[1] == 'A' && fifo[2] == 'I') {
 			printf("Set Gain to ");
 			printf(arg);
 			printf("\n");
