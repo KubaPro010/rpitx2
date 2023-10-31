@@ -17,6 +17,7 @@
 #define CONTROL_PIPE_RDS_SET 10
 #define CONTROL_PIPE_DEVIATION_SET 11
 #define CONTROL_PIPE_STEREO_SET 12
+#define CONTROL_PIPE_GAIN_SET 13
 
 typedef struct {
     int res;

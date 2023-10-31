@@ -145,6 +145,12 @@ ResultAndArg poll_control_pipe() {
 			printf("\n");
 			resarg.res = CONTROL_PIPE_DEVIATION_SET;
 			resarg.arg = arg;
+		 else if(fifo[0] == 'G' && fifo[1] == 'A' && fifo[2] == 'I') {
+			printf("Set Gain to ");
+			printf(arg);
+			printf("\n");
+			resarg.res = CONTROL_PIPE_GAIN_SET;
+			resarg.arg = arg;
 		} else if(fifo[0] == 'S' && fifo[1] == 'T' && fifo[2] == 'R') {
 			int togg = ( strcmp(arg, "OFF") == 0 );
 			printf("Set Stereo Toggle to ");
