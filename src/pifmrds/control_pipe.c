@@ -146,9 +146,9 @@ ResultAndArg poll_control_pipe() {
 			resarg.res = CONTROL_PIPE_DEVIATION_SET;
 			resarg.arg = arg;
 		} else if(fifo[0] == 'S' && fifo[1] == 'T' && fifo[2] == 'R') {
-			int togg = ( strcmp(arg, "ON") == 0 );
-			printf("Set Streo Toggle to ");
-			if(togg) printf("ON\n"); else printf("OFF\n");
+			int togg = ( strcmp(arg, "OFF") == 0 );
+			printf("Set Stereo Toggle to ");
+			if(!togg) printf("ON\n"); else printf("OFF\n");
 			resarg.res = CONTROL_PIPE_STEREO_SET;
 			resarg.arg = (char)togg;
 		}
