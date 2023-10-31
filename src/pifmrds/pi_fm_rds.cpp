@@ -106,7 +106,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     int disablestereo = 0;
 
     // Initialize the baseband generator
-    if(fm_mpx_open(audio_file, DATA_SIZE, raw, preemp, rawSampleRate, rawChannels, cutoff_freq, gaim) < 0) return 1;
+    if(fm_mpx_open(audio_file, DATA_SIZE, raw, preemp, rawSampleRate, rawChannels, cutoff_freq) < 0) return 1;
 
     // Initialize the RDS modulator
     char myps[9] = {0};
@@ -202,7 +202,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             }
         }
 
-			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, disablestereo) < 0 ) {
+			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, disablestereo, gaim) < 0 ) {
                     terminate(0);
                 }
                 data_len = DATA_SIZE;

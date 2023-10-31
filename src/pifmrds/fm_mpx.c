@@ -81,7 +81,7 @@ float *alloc_empty_buffer(size_t length) {
 }
 
 
-int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels, float cutoff_freq, float gain) {
+int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels, float cutoff_freq) {
     length = len;
     raw_ = raw;
 
@@ -160,11 +160,11 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
                                             // matches the example in the reference material
 
             window = (.54 - .46 * cos(2*PI * (mi) / (double) FIR_TAPS*FIR_PHASES )) ; // Hamming window
-            low_pass_fir[j][i] = firpreemph * window * gain ; 
+            low_pass_fir[j][i] = firpreemph * window; 
           }
         }
     
-        printf("Created low-pass FIR filter for audio channels, with cutoff at %.1f Hz (gain: %.f\n", cutoff_freq, gain);
+        printf("Created low-pass FIR filter for audio channels, with cutoff at %.1f Hz\n", cutoff_freq);
     
         if( 0 )
         {
@@ -193,7 +193,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo) {
+int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain) {
     if(!drds) get_rds_samples(mpx_buffer, length);
 
     if(inf == NULL) return 0; // if there is no audio, stop here
@@ -264,6 +264,10 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
             out_left+=low_pass_fir[iphase][fi] * fir_buffer_left[(fir_index-fi)&(FIR_TAPS-1)];
           }
         }
+
+        //Add the gain
+        out_left = out_left * gain;
+        if(channels > 1) out_right = out_right * gain;
 		
         // Simple broadcast compressor
         // 
