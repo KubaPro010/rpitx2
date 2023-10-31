@@ -200,7 +200,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             } else if(pollResult.res == CONTROL_PIPE_STEREO_SET) {
                 disablestereo = (int)pollResult.arg;
             } else if(pollResult.res == CONTROL_PIPE_GAIN_SET) {
-                gaim = stof(pollResult.arg);
+                gaim = std::stof(pollResult.arg);
             }
         }
 
