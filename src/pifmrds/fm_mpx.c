@@ -326,14 +326,14 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
             } else {
                 mpx_buffer[i] =  
                     mpx_buffer[i] +    // RDS data samples are currently in mpx_buffer :to be Remove in NFM
-                    9.0*(out_left+out_right);      // Unmodulated L+R signal
+                    4.05*(out_left+out_right);      // Unmodulated L+R signal
             }
         }
         else
         {
             mpx_buffer[i] =  
                 mpx_buffer[i] +    // RDS data samples are currently in mpx_buffer :to be Remove in NFM
-                9.0*out_left;      // Unmodulated monophonic signal
+                4.05*out_left;      // Unmodulated monophonic signal
         } 
             
         audio_pos++;   
