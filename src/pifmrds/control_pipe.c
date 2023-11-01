@@ -163,6 +163,12 @@ ResultAndArg poll_control_pipe() {
 			printf("\n");
 			resarg.res = CONTROL_PIPE_COMPRESSORDECAY_SET;
 			resarg.arg = arg;
+		} else if(fifo[0] == 'C' && fifo[1] == 'O' && fifo[2] == 'A') {
+			printf("Set Compressor Attack to ");
+			printf(arg);
+			printf("\n");
+			resarg.res = CONTROL_PIPE_COMPRESSORATTACK_SET;
+			resarg.arg = arg;
 		}
 	}
 	return resarg;
