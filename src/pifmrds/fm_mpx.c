@@ -194,7 +194,8 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
 int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor) {
-    if(!drds) get_rds_samples(mpx_buffer, length);
+    int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
+    if(!drds) get_rds_samples(mpx_buffer, length, stereo_capable);
 
     if(inf == NULL) return 0; // if there is no audio, stop here
     

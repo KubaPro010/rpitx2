@@ -121,7 +121,7 @@ int get_rds_ct_group(uint16_t *blocks) {
    pattern. 'ps_state' and 'rt_state' keep track of where we are in the PS (0A) sequence
    or RT (2A) sequence, respectively.
 */
-void get_rds_group(int *buffer) {
+void get_rds_group(int *buffer, int stereo) {
     static int state = 0;
     static int ps_state = 0;
     static int rt_state = 0;
@@ -132,7 +132,7 @@ void get_rds_group(int *buffer) {
     if(! get_rds_ct_group(blocks)) { // CT (clock time) has priority on other group types
         if(state < 4) {
             blocks[1] = 0x0000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ta << 4 | rds_params.ms << 3 | ps_state;
-            if(ps_state == 3) blocks[1] |= 0x0004; // DI = 1 - Stereo
+            if((ps_state == 3) && stereo) blocks[1] |= 0x0004; // DI = 1 - Stereo
             if(rds_params.af[0]) { // AF
                 if(af_state == 0) { 
 			        blocks[2] = (rds_params.af[0] + 224) << 8 | rds_params.af[1];
@@ -181,7 +181,7 @@ void get_rds_group(int *buffer) {
    envelope with a 57 kHz carrier, which is very efficient as 57 kHz is 4 times the
    sample frequency we are working at (228 kHz).
  */
-void get_rds_samples(float *buffer, int count) {
+void get_rds_samples(float *buffer, int count, int stereo) {
     static int bit_buffer[BITS_PER_GROUP];
     static int bit_pos = BITS_PER_GROUP;
     static float sample_buffer[SAMPLE_BUFFER_SIZE] = {0};
@@ -199,7 +199,7 @@ void get_rds_samples(float *buffer, int count) {
     for(int i=0; i<count; i++) {
         if(sample_count >= SAMPLES_PER_BIT) {
             if(bit_pos >= BITS_PER_GROUP) {
-                get_rds_group(bit_buffer);
+                get_rds_group(bit_buffer, stereo);
                 bit_pos = 0;
             }
             
