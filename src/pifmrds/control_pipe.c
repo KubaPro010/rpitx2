@@ -157,6 +157,12 @@ ResultAndArg poll_control_pipe() {
 			if(!togg) printf("ON\n"); else printf("OFF\n");
 			resarg.res = CONTROL_PIPE_STEREO_SET;
 			resarg.arg = (char)togg;
+		} else if(fifo[0] == 'C' && fifo[1] == 'O' && fifo[2] == 'D') {
+			printf("Set Compressor Decay to ");
+			printf(arg);
+			printf("\n");
+			resarg.res = CONTROL_PIPE_COMPRESSORDECAY_SET;
+			resarg.arg = arg;
 		}
 	}
 	return resarg;
