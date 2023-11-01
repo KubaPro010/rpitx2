@@ -261,7 +261,7 @@ int main(int argc, char **argv) {
         } else if(strcmp("-freq", arg)==0 && param != NULL) {
             i++;
             carrier_freq = 1e6 * atof(param);
-            if((carrier_freq < 64e6 || carrier_freq > 108e6) && bypassfreqrange == 0)
+            if((carrier_freq < 64e6 || carrier_freq > 108e6) && !bypassfreqrange)
                fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for UKF radios, such as the UNITRA Jowita or other old band FM Radios)\n");
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
