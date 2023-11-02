@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 		clk->enableclk(4);
 		
 		//clk->enableclk(6);//CLK2 : experimental
-		//clk->enableclk(20);//CLK1 duplicate on GPIO20 for more power ?
+		//clk->enableclk(20);//CLK1 duplicate on GPIO20 for more power ? (kuba's note: it can extend range, but not far (depending on the antenna), also no more power, because its impossible)
 		if(!NotKill)
 		{
 			while(running)
