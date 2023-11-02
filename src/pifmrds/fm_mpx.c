@@ -193,9 +193,9 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor) {
+int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled) {
     int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
-    if(!drds) get_rds_samples(mpx_buffer, length, stereo_capable);
+    if(!drds) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled);
 
     if(inf == NULL) return 0; // if there is no audio, stop here
     
@@ -326,14 +326,14 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                 if(phase_38 >= 6) phase_38 = 0;
             } else {
                 mpx_buffer[i] =  
-                    mpx_buffer[i] +    // RDS data samples are currently in mpx_buffer :to be Remove in NFM
+                    mpx_buffer[i] +
                     4.05*(out_left+out_right);      // Unmodulated L+R signal
             }
         }
         else
         {
             mpx_buffer[i] =  
-                mpx_buffer[i] +    // RDS data samples are currently in mpx_buffer :to be Remove in NFM
+                mpx_buffer[i] +
                 4.05*out_left;      // Unmodulated monophonic signal
         } 
             

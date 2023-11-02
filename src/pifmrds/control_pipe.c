@@ -103,6 +103,12 @@ ResultAndArg poll_control_pipe() {
 			printf("Set AB to ");
 			if(ab) printf("ON\n"); else printf("OFF\n");
 			resarg.res = CONTROL_PIPE_AB_SET;
+		} else if(fifo[0] == 'C' && fifo[1] == 'T') {
+			int ct = ( strcmp(arg, "ON") == 0 );
+			printf("Set CT to ");
+			if(ct) printf("ON\n"); else printf("OFF\n");
+			resarg.arg = (char)ct;
+			resarg.res = CONTROL_PIPE_CT_SET;
 		}
 	} else if(strlen(fifo) > 4 && fifo[3] == ' ') {
 		char *arg = fifo+4;

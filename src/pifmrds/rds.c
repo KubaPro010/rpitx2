@@ -82,7 +82,8 @@ uint16_t crc(uint16_t block) {
 /* Possibly generates a CT (clock time) group if the minute has just changed
    Returns 1 if the CT group was generated, 0 otherwise
 */
-int get_rds_ct_group(uint16_t *blocks) {
+int get_rds_ct_group(uint16_t *blocks, int enabled) {
+    if(!enabled) return;
     static int latest_minutes = -1;
 
     // Check time
@@ -121,7 +122,7 @@ int get_rds_ct_group(uint16_t *blocks) {
    pattern. 'ps_state' and 'rt_state' keep track of where we are in the PS (0A) sequence
    or RT (2A) sequence, respectively.
 */
-void get_rds_group(int *buffer, int stereo) {
+void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) {
     static int state = 0;
     static int ps_state = 0;
     static int rt_state = 0;
@@ -129,7 +130,7 @@ void get_rds_group(int *buffer, int stereo) {
     uint16_t blocks[GROUP_LENGTH] = {rds_params.pi, 0, 0, 0};
     
     // Generate block content
-    if(! get_rds_ct_group(blocks)) { // CT (clock time) has priority on other group types
+    if(! get_rds_ct_group(blocks, ct_clock_enabled)) { // CT (clock time) has priority on other group types (when its on)
         if(state < 4) {
             blocks[1] = 0x0000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ta << 4 | rds_params.ms << 3 | ps_state;
             if((ps_state == 3) && stereo) blocks[1] |= 0x0004; // DI = 1 - Stereo
@@ -181,7 +182,7 @@ void get_rds_group(int *buffer, int stereo) {
    envelope with a 57 kHz carrier, which is very efficient as 57 kHz is 4 times the
    sample frequency we are working at (228 kHz).
  */
-void get_rds_samples(float *buffer, int count, int stereo) {
+void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled) {
     static int bit_buffer[BITS_PER_GROUP];
     static int bit_pos = BITS_PER_GROUP;
     static float sample_buffer[SAMPLE_BUFFER_SIZE] = {0};
@@ -199,7 +200,7 @@ void get_rds_samples(float *buffer, int count, int stereo) {
     for(int i=0; i<count; i++) {
         if(sample_count >= SAMPLES_PER_BIT) {
             if(bit_pos >= BITS_PER_GROUP) {
-                get_rds_group(bit_buffer, stereo);
+                get_rds_group(bit_buffer, stereo, ct_clock_enabled);
                 bit_pos = 0;
             }
             
