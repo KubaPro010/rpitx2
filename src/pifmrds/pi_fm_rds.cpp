@@ -98,7 +98,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
     sigaction(SIGKILL, &sa, NULL);
-    sigaction(SIGHUP, &sa, NULL);
+    sigaction(SIGHUP, &sa, NULL); //https://www.gnu.org/software/libc/manual/html_node/Termination-Signals.html
 
     //Set the power
     pad_reg = (volatile uint32_t *)map_peripheral(PAD_VIRT_BASE, PAD_LEN);
