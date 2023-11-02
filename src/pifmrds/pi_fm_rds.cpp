@@ -396,7 +396,8 @@ int main(int argc, char **argv) {
     }
     alternative_freq[0] = af_size;
     int FifoSize=DATA_SIZE*2;
-    fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin);
+    //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
+    fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
     int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct);
     terminate(errcode);
 }
