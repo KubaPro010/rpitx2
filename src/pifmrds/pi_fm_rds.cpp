@@ -256,6 +256,7 @@ int main(int argc, char **argv) {
     int alternative_freq[100] = {};
     float ppm = 0;
     int bypassfreqrange = 0;
+    int ct = 1;
     float cutofffreq = 15700;
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
@@ -356,6 +357,9 @@ int main(int argc, char **argv) {
         } else if(strcmp("-disablecompressor", arg)==0) {
             i++;
             enable_compressor = 0;
+        } else if(strcmp("-disablect", arg)==0) {
+            i++;
+            ct = 0;
         } else if(strcmp("-preemphasis", arg)==0 && param != NULL) {
             i++;
             if(strcmp("us", param)==0) {
@@ -382,6 +386,6 @@ int main(int argc, char **argv) {
     alternative_freq[0] = af_size;
     int FifoSize=DATA_SIZE*2;
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin);
-    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor);
+    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct);
     terminate(errcode);
 }
