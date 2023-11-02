@@ -84,13 +84,21 @@ static volatile void *map_peripheral(uint32_t base, uint32_t len)
 int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled) {
     // Catch all signals possible - it is vital we kill the DMA engine
     // on process exit!
-    for (int i = 0; i < 64; i++) {
-        struct sigaction sa;
+    // for (int i = 0; i < 64; i++) {
+    //     struct sigaction sa;
 
-        memset(&sa, 0, sizeof(sa));
-        sa.sa_handler = terminate;
-        sigaction(i, &sa, NULL);
-    }
+    //     memset(&sa, 0, sizeof(sa));
+    //     sa.sa_handler = terminate;
+    //     sigaction(i, &sa, NULL);
+    // }
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = terminate;
+    sigaction(SIGTERM, &term_sa, NULL);
+    sigaction(SIGINT, &term_sa, NULL);
+    sigaction(SIGQUIT, &term_sa, NULL);
+    sigaction(SIGKILL, &term_sa, NULL);
+    sigaction(SIGHUP, &term_sa, NULL);
 
     //Set the power
     pad_reg = (volatile uint32_t *)map_peripheral(PAD_VIRT_BASE, PAD_LEN);
