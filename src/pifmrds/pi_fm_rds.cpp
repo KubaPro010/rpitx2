@@ -383,6 +383,9 @@ int main(int argc, char **argv) {
     if(compressorchanges) {
         printf("You've changed the compressor settings, just don't set it too low, so the deviation won't go crazy\n");
     }
+    if(enable_compressor) {
+        printf("DUDE YOU ARE CRAZY?\n");
+    }
     alternative_freq[0] = af_size;
     int FifoSize=DATA_SIZE*2;
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin);
