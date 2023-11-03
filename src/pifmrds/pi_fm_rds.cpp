@@ -81,7 +81,7 @@ static volatile void *map_peripheral(uint32_t base, uint32_t len)
     return vaddr;
 }
 
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled) {
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, float ppm, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume) {
     // Catch all signals possible - it is vital we kill the DMA engine
     // on process exit!
     // for (int i = 0; i < 64; i++) {
@@ -217,10 +217,12 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 compressor_attack = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_CT_SET) {
                 rds_ct_enabled = (int)pollResult.arg;
+            } else if(pollResult.res == CONTROL_PIPE_RDSVOL_SET) {
+                rds_volume = std::stof(pollResult.arg);
             }
         }
 
-			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, disablestereo, gaim, enablecompressor, rds_ct_enabled, 1.0) < 0 ) {
+			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, disablestereo, gaim, enablecompressor, rds_ct_enabled, rds_volume) < 0 ) {
                     terminate(0);
                 }
                 data_len = DATA_SIZE;
@@ -250,6 +252,7 @@ int main(int argc, char **argv) {
     float compressor_attack = 1.0;
     float compressor_max_gain_recip = 0.01;
     int enable_compressor = 1;
+    float rds_volume = 1.0;
     int ta = 0;
     int tp = 0;
     int af_size = 0;
@@ -400,6 +403,6 @@ int main(int argc, char **argv) {
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct);
+    int errcode = tx(carrier_freq,  audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume);
     terminate(errcode);
 }

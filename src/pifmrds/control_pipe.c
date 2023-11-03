@@ -175,6 +175,12 @@ ResultAndArg poll_control_pipe() {
 			printf("\n");
 			resarg.res = CONTROL_PIPE_COMPRESSORATTACK_SET;
 			resarg.arg = arg;
+		} else if(fifo[0] == 'R' && fifo[1] == 'D' && fifo[2] == 'V') {
+			printf("Set RDS Volume to ");
+			printf(arg);
+			printf("\n");
+			resarg.res = CONTROL_PIPE_RDSVOL_SET;
+			resarg.arg = arg;
 		}
 	}
 	return resarg;
