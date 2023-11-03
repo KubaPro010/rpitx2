@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 
-extern void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled);
+extern void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled, float sample_volume=1.0);
 extern void set_rds_pi(uint16_t pi_code);
 extern void set_rds_rt(char *rt);
 extern void set_rds_ps(char *ps);

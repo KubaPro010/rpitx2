@@ -185,7 +185,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) {
    envelope with a 57 kHz carrier, which is very efficient as 57 kHz is 4 times the
    sample frequency we are working at (228 kHz).
  */
-void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled) {
+void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled, float sample_volume) {
     static int bit_buffer[BITS_PER_GROUP];
     static int bit_pos = BITS_PER_GROUP;
     static float sample_buffer[SAMPLE_BUFFER_SIZE] = {0};
@@ -248,7 +248,7 @@ void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled)
         phase++;
         if(phase >= 4) phase = 0;
         
-        *buffer++ = sample;
+        *buffer++ = (sample * sample_volume);
         sample_count++;
     }
 }
