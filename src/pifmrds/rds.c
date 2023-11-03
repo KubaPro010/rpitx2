@@ -83,7 +83,7 @@ uint16_t crc(uint16_t block) {
    Returns 1 if the CT group was generated, 0 otherwise
 */
 int get_rds_ct_group(uint16_t *blocks, int enabled) {
-    if(!enabled) return;
+    if(!enabled) return 0;
     static int latest_minutes = -1;
 
     // Check time
