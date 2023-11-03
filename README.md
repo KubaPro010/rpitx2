@@ -23,7 +23,7 @@ You can now clone the repository. A script (install.sh) is there for easy instal
 
 ```sh
 git clone https://github.com/KubaPro010/rpitx2
-cd rpitx
+cd rpitx2
 ./install.sh
 ```
 Make a reboot in order to use **rpitx2** in a stable state.
