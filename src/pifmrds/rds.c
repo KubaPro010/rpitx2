@@ -83,7 +83,6 @@ uint16_t crc(uint16_t block) {
    Returns 1 if the CT group was generated, 0 otherwise
 */
 int get_rds_ct_group(uint16_t *blocks, int enabled) {
-    if(!enabled) return 0;
     static int latest_minutes = -1;
 
     // Check time
@@ -93,6 +92,10 @@ int get_rds_ct_group(uint16_t *blocks, int enabled) {
     now = time (NULL);
     utc = gmtime (&now);
 
+    if(!enabled) {
+        latest_minutes = utc->tm_min; //so if many minutes when disabled someone enables it won't bomb the rds decoders with like 1 million 4As(s [sorry])
+        return 0;
+    }
     if(utc->tm_min != latest_minutes) {
         // Generate CT group
         latest_minutes = utc->tm_min;
