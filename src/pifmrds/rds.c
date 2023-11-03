@@ -93,7 +93,7 @@ int get_rds_ct_group(uint16_t *blocks, int enabled) {
     utc = gmtime (&now);
 
     if(!enabled) {
-        latest_minutes = utc->tm_min; //so if many minutes when disabled someone enables it won't bomb the rds decoders with like 1 million 4As(s [sorry])
+        latest_minutes = utc->tm_min; //oh wait it won't anyway
         return 0;
     }
     if(utc->tm_min != latest_minutes) {
