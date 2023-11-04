@@ -101,6 +101,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     sigaction(SIGHUP, &sa, NULL); //https://www.gnu.org/software/libc/manual/html_node/Termination-Signals.html
     sigaction(SIGPWR, &sa, NULL);
     sigaction(SIGTSTP, &sa, NULL);
+    sigaction(SIGSEGV, &sa, NULL); //seg fault
 
     //Set the power
     pad_reg = (volatile uint32_t *)map_peripheral(PAD_VIRT_BASE, PAD_LEN);
@@ -200,7 +201,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             if(pollResult.res == CONTROL_PIPE_PS_SET) {
                 varying_ps = 0;
             } else if(pollResult.res == CONTROL_PIPE_RDS_SET) {
-                drds = (int)pollResult.arg;
+                drds = atoi(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_PWR_SET) {
                 pad_reg[GPIO_PAD_0_27] = 0x5a000018 + (int)pollResult.arg;
                 pad_reg[GPIO_PAD_28_45] = 0x5a000018 + (int)pollResult.arg;
@@ -208,7 +209,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 deviation = atoi(pollResult.arg);
                 deviation_scale_factor=  0.1 * (deviation );
             } else if(pollResult.res == CONTROL_PIPE_STEREO_SET) {
-                disablestereo = (int)pollResult.arg;
+                disablestereo = atoi(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_GAIN_SET) {
                 gaim = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSORDECAY_SET) {
@@ -216,7 +217,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSORATTACK_SET) {
                 compressor_attack = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_CT_SET) {
-                rds_ct_enabled = (int)pollResult.arg;
+                rds_ct_enabled = atoi(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_RDSVOL_SET) {
                 rds_volume = std::stof(pollResult.arg);
             }
