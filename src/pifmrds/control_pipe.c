@@ -130,7 +130,7 @@ ResultAndArg poll_control_pipe() {
 			resarg.res = CONTROL_PIPE_PTY_SET;
 		} else if(fifo[0] == 'P' && fifo[1] == 'W' && fifo[2] == 'R') {
 			int power_level = atoi(arg);
-			resarg.arg = (char)power_level;
+			resarg.arg = (char*)power_level;
 			printf("POWER set to: \"%s\"\n", arg);
 			resarg.res = CONTROL_PIPE_PWR_SET;
 		} else if(fifo[0] == 'R' && fifo[1] == 'T' && fifo[2] == 'B') {
@@ -144,7 +144,7 @@ ResultAndArg poll_control_pipe() {
 			printf("Set RDS to ");
 			if(rds) printf("OFF\n"); else printf("ON\n");
 			resarg.res = CONTROL_PIPE_RDS_SET;
-			resarg.arg = (char)rds;
+			resarg.arg = (char*)rds;
 		} else if(fifo[0] == 'D' && fifo[1] == 'E' && fifo[2] == 'V') {
 			printf("Set Deviation to ");
 			printf(arg);
@@ -162,7 +162,7 @@ ResultAndArg poll_control_pipe() {
 			printf("Set Stereo Toggle to ");
 			if(!togg) printf("ON\n"); else printf("OFF\n");
 			resarg.res = CONTROL_PIPE_STEREO_SET;
-			resarg.arg = (char)togg;
+			resarg.arg = (char*)togg;
 		} else if(fifo[0] == 'C' && fifo[1] == 'O' && fifo[2] == 'D') {
 			printf("Set Compressor Decay to ");
 			printf(arg);
