@@ -206,7 +206,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 pad_reg[GPIO_PAD_0_27] = 0x5a000018 + std::stoi(pollResult.arg);
                 pad_reg[GPIO_PAD_28_45] = 0x5a000018 + std::stoi(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_DEVIATION_SET) {
-                deviation = atoi(pollResult.arg);
+                deviation = std::stoi(pollResult.arg);
                 deviation_scale_factor=  0.1 * (deviation );
             } else if(pollResult.res == CONTROL_PIPE_STEREO_SET) {
                 disablestereo = std::stoi(pollResult.arg);
