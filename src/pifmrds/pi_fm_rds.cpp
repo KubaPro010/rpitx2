@@ -201,7 +201,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             if(pollResult.res == CONTROL_PIPE_PS_SET) {
                 varying_ps = 0;
             } else if(pollResult.res == CONTROL_PIPE_RDS_SET) {
-                drds = std::stoi(pollResult.arg);
+                drds = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_PWR_SET) {
                 pad_reg[GPIO_PAD_0_27] = 0x5a000018 + std::stoi(pollResult.arg);
                 pad_reg[GPIO_PAD_28_45] = 0x5a000018 + std::stoi(pollResult.arg);
@@ -209,7 +209,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 deviation = std::stoi(pollResult.arg);
                 deviation_scale_factor=  0.1 * (deviation );
             } else if(pollResult.res == CONTROL_PIPE_STEREO_SET) {
-                disablestereo = std::stoi(pollResult.arg);
+                disablestereo = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_GAIN_SET) {
                 gaim = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSORDECAY_SET) {
@@ -217,7 +217,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSORATTACK_SET) {
                 compressor_attack = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_CT_SET) {
-                rds_ct_enabled = std::stoi(pollResult.arg);
+                rds_ct_enabled = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_RDSVOL_SET) {
                 rds_volume = std::stof(pollResult.arg);
             }

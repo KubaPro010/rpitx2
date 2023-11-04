@@ -26,6 +26,7 @@
 typedef struct {
     int res;
     char *arg;
+    int arg_int;
 } ResultAndArg;
 
 extern int open_control_pipe(char *filename);
