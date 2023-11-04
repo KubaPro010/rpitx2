@@ -107,7 +107,7 @@ ResultAndArg poll_control_pipe() {
 			int ct = ( strcmp(arg, "ON") == 0 );
 			printf("Set CT to ");
 			if(ct) printf("ON\n"); else printf("OFF\n");
-			resarg.arg = (char)ct;
+			resarg.arg = (char*)ct;
 			resarg.res = CONTROL_PIPE_CT_SET;
 		}
 	} else if(strlen(fifo) > 4 && fifo[3] == ' ') {
