@@ -178,7 +178,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
         // and about 2.5kHz for NFM (walkie-talkie style radio)
         deviation_scale_factor=  0.1 * (deviation ) ; // todo PPM
     }
-
+    int paused = 0;
     for (;;)
 	{
         if(drds == 0) {
@@ -221,10 +221,12 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 rds_ct_enabled = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_RDSVOL_SET) {
                 rds_volume = std::stof(pollResult.arg);
+            } else if(pollResult.res == CONTROL_PIPE_PAUSE_SET) {
+                paused = pollResult.arg_int;
             }
         }
 
-			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, disablestereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, 0) < 0 ) {
+			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, disablestereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused) < 0 ) {
                     terminate(0);
                 }
                 data_len = DATA_SIZE;

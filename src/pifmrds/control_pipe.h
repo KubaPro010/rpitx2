@@ -22,6 +22,7 @@
 #define CONTROL_PIPE_COMPRESSORATTACK_SET 15
 #define CONTROL_PIPE_CT_SET 16
 #define CONTROL_PIPE_RDSVOL_SET 17
+#define CONTROL_PIPE_PAUSE_SET 18
 
 typedef struct {
     int res;

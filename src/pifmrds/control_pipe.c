@@ -181,6 +181,12 @@ ResultAndArg poll_control_pipe() {
 			printf("\n");
 			resarg.res = CONTROL_PIPE_RDSVOL_SET;
 			resarg.arg = arg;
+		} else if(fifo[0] == 'P' && fifo[1] == 'A' && fifo[2] == 'U') {
+			int togg = ( strcmp(arg, "OFF") == 0 );
+			printf("Set paused to ");
+			if(!togg) printf("ON\n"); else printf("OFF\n");
+			resarg.res = CONTROL_PIPE_PAUSE_SET;
+			resarg.arg_int = togg;
 		}
 	}
 	return resarg;
