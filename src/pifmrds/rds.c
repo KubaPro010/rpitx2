@@ -154,7 +154,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) {
             ps_state++;
             if(ps_state >= 4) ps_state = 0;
         } else { // Type 2A groups
-            if(!strlen(rds_params.rt) == 0) {
+            if(strlen(rds_params.rt) != 0) {
                 blocks[1] = 0x2000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ab << 4 | rt_state;
                 blocks[2] = rds_params.rt[rt_state*4+0] << 8 | rds_params.rt[rt_state*4+1];
                 blocks[3] = rds_params.rt[rt_state*4+2] << 8 | rds_params.rt[rt_state*4+3];
