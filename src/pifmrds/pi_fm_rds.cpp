@@ -122,6 +122,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     // Initialize the RDS modulator
     char myps[9] = {0};
     set_rds_pi(pi);
+    set_rds_ps(ps);
     set_rds_rt(rt);
     set_rds_pty(pty);
     set_rds_ab(0);
