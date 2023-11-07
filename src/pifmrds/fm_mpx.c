@@ -65,7 +65,6 @@ float fir_buffer_left[FIR_TAPS] = {0};
 float fir_buffer_right[FIR_TAPS] = {0};
 int fir_index = 0;
 int channels;
-int in_samplerate;
 float left_max=1, right_max=1;  // start compressor with low gain 
 
 SNDFILE *inf;
@@ -82,7 +81,7 @@ float *alloc_empty_buffer(size_t length) {
 }
 
 
-int fm_mpx_open(char *filename, size_t len, int raw, int rawSampleRate, int rawChannels) {
+int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels, float cutoff_freq) {
     length = len;
     raw_ = raw;
 
@@ -113,7 +112,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, int rawSampleRate, int rawC
             }
         }
             
-        in_samplerate = sfinfo.samplerate;
+        int in_samplerate = sfinfo.samplerate;
         downsample_factor = 228000. / in_samplerate;
     
         printf("Input: %d Hz, upsampling factor: %.2f\n", in_samplerate, downsample_factor);
@@ -124,6 +123,48 @@ int fm_mpx_open(char *filename, size_t len, int raw, int rawSampleRate, int rawC
         } else {
             printf("1 channel, monophonic operation.\n");
         }
+    
+        // Choose a cutoff frequency for the low-pass FIR filter
+        if(in_samplerate/2 < cutoff_freq) cutoff_freq = in_samplerate/2 * .8;
+   
+
+        // Create the low-pass FIR filter, with pre-emphasis
+        double window, firlowpass, firpreemph , sincpos;
+
+        // IIR pre-emphasis filter
+        // Reference material:    http://jontio.zapto.org/hda1/preempiir.pdf
+        double tau=preemphasis;
+        double delta=1/(2*PI*20000);//double delta=1.96e-6;
+        double taup, deltap, bp, ap, a0, a1, b1;
+        taup=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*tau*(in_samplerate*FIR_PHASES) ));
+        deltap=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*delta*(in_samplerate*FIR_PHASES) ));
+        bp=sqrt( -taup*taup + sqrt(taup*taup*taup*taup + 8.0*taup*taup*deltap*deltap) ) / 2.0 ;
+        ap=sqrt( 2*bp*bp + taup*taup );
+        a0=( 2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
+        // a1=(-2.0*ap + 1/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1/(in_samplerate*FIR_PHASES) ); //ORI
+        // b1=( 2.0*bp + 1/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1/(in_samplerate*FIR_PHASES) ); //ORI
+        a1=(-2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
+        b1=( 2.0*bp - 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
+        double x=0,y=0;
+ 
+        for(int i=0; i<FIR_TAPS; i++) { 
+         for(int j=0; j<FIR_PHASES; j++) {
+            int mi=i*FIR_PHASES + j+1;// match indexing of Matlab script
+            sincpos = (mi)-(((FIR_TAPS*FIR_PHASES)+1.0)/2.0); // offset by 0.5 so sincpos!=0 (causes NaN x/0 )
+            //printf("%d=%f \n",mi ,sincpos); 
+            firlowpass = sin(2 * PI * cutoff_freq * sincpos / (in_samplerate*FIR_PHASES) ) / (PI * sincpos) ; 
+
+            y=a0*firlowpass + a1*x + b1*y ; // Find the combined impulse response
+            x=firlowpass;                   // of FIR low-pass and IIR pre-emphasis
+            firpreemph=y;                   // y could be replaced by firpreemph but this
+                                            // matches the example in the reference material
+
+            window = (.54 - .46 * cos(2*PI * (mi) / (double) FIR_TAPS*FIR_PHASES )) ; // Hamming window
+            low_pass_fir[j][i] = firpreemph * window; 
+          }
+        }
+    
+        printf("Created low-pass FIR filter for audio channels, with cutoff at %.1f Hz\n", cutoff_freq);
     
         if( 0 )
         {
@@ -152,43 +193,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, int rawSampleRate, int rawC
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, double preemphasis, float cutoff_freq) {
-    // Choose a cutoff frequency for the low-pass FIR filter
-    if(in_samplerate/2 < cutoff_freq) cutoff_freq = in_samplerate/2 * .8;
-    // Create the low-pass FIR filter, with pre-emphasis
-    double window, firlowpass, firpreemph , sincpos;
-    // IIR pre-emphasis filter
-    // Reference material:    http://jontio.zapto.org/hda1/preempiir.pdf
-    double tau=preemphasis;
-    double delta=1/(2*PI*20000);//double delta=1.96e-6;
-    double taup, deltap, bp, ap, a0, a1, b1;
-    taup=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*tau*(in_samplerate*FIR_PHASES) ));
-    deltap=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*delta*(in_samplerate*FIR_PHASES) ));
-    bp=sqrt( -taup*taup + sqrt(taup*taup*taup*taup + 8.0*taup*taup*deltap*deltap) ) / 2.0 ;
-    ap=sqrt( 2*bp*bp + taup*taup );
-    a0=( 2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
-    // a1=(-2.0*ap + 1/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1/(in_samplerate*FIR_PHASES) ); //ORI
-    // b1=( 2.0*bp + 1/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1/(in_samplerate*FIR_PHASES) ); //ORI
-    a1=(-2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
-    b1=( 2.0*bp - 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
-    double x=0,y=0;
-    for(int i=0; i<FIR_TAPS; i++) { 
-         for(int j=0; j<FIR_PHASES; j++) {
-            int mi=i*FIR_PHASES + j+1;// match indexing of Matlab script
-            sincpos = (mi)-(((FIR_TAPS*FIR_PHASES)+1.0)/2.0); // offset by 0.5 so sincpos!=0 (causes NaN x/0 )
-            //printf("%d=%f \n",mi ,sincpos); 
-            firlowpass = sin(2 * PI * cutoff_freq * sincpos / (in_samplerate*FIR_PHASES) ) / (PI * sincpos) ; 
-
-            y=a0*firlowpass + a1*x + b1*y ; // Find the combined impulse response
-            x=firlowpass;                   // of FIR low-pass and IIR pre-emphasis
-            firpreemph=y;                   // y could be replaced by firpreemph but this
-                                            // matches the example in the reference material
-
-            window = (.54 - .46 * cos(2*PI * (mi) / (double) FIR_TAPS*FIR_PHASES )) ; // Hamming window
-            low_pass_fir[j][i] = firpreemph * window; 
-          }
-        }
-    
+int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused) {
     int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
     if(!drds) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
 
