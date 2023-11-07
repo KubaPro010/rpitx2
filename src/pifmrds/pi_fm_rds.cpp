@@ -223,7 +223,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             }
         }
 
-			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, disablestereo, gaim, enablecompressor, rds_ct_enabled, rds_volume) < 0 ) {
+			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, disablestereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, 0) < 0 ) {
                     terminate(0);
                 }
                 data_len = DATA_SIZE;

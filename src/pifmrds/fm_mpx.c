@@ -193,7 +193,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume) {
+int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused) {
     int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
     if(!drds) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
 
@@ -310,7 +310,10 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
           if(enablecompressor) out_right=out_right/(right_max+compressor_max_gain_recip);
         }
         if(enablecompressor) out_left= out_left/(left_max+compressor_max_gain_recip); // Adjust volume with limited maximum gain
-
+        if(paused) {
+            out_left = 0;
+            if(channels > 1) out_right = 0;
+        }
         if(drds) mpx_buffer[i] = 0; //do not remove this, the bandwidht will go nuts
  
         // Generate the stereo mpx
