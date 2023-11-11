@@ -47,7 +47,7 @@ sudo reboot
 | Pi3B|OK|
 | Pi3B+|OK|
 | Pi3A+|OK|
-| Pi4|In beta mode|
+| Pi4|Partial (system may crash completly)|
 
 Plug a wire on GPIO 4, means Pin 7 of the GPIO header ([header P1](http://elinux.org/RPi_Low-level_peripherals#General_Purpose_Input.2FOutput_.28GPIO.29)). This acts as the antenna. The optimal length of the wire depends the frequency you want to transmit on, but it works with a few centimeters for local testing. (Use https://www.southwestantennas.com/calculator/antenna-wavelength to calculate the lenght, make sure to use the 1/4 wave setting, as for 1/2 wave you'd need a impedance transformator, and these are not cheap [also yes, i learned it the hard way after having to cut my antenna])
 
