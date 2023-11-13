@@ -1,3 +1,4 @@
+if you wanna use pifmrds, then scroll down to pifmrds usage
 ![rpitx banner](/doc/rpitxlogo.png)
 # About rpitx2
 **rpitx2** is a general radio frequency transmitter for Raspberry Pi which doesn't require any other hardware unless filter to avoid intererence. It can handle frequencies from 5 KHz up to 1500 MHz.
@@ -131,8 +132,46 @@ We can also live transmitting a received band frequency. Here the input frequenc
 ### Relay with transmodulation ###
 We assume that input frequency is tuned on FM station. It is demodulated and modulate to SSB on 434MHZ. SSB is not HiFi, so prefere to choose a talk radio, music sounds like bit weird !
 
+# PiFMRds usage
+See https://github.com/ChristopheJacquet/PiFmRds/blob/master/README.md, it will show what you can do, but theres MORE, yeah, this ain't some that undeveloped code, this is developed, but whats the quality of the code? lets not talk about that, okay? anyways, let me show you the *features* of this :)
+
+first, the normal args, like `pifmrds -arg argtoarg?`<br>
+`-compressordecay` - compressor decay, specify in float (like: 0.999)<br>
+`-compressorattack` - same thing but attack<br>
+`-compressormaxgainrecip` - i dunno<br>
+`-bfr` - by default a 65-108 freq range is defined, a freq outside makes the program crash, this bypasses the range, also it requires a arg, it can be anything as the arg is not parsed, so pass: `-bfr thisbypassescrap`<br>
+`-deviation` - sets how large the fm signal can be, in khz, default is 75khz<br>
+`-raw` - same arg as bfr, but this disables the format of the audio and sets channels and samplerate forcefully<br>
+`-rawchannels` - change the sample rate if raw<br>
+`-rawsamplerate` - same stuff but sample rate<br>
+`-cutofffreq` - fm broadcast uses a cut off freq around 16-18 khz, to avoid interferance with the 19khz stereo pilot<br>
+`-audiogain` - audio too loud or too quiet? use this, this defines how many times the audio can be, here pass in int, but you can pass in `GAI {float}` on the fifo pipe (dont ask)<br>
+`-power` - for now works only for rpi3, but you can change the code very easy to fix it for your pi<br>
+`-disablerds` - same arg as bfr, pass this in and no rds anymore<br>
+`-disablecompressor` - same as bfr, dont pass this please<br>
+`-disablect` - disable rds ct id you'd want for some reason<br>
+`-preemphasis` - you can pass either `us` or `22`, us will give 75μs and 22μs (why is 22 here? i dunno ask sdr++ creator why he also added 22)<br>
+`-af` - same as pifmadv<br>
+
+now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
+`PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
+`CT` - turn ct on or off, but while *runtime*<br>
+`PWR` - same as arg `-power`<br>
+`RTB` - there are 2 rts, they can have both one text of content, you can use this to refresh the current rt, or if you have a sequence of rt texts, you can switch rt a and rtb (rt sets rt a and this sets rt b)<br>
+`RDS` - turn on or off rds, same as for example ms<br>
+`DEV` - set deviation while *runtime*<br>
+`GAI` (not gay) - set the gain while *runtime*<br>
+`STR` - turn stereo on and off<br>
+`COD` - change compressor decay<br>
+`COA` - change compressor attack<br>
+`RDV` - gain but not audio but rds gain<br>
+`PAU` - pause, kinda, it will cancel out any audio, you could use `GAI 0` but you could forgor the old gain value, right?<br>
+<br>
+and thats all, and remember kids dont pirate
+
+
 # Range
-It has been mostly untested, but i've tested it on 95 mhz, with a 79 cm antenna, the signal depending on the directionality, transmitter elavation, it can reach about 300 meters
+It has been mostly untested, but i've tested it on 95 mhz, with a 79 cm antenna, the range depending on the directionality, transmitter elavation, it can reach about 300 meters
 
 # Transmitter Power
 By default the Raspberry Pi outputs 4 mA on a gpio pin, but here it gets overriden to max, which is about 16 mA, some apps have a setting to change the power, here is a sheet of the power levels and their correspondent radiated power: (NOTE: RADIATED POWER, NOT ERP, TO HAVE THE EXACT TX POWER OF A TRANSMITTER, THE ANTENNA EFFIECENCY AND GAIN WOULD NEED TO BE COUNTED IN THE CALCULATION)
