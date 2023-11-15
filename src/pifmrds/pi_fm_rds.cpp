@@ -313,6 +313,12 @@ int main(int argc, char **argv) {
             i++;
             compressor_max_gain_recip = atof(param);
             compressorchanges = 1;
+        } else if(strcmp("-rdsvolume", arg)==0 && param != NULL) {
+            i++;
+            rds_volume = atof(param);
+        } else if(strcmp("-pilotvolume", arg)==0 && param != NULL) {
+            i++;
+            pilot_volume = atof(param);
         } else if(strcmp("-pty", arg)==0 && param != NULL) {
             i++;
             pty = atoi(param);

@@ -136,9 +136,9 @@ We assume that input frequency is tuned on FM station. It is demodulated and mod
 See https://github.com/ChristopheJacquet/PiFmRds/blob/master/README.md, it will show what you can do, but theres MORE, yeah, this ain't some that undeveloped code, this is developed, but whats the quality of the code? lets not talk about that, okay? anyways, let me show you the *features* of this :)
 
 first, the normal args, like `pifmrds -arg argtoarg?`<br>
-`-compressordecay` - compressor decay, specify in float (like: 0.999)<br>
-`-compressorattack` - same thing but attack<br>
-`-compressormaxgainrecip` - i dunno<br>
+`-compressordecay` - compressor decay, specify in float (like: 0.999, default: 0.999995)<br>
+`-compressorattack` - same thing but attack (default: 1.0)<br>
+`-compressormaxgainrecip` - i dunno (default: 0.1)<br>
 `-bfr` - by default a 65-108 freq range is defined, a freq outside makes the program crash, this bypasses the range, also it requires a arg, it can be anything as the arg is not parsed, so pass: `-bfr thisbypassescrap`<br>
 `-deviation` - sets how large the fm signal can be, in khz, default is 75khz<br>
 `-raw` - same arg as bfr, but this disables the format of the audio and sets channels and samplerate forcefully<br>
@@ -148,10 +148,12 @@ first, the normal args, like `pifmrds -arg argtoarg?`<br>
 `-audiogain` - audio too loud or too quiet? use this, this defines how many times the audio can be, here pass in int, but you can pass in `GAI {float}` on the fifo pipe (dont ask)<br>
 `-power` - for now works only for rpi3, but you can change the code very easy to fix it for your pi<br>
 `-disablerds` - same arg as bfr, pass this in and no rds anymore<br>
-`-disablecompressor` - same as bfr, dont pass this please<br>
+`-disablecompressor` - same as bfr, dont pass this please, DO NOT<br>
 `-disablect` - disable rds ct id you'd want for some reason<br>
 `-preemphasis` - you can pass either `us` or `22`, us will give 75μs and 22μs (why is 22 here? i dunno ask sdr++ creator why he also added 22)<br>
 `-af` - same as pifmadv<br>
+`-rdsvolume` - rds volume, so how many times is the rds "louder"<br>
+`-pilotvolume` - rds volume, so how many times is the stereo pilot "louder" (note: its normalized by 0.1, so if you input it as 1 its really 0.9)<br>
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
 `PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
