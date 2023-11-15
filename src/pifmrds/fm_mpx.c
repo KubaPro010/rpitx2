@@ -47,9 +47,12 @@ float low_pass_fir[FIR_PHASES][FIR_TAPS];
 float carrier_38[] = {0.0, 0.8660254037844386, 0.8660254037844388, 1.2246467991473532e-16, -0.8660254037844384, -0.8660254037844386};
 
 float carrier_19[] = {0.0, 0.5, 0.8660254037844386, 1.0, 0.8660254037844388, 0.5, 1.2246467991473532e-16, -0.5, -0.8660254037844384, -1.0, -0.8660254037844386, -0.5};
-    
+
+float carrier_31[] = {0.0, 0.7071067811865475, 1.0, 0.7071067811865476, 1.2246467991473532e-16, -0.7071067811865474, -1.0, -0.7071067811865477}; //chatgpt i have hope
+
 int phase_38 = 0;
 int phase_19 = 0;
+int phase_31 = 0;
 
 
 float downsample_factor;
@@ -319,14 +322,23 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
         // Generate the stereo mpx
         if( channels > 1 ) {
             if(!disablestereo) {
-                mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
-                    4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
-                    (pilot_volume-0.1)*carrier_19[phase_19];                  // Stereo pilot tone (doing 0.1 minus to balance it out, as by default its 0.9, but to make the 1.0 the normal value of the volume)
+                if(1) {
+                    mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
+                        4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
+                       (pilot_volume-0.1)*carrier_19[phase_19];                  // Stereo pilot tone (doing 0.1 minus to balance it out, as by default its 0.9, but to make the 1.0 the normal value of the volume)
 
-                phase_19++;
-                phase_38++;
-                if(phase_19 >= 12) phase_19 = 0;
-                if(phase_38 >= 6) phase_38 = 0;
+                    phase_19++;
+                    phase_38++;
+                    if(phase_19 >= 12) phase_19 = 0;
+                    if(phase_38 >= 6) phase_38 = 0;
+                } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233)
+                    mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal (L+R)
+                        4.05 * carrier_31[phase_31] * (out_left-out_right) + // Stereo difference signal
+                        //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                    phase_31++;
+                    if(phase_31 >= 8) phase_31 = 0;
+                }
             } else {
                 mpx_buffer[i] =  
                     mpx_buffer[i] +
