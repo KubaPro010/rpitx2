@@ -125,7 +125,7 @@ int get_rds_ct_group(uint16_t *blocks, int enabled) {
    pattern. 'ps_state' and 'rt_state' keep track of where we are in the PS (0A) sequence
    or RT (2A) sequence, respectively.
 */
-void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) {
+void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea how to do ptyn and decoder id
     static int state = 0;
     static int ps_state = 0;
     static int rt_state = 0;
