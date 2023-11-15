@@ -328,7 +328,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                     phase_38++;
                     if(phase_19 >= 12) phase_19 = 0;
                     if(phase_38 >= 6) phase_38 = 0;
-                } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233)
+                } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
                     mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal (L+R)
                         4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
                         //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!
