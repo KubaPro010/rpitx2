@@ -193,7 +193,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused) {
+int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume) {
     int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
     if(!drds) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
 
@@ -321,7 +321,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
             if(!disablestereo) {
                 mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
                     4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
-                    .9*carrier_19[phase_19];                  // Stereo pilot tone
+                    (pilot_volume-0.1)*carrier_19[phase_19];                  // Stereo pilot tone (doing 0.1 minus to balance it out, as by default its 0.9, but to make the 1.0 the normal value of the volume)
 
                 phase_19++;
                 phase_38++;
