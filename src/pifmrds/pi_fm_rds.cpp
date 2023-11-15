@@ -257,6 +257,7 @@ int main(int argc, char **argv) {
     float compressor_max_gain_recip = 0.01;
     int enable_compressor = 1;
     float rds_volume = 1.0;
+    float pilot_volume = 1.0;
     int ta = 0;
     int tp = 0;
     int af_size = 0;
@@ -407,6 +408,6 @@ int main(int argc, char **argv) {
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, 1.0);
+    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume);
     terminate(errcode);
 }
