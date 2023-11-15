@@ -223,6 +223,8 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 rds_volume = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_PAUSE_SET) {
                 paused = pollResult.arg_int;
+            } else if(pollResult.res == CONTROL_PIPE_PILVOL_SET) {
+                pilot_volume = std::stof(pollResult.arg);
             }
         }
 

@@ -145,7 +145,7 @@ first, the normal args, like `pifmrds -arg argtoarg?`<br>
 `-rawchannels` - change the sample rate if raw<br>
 `-rawsamplerate` - same stuff but sample rate<br>
 `-cutofffreq` - fm broadcast uses a cut off freq around 16-18 khz, to avoid interferance with the 19khz stereo pilot<br>
-`-audiogain` - audio too loud or too quiet? use this, this defines how many times the audio can be, here pass in int, but you can pass in `GAI {float}` on the fifo pipe (dont ask)<br>
+`-audiogain` - audio too loud or too quiet? use this, this defines how many times the audio can be<br>
 `-power` - for now works only for rpi3, but you can change the code very easy to fix it for your pi<br>
 `-disablerds` - same arg as bfr, pass this in and no rds anymore<br>
 `-disablecompressor` - same as bfr, dont pass this please, DO NOT<br>
@@ -168,6 +168,7 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `COA` - change compressor attack<br>
 `RDV` - gain but not audio but rds gain<br>
 `PAU` - pause, kinda, it will cancel out any audio, you could use `GAI 0` but you could forgor the old gain value, right?<br>
+`PIV` - gain but not audio or rds but stereo pilot gain<br>
 <br>
 and thats all, and remember kids dont pirate
 
