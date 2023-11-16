@@ -1,3 +1,4 @@
+#this is for pifmrds, if you have a service that interacts with the pipe from the network, you can use this, just make sure you `mkfifo tctl` and pass the `-ctl tctl` to pifmrds :)
 import socket
 import os
 import threading
@@ -12,8 +13,6 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind((server_ip, server_port))
 server.listen(5)  # Allow multiple connections
-
-print("R27 NRDSOS 1.1 (THIS IS AN INTERNAL APP USED IN R27'S INTERNAL RDS SERVICE)")
 print("Listening for incoming connections...")
 
 def handle_client(client_socket):
