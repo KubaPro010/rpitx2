@@ -32,10 +32,10 @@ sudo make install
 cd .. || exit
 
 printf "\n\n"
-printf "In order to run properly, rpitx need to modify /boot/config.txt. Are you sure (y/n) "
+printf "In order to run properly, rpitx needs to modify /boot/config.txt. Are you sure (y/yes/n)? "
 read -r CONT
 
-if [ "$CONT" = "y" ]; then
+if [ "$CONT" = "y" ] || [ "$CONT" = "yes" ]; then
   echo "Set GPU to 250Mhz in order to be stable"
    LINE='gpu_freq=250'
    FILE='/boot/config.txt'
