@@ -56,13 +56,13 @@ int main(int argc, char* argv[])
 		switch(a)
 		{
 		case 'f': // Frequency
-			SetFrequency = strtof(optarg);
+			SetFrequency = atof(optarg);
 			break;
 		case 'e': //End immediately
 			NotKill=true;
 			break;
 		case 'p': //ppm
-			ppm=std::strtof(optarg);
+			ppm=atof(optarg);
 			ppmset=1;
 			break;	
 		case 'h': // help
