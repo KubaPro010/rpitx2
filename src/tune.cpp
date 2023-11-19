@@ -7,7 +7,7 @@
 
 bool running=true;
 
-#define PROGRAM_VERSION "0.1"
+#define PROGRAM_VERSION "0.2"
 
 
 void print_usage(void)
@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
 	dbg_setlevel(1);
 	bool NotKill=false;
 	float ppm=1000.0;
+	int ppmset=0;
 	while(1)
 	{
 		a = getopt(argc, argv, "f:ehp:");
@@ -55,13 +56,14 @@ int main(int argc, char* argv[])
 		switch(a)
 		{
 		case 'f': // Frequency
-			SetFrequency = atof(optarg);
+			SetFrequency = strtof(optarg);
 			break;
 		case 'e': //End immediately
 			NotKill=true;
 			break;
 		case 'p': //ppm
-			ppm=atof(optarg);
+			ppm=std::strtof(optarg);
+			ppmset=1;
 			break;	
 		case 'h': // help
 			print_usage();
@@ -105,14 +107,14 @@ int main(int argc, char* argv[])
 		pad.setlevel(7);
 		clkgpio *clk=new clkgpio;
 		clk->SetAdvancedPllMode(true);
-		if(ppm!=1000)	//ppm is set else use ntp
+		if(ppmset)	//ppm is set else use ntp
 			clk->Setppm(ppm);
 		clk->SetCenterFrequency(SetFrequency,10);
 		clk->SetFrequency(000);
 		clk->enableclk(4);
 		
 		//clk->enableclk(6);//CLK2 : experimental
-		//clk->enableclk(20);//CLK1 duplicate on GPIO20 for more power ? (kuba's note: it can extend range, but not far (depending on the antenna), also no more power, because its impossible)
+		//clk->enableclk(20);//CLK1 duplicate on GPIO20 for more power ? (kuba's note: it can extend range, but not far (depending on the antenna), also no more power, because its impossible, you cant get more than your receiving, youd need to receive more then and not appear it out of nowhere)
 		if(!NotKill)
 		{
 			while(running)
@@ -125,7 +127,7 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			//Ugly method : not destroying clk object will not call destructor thus leaving clk running 
+			//Ugly method : not destroying clk object will not call destructor thus leaving clk running, until a new transmission starts
 		}
 	
 	
