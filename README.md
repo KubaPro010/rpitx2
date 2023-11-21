@@ -49,8 +49,13 @@ sudo reboot
 | Pi3B+|OK|
 | Pi3A+|OK|
 | Pi4|Partial (system may crash completly)|
+| Pi400|Partial (system probably will crash completly)|
+| Pi5|Unknown (open issue if you have an RPI 5)|
 
 Plug a wire on GPIO 4, means Pin 7 of the GPIO header ([header P1](http://elinux.org/RPi_Low-level_peripherals#General_Purpose_Input.2FOutput_.28GPIO.29)). This acts as the antenna. The optimal length of the wire depends the frequency you want to transmit on, but it works with a few centimeters for local testing. (Use https://www.southwestantennas.com/calculator/antenna-wavelength to calculate the lenght, make sure to use the 1/4 wave setting, as for 1/2 wave you'd need a impedance transformator, and these are not cheap [also yes, i learned it the hard way after having to cut my antenna])
+
+# Hardware (detailed compatibility
+It definitly works on a RPI 3 A+, as im testing this program on it, ive used it on a pi 400, it sometimes works with no problem, but sometime it just crashes, possible cause can be this: "the rpi swtiches the gpio pin so fast it cant tell it states, for example if its 0.5 instead of high or low, whats next?" but, that just a theory, A ELECTRONIC THEORY
 
 # How to use it
 ![easymenu](/doc/easymenu.png)
