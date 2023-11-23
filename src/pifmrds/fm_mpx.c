@@ -133,21 +133,20 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
         // Create the low-pass FIR filter, with pre-emphasis
         double window, firlowpass, firpreemph , sincpos;
-
+        double taup, deltap, bp, ap, a0, a1, b1;
+        if(preemphasis != 0) {
         // IIR pre-emphasis filter
         // Reference material:    http://jontio.zapto.org/hda1/preempiir.pdf
-        double tau=preemphasis;
-        double delta=1/(2*PI*20000);//double delta=1.96e-6;
-        double taup, deltap, bp, ap, a0, a1, b1;
-        taup=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*tau*(in_samplerate*FIR_PHASES) ));
-        deltap=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*delta*(in_samplerate*FIR_PHASES) ));
-        bp=sqrt( -taup*taup + sqrt(taup*taup*taup*taup + 8.0*taup*taup*deltap*deltap) ) / 2.0 ;
-        ap=sqrt( 2*bp*bp + taup*taup );
-        a0=( 2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
-        // a1=(-2.0*ap + 1/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1/(in_samplerate*FIR_PHASES) ); //ORI
-        // b1=( 2.0*bp + 1/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1/(in_samplerate*FIR_PHASES) ); //ORI
-        a1=(-2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
-        b1=( 2.0*bp - 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
+            double tau=preemphasis; //why? well im gonna listen to rule: "if it works dont touch it"
+            double delta=1/(2*PI*20000);//double delta=1.96e-6;
+            taup=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*tau*(in_samplerate*FIR_PHASES) ));
+            deltap=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*delta*(in_samplerate*FIR_PHASES) ));
+            bp=sqrt( -taup*taup + sqrt(taup*taup*taup*taup + 8.0*taup*taup*deltap*deltap) ) / 2.0 ;
+            ap=sqrt( 2*bp*bp + taup*taup );
+            a0=( 2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
+            a1=(-2.0*ap + 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
+            b1=( 2.0*bp - 1.0/(in_samplerate*FIR_PHASES) )/(2.0*bp + 1.0/(in_samplerate*FIR_PHASES) );
+        }
         double x=0,y=0;
  
         for(int i=0; i<FIR_TAPS; i++) { 
@@ -156,11 +155,16 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
             sincpos = (mi)-(((FIR_TAPS*FIR_PHASES)+1.0)/2.0); // offset by 0.5 so sincpos!=0 (causes NaN x/0 )
             //printf("%d=%f \n",mi ,sincpos); 
             firlowpass = sin(2 * PI * cutoff_freq * sincpos / (in_samplerate*FIR_PHASES) ) / (PI * sincpos) ; 
-
-            y=a0*firlowpass + a1*x + b1*y ; // Find the combined impulse response
+                                            // Find the combined impulse response
+            if(preemphasis != 0) {
+                y=a0*firlowpass + a1*x + b1*y; 
+            } else {
+                y=firlowpass; 
+            }
             x=firlowpass;                   // of FIR low-pass and IIR pre-emphasis
             firpreemph=y;                   // y could be replaced by firpreemph but this
                                             // matches the example in the reference material
+
 
             window = (.54 - .46 * cos(2*PI * (mi) / (double) FIR_TAPS*FIR_PHASES )) ; // Hamming window
             low_pass_fir[j][i] = firpreemph * window; 
@@ -325,7 +329,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                 if(1) {
                     mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
                         4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
-                       pilot_volume*carrier_19[phase_19];                  // Stereo pilot tone (doing 0.1 minus to balance it out, as by default its 0.9, but to make the 1.0 the normal value of the volume)
+                       pilot_volume*carrier_19[phase_19];                  // Stereo pilot tone
 
                     phase_19++;
                     phase_38++;

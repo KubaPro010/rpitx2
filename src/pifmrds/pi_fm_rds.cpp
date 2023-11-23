@@ -274,7 +274,7 @@ int main(int argc, char **argv) {
     double preemp = 50e-6; //eu
     int deviation = 75000;
     int alternative_freq[100] = {};
-    float ppm = 0;
+    // float ppm = 0; this is useless as the ppm isnt used anywhere anyway
     int bypassfreqrange = 0;
     int ct = 1;
     float cutofffreq = 15700;
@@ -300,9 +300,6 @@ int main(int argc, char **argv) {
         } else if(strcmp("-rt", arg)==0 && param != NULL) {
             i++;
             rt = param;
-        } else if(strcmp("-ppm", arg)==0 && param != NULL) {
-            i++;
-            ppm = atof(param);
         } else if(strcmp("-compressordecay", arg)==0 && param != NULL) {
             i++;
             compressor_decay = atof(param);
@@ -326,12 +323,13 @@ int main(int argc, char **argv) {
             pty = atoi(param);
         } else if(strcmp("-gpiopin", arg)==0 && param != NULL) {
             i++;
-            int pinnum = atoi(param);
-            if (!(pinnum == 4 || pinnum == 20 || pinnum == 32 || pinnum == 34 || pinnum == 6)) {
-                fatal("Invalid gpio pin, allowed: 4, 20, 32, 34, 6");
-            } else {
-                gpiopin = pinnum;
-            }
+            printf("GPIO pin setting disabled, mod librpitx and pifmsa (pifm simply advanced) for this");
+            // int pinnum = atoi(param);
+            // if (!(pinnum == 4 || pinnum == 20 || pinnum == 32 || pinnum == 34 || pinnum == 6)) {
+            //     fatal("Invalid gpio pin, allowed: 4, 20, 32, 34, 6");
+            // } else {
+            //     gpiopin = pinnum;
+            // }
         } else if(strcmp("-ta", arg)==0) {
             i++;
             ta = 1;
@@ -391,7 +389,9 @@ int main(int argc, char **argv) {
             if(strcmp("us", param)==0) {
                 preemp = 75e-6; //usa
             } else if(strcmp("22", param)==0) {
-                preemp = 22e-6; //22
+                preemp = 22e-6; //22, why is it here? ask sdr++ creator
+            } else if(strcmp("off", param)==0) {
+                preemp = 0; //disabled
             }
         } else if(strcmp("-af", arg)==0 && param != NULL) {
             i++;
@@ -402,7 +402,7 @@ int main(int argc, char **argv) {
         }
         else {
             fatal("Unrecognised argument: %s.\n"
-            "Syntax: pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code]\n"
+            "Syntax: pi_fm_rds [-freq freq] [-audio file] [-pi pi_code]\n"
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm] [-tp] [-ta]\n", arg);
         }
     }
@@ -416,6 +416,6 @@ int main(int argc, char **argv) {
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, ppm, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume);
+    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume);
     terminate(errcode);
 }
