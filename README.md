@@ -173,7 +173,7 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `COA` - change compressor attack<br>
 `RDV` - gain but not audio but rds gain<br>
 `PAU` - pause, kinda, it will cancel out any audio, you could use `GAI 0` but you could forgor the old gain value, right?<br>
-`PIV` - gain but not audio or rds but stereo pilot gain<br>
+`PIV` - gain but not audio or rds but stereo pilot gain (default = 0.9)<br>
 <br>
 and thats all, and remember kids dont pirate
 

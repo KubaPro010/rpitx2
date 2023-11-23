@@ -325,7 +325,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                 if(1) {
                     mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
                         4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
-                       (pilot_volume-0.1)*carrier_19[phase_19];                  // Stereo pilot tone (doing 0.1 minus to balance it out, as by default its 0.9, but to make the 1.0 the normal value of the volume)
+                       pilot_volume*carrier_19[phase_19];                  // Stereo pilot tone (doing 0.1 minus to balance it out, as by default its 0.9, but to make the 1.0 the normal value of the volume)
 
                     phase_19++;
                     phase_38++;

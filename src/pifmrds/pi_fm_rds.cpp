@@ -259,7 +259,7 @@ int main(int argc, char **argv) {
     float compressor_max_gain_recip = 0.01;
     int enable_compressor = 1;
     float rds_volume = 1.0;
-    float pilot_volume = 1.0;
+    float pilot_volume = 0.9;
     int ta = 0;
     int tp = 0;
     int af_size = 0;
