@@ -24,35 +24,11 @@ extern "C"
 #include <librpitx/librpitx.h>
 
 ngfmdmasync *fmmod;
-static volatile uint32_t *pad_reg;
-#define GPIO_PAD_0_27                   (0x2C/4)
-#define GPIO_PAD_28_45                  (0x30/4)
-#define PI 3
-
-#if (PI) == 1 //Original
-#define PERIPH_VIRT_BASE                0x20000000
-#elif (PI) == 2
-#define PERIPH_VIRT_BASE                0x3f000000
-#elif (PI) == 3
-#define PERIPH_VIRT_BASE                0x3f000000
-#elif (PI) == 4
-#define PERIPH_VIRT_BASE                0xfe000000
-#else
-#error Unknown Raspberry Pi version (variable PI)
-#endif
-//i dunno it for pi 5, but rp1 is gonna steer the io: https://datasheets.raspberrypi.com/rp1/rp1-peripherals.pdf
-#define SUBSIZE 512
 #define DATA_SIZE 5000
-#define PAD_LEN                         (0x40/4) //0x64
-#define PAD_BASE_OFFSET                 0x00100000
-#define PAD_VIRT_BASE                   (PERIPH_VIRT_BASE + PAD_BASE_OFFSET)
-
 static void
 terminate(int num)
 {
     delete fmmod;
-    pad_reg[GPIO_PAD_0_27] = 0x5a000018 + 1; //Set original power, just in case
-    pad_reg[GPIO_PAD_28_45] = 0x5a000018 + 1;
     fm_mpx_close();
     close_control_pipe();
     exit(num);
@@ -66,19 +42,6 @@ fatal(char *fmt, ...)
     vfprintf(stderr, fmt, ap);
     va_end(ap);
     terminate(0);
-}
-
-static volatile void *map_peripheral(uint32_t base, uint32_t len)
-{
-    int fd = open("/dev/mem", O_RDWR | O_SYNC);
-    void * vaddr;
-    if (fd < 0)
-        fatal("Failed to open /dev/mem: %m.\n");
-    vaddr = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, base);
-    if (vaddr == MAP_FAILED)
-        fatal("Failed to map peripheral at 0x%08x: %m.\n", base);
-    close(fd);
-    return vaddr;
 }
 
 int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, clkgpio clk) {
@@ -102,11 +65,6 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     sigaction(SIGPWR, &sa, NULL);
     sigaction(SIGTSTP, &sa, NULL);
     sigaction(SIGSEGV, &sa, NULL); //seg fault
-
-    //Set the power
-    pad_reg = (volatile uint32_t *)map_peripheral(PAD_VIRT_BASE, PAD_LEN);
-    pad_reg[GPIO_PAD_0_27] = 0x5a000018 + power;
-    pad_reg[GPIO_PAD_28_45] = 0x5a000018 + power;
     
     // Data structures for baseband data
     float data[DATA_SIZE];
@@ -115,6 +73,10 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     int data_index = 0;
 
     int disablestereo = 0;
+
+    //set the power
+    padgpio gpiopad;
+    gpiopad.setlevel(power);
 
     // Initialize the baseband generator
     if(fm_mpx_open(audio_file, DATA_SIZE, raw, preemp, rawSampleRate, rawChannels, cutoff_freq) < 0) return 1;
@@ -204,8 +166,8 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             } else if(pollResult.res == CONTROL_PIPE_RDS_SET) {
                 drds = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_PWR_SET) {
-                pad_reg[GPIO_PAD_0_27] = 0x5a000018 + std::stoi(pollResult.arg);
-                pad_reg[GPIO_PAD_28_45] = 0x5a000018 + std::stoi(pollResult.arg);
+                padgpio gpiopad;
+                gpiopad.setlevel(pollResult.arg_int);
             } else if(pollResult.res == CONTROL_PIPE_DEVIATION_SET) {
                 deviation = std::stoi(pollResult.arg);
                 deviation_scale_factor=  0.1 * (deviation );
