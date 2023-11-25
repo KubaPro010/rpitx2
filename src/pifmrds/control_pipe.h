@@ -24,6 +24,7 @@
 #define CONTROL_PIPE_RDSVOL_SET 17
 #define CONTROL_PIPE_PAUSE_SET 18
 #define CONTROL_PIPE_PILVOL_SET 19 //fitting
+#define CONTROL_PIPE_PPM_SET 20
 
 typedef struct {
     int res;
