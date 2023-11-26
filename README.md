@@ -32,6 +32,8 @@ That's it !
 ```sh
 sudo reboot
 ```
+# Update
+you wanna update? sure, just run `./compile.sh` if you have a error type in `chmod +x ./compile.sh` and there you go it will update and compile!
 
 # Hardware
 ![bpf](/doc/bpf-warning.png)
