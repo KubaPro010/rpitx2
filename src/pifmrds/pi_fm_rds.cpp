@@ -187,8 +187,6 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 paused = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_PILVOL_SET) {
                 pilot_volume = std::stof(pollResult.arg);
-            } else if(pollResult.res == CONTROL_PIPE_PPM_SET) {
-                clk->Setppm(std::stof(pollResult.arg));
             }
         }
 
@@ -238,7 +236,6 @@ int main(int argc, char **argv) {
     double preemp = 50e-6; //eu
     int deviation = 75000;
     int alternative_freq[100] = {};
-    float ppm = 0;
     int bypassfreqrange = 0;
     int ct = 1;
     float cutofffreq = 15700;
@@ -264,9 +261,6 @@ int main(int argc, char **argv) {
         } else if(strcmp("-rt", arg)==0 && param != NULL) {
             i++;
             rt = param;
-        } else if(strcmp("-ppm", arg)==0 && param != NULL) {
-            i++;
-            ppm = atof(param);
         } else if(strcmp("-compressordecay", arg)==0 && param != NULL) {
             i++;
             compressor_decay = atof(param);
@@ -369,7 +363,7 @@ int main(int argc, char **argv) {
         }
         else {
             fatal("Unrecognised argument: %s.\n"
-            "Syntax: pi_fm_rds [-freq freq] [-ppm clock error] [-audio file] [-pi pi_code]\n"
+            "Syntax: pi_fm_rds [-freq freq] [-audio file] [-pi pi_code]\n"
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm] [-tp] [-ta]\n", arg);
         }
     }
@@ -383,10 +377,6 @@ int main(int argc, char **argv) {
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    clkgpio *clk=new clkgpio;
-    if(ppm != 0) {
-        clk->Setppm(ppm);
-    }
     int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, clk);
     terminate(errcode);
 }

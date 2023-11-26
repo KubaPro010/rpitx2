@@ -193,12 +193,6 @@ ResultAndArg poll_control_pipe() {
 			printf("\n");
 			resarg.res = CONTROL_PIPE_PILVOL_SET;
 			resarg.arg = arg;
-		} else if(fifo[0] == 'P' && fifo[1] == 'P' && fifo[2] == 'M') {
-			printf("Set PPM to ");
-			printf(arg);
-			printf("\n");
-			resarg.res = CONTROL_PIPE_PILVOL_SET;
-			resarg.arg = arg;
 		}
 	}
 	return resarg;
