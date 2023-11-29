@@ -193,6 +193,12 @@ ResultAndArg poll_control_pipe() {
 			printf("\n");
 			resarg.res = CONTROL_PIPE_PILVOL_SET;
 			resarg.arg = arg;
+		} else if(fifo[0] == 'M' && fifo[1] == 'P' && fifo[2] == 'X') {
+			int mpx = ( strcmp(arg, "ON") == 0 );
+			printf("Set Generate MPX to ");
+			if(mpx) printf("ON\n"); else printf("OFF\n");
+			resarg.res = CONTROL_PIPE_MPXGEN_SET;
+			resarg.arg_int = mpx;
 		}
 	}
 	return resarg;

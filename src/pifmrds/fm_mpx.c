@@ -200,9 +200,9 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume) {
+int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume, int generate_multiplex) {
     int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
-    if(!drds) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
+    if(!drds && generate_multiplex) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
 
     if(inf == NULL) return 0; // if there is no audio, stop here
     
@@ -326,34 +326,40 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
         // Generate the stereo mpx
         if( channels > 1 ) {
             if(!disablestereo) {
-                if(1) {
-                    mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
-                        4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
-                       pilot_volume*carrier_19[phase_19];                  // Stereo pilot tone
+                if(generate_multiplex) {
+                    if(1) {
+                        mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
+                            4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
+                        pilot_volume*carrier_19[phase_19];                  // Stereo pilot tone
 
-                    phase_19++;
-                    phase_38++;
-                    if(phase_19 >= 12) phase_19 = 0;
-                    if(phase_38 >= 6) phase_38 = 0;
-                } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
-                    mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal (L+R)
-                        4.05 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
-                        //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        phase_19++;
+                        phase_38++;
+                        if(phase_19 >= 12) phase_19 = 0;
+                        if(phase_38 >= 6) phase_38 = 0;
+                    } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
+                        mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal (L+R)
+                            4.05 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
+                            //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-                    phase_3125++;
-                    if(phase_3125 >= 6) phase_3125 = 0;
+                        phase_3125++;
+                        if(phase_3125 >= 6) phase_3125 = 0;
+                    }
                 }
             } else {
-                mpx_buffer[i] =  
-                    mpx_buffer[i] +
-                    4.05*(out_left+out_right);      // Unmodulated L+R signal
+                if(generate_multiplex) {
+                    mpx_buffer[i] =  
+                        mpx_buffer[i] +
+                        4.05*(out_left+out_right);      // Unmodulated L+R signal
+                }
             }
         }
         else
         {
-            mpx_buffer[i] =  
-                mpx_buffer[i] +
-                4.05*out_left;      // Unmodulated monophonic signal
+            if(generate_multiplex) {
+                mpx_buffer[i] =  
+                    mpx_buffer[i] +
+                    4.05*out_left;      // Unmodulated monophonic signal
+            }
         } 
             
         audio_pos++;   
