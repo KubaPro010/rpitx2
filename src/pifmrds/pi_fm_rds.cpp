@@ -240,7 +240,7 @@ int main(int argc, char **argv) {
     int alternative_freq[100] = {};
     int bypassfreqrange = 0;
     int ct = 1;
-    float cutofffreq = 15700;
+    float cutofffreq = 16200;
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
         char *arg = argv[i];
