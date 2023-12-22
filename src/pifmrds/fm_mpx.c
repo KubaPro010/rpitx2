@@ -361,6 +361,11 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                     4.05*out_left;      // Unmodulated monophonic signal
             }
         } 
+        if(!generate_multiplex) {
+            mpx_buffer[i] = 
+                mpx_buffer[i] +
+                0; //nothing, rpitx works like this: theres a array with data and rpitx goes thought it to transmit it, now here the functions with the mpx_buffer such as this one update the array, but what if the array is not updated? well, then it keeps transmitting the exact same thing, it doesnt update whats its transmitting, no really, take a sdr and remove this and turn off the mpx gen, if no music then look at rds
+        }
             
         audio_pos++;   
         
