@@ -32,7 +32,7 @@
 #include "rds.h"
 
 
-#define PI 3.141592654
+#define PI 3.14159265359
 
 
 #define FIR_PHASES    (32)
