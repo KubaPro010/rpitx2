@@ -230,6 +230,7 @@ int main(int argc, char **argv) {
     int gpiopin = 4;
     int raw = 0;
     int drds = 0;
+    int dstereo = 0;
     int power = 7;
     float gain = 1;
     int rawSampleRate = 44100;
@@ -341,6 +342,9 @@ int main(int argc, char **argv) {
         } else if(strcmp("-disablerds", arg)==0) {
             i++;
             drds = 1;
+        } else if(strcmp("-disablestereo", arg)==0) {
+            i++;
+            dstereo = 1;
         } else if(strcmp("-disablecompressor", arg)==0) {
             i++;
             enable_compressor = 0;
@@ -379,6 +383,6 @@ int main(int argc, char **argv) {
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, 0);
+    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, dstereo);
     terminate(errcode);
 }
