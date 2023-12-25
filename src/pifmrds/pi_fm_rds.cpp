@@ -309,8 +309,8 @@ int main(int argc, char **argv) {
             control_pipe = param;
         } else if(strcmp("-deviation", arg)==0 && param != NULL) {
             i++;
-            if(strcmp("ukf", param)==0) {
-                deviation = 65000; //i don't know the original bandwidht, but when testing on an UNITRA LIZA R-203, the sound doesn't sound out of order, correct this if im wrong
+            if(strcmp("small", param)==0) {
+                deviation = 50000;
             } else if(strcmp("nfm", param)==0) {
                 deviation = 2500;
             }
@@ -332,11 +332,8 @@ int main(int argc, char **argv) {
         } else if(strcmp("-power", arg)==0 && param != NULL) {
             i++;
             int tpower = atoi(param);
-            if(tpower > 7 || tpower < 0) {
-                fatal("Power can be between 0 and 7");
-            } else {
-                power = tpower;
-            }
+            if(tpower > 7 || tpower < 0) fatal("Power can be between 0 and 7");
+            else power = tpower; //OMG SUCH ONE LINER
         } else if(strcmp("-raw", arg)==0) {
             i++;
             raw = 1;
@@ -356,10 +353,13 @@ int main(int argc, char **argv) {
             i++;
             if(strcmp("us", param)==0) {
                 preemp = 75e-6; //usa
-            } else if(strcmp("22", param)==0) {
-                preemp = 22e-6; //22, why is it here? ask sdr++ creator
-            } else if(strcmp("off", param)==0) {
+            } else if(strcmp("eu", param)==0) {
+                printf("eu default but ok\n");
+                preemp = 50e-6;
+            } else if(strcmp("off", param)==0 || strcmp("0", param)==0) {
                 preemp = 0; //disabled
+            } else {
+                preemp = atof(param) * 1e-6;
             }
         } else if(strcmp("-af", arg)==0 && param != NULL) {
             i++;
@@ -371,7 +371,7 @@ int main(int argc, char **argv) {
         else {
             fatal("Unrecognised argument: %s.\n"
             "Syntax: pi_fm_rds [-freq freq] [-audio file] [-pi pi_code]\n"
-            "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000, there are 2 predefined other cases: ukf (for old radios such as the UNITRA Jowita), nfm] [-tp] [-ta]\n", arg);
+            "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000] [-tp] [-ta]\n", arg);
         }
     }
     if(compressorchanges) {
