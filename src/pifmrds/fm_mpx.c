@@ -339,7 +339,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                     } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
                         mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal (L+R)
                             4.05 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
-                            //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!! (its missplelled correctly probably just like misspelled)
 
                         phase_3125++;
                         if(phase_3125 >= 6) phase_3125 = 0;
@@ -363,8 +363,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
         } 
         if(!generate_multiplex) {
             mpx_buffer[i] = 
-                mpx_buffer[i] +
-                0; //nothing, rpitx works like this: theres a array with data and rpitx goes thought it to transmit it, now here the functions with the mpx_buffer such as this one update the array, but what if the array is not updated? well, then it keeps transmitting the exact same thing, it doesnt update whats its transmitting, no really, take a sdr and remove this and turn off the mpx gen, if no music then look at rds
+                0.0; //nothing, rpitx works like this: theres a array with data and rpitx goes thought it to transmit it, now here the functions with the mpx_buffer such as this one update the array, but what if the array is not updated? well, then it keeps transmitting the exact same thing, it doesnt update whats its transmitting, no really, take a sdr and remove this and turn off the mpx gen, if no music then look at rds
         }
             
         audio_pos++;   
