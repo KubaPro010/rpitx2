@@ -68,7 +68,7 @@ float fir_buffer_left[FIR_TAPS] = {0};
 float fir_buffer_right[FIR_TAPS] = {0};
 int fir_index = 0;
 int channels;
-float left_max=1, right_max=1;  // start compressor with low gain 
+float left_max=1, right_max=1;  // start compressor with low gain
 
 SNDFILE *inf;
 
@@ -261,7 +261,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
         {
           for(int fi=0; fi<FIR_TAPS; fi++)  // fi = Filter Index
           {                                 // use bit masking to implement circular buffer
-            out_left+= low_pass_fir[iphase][fi]* fir_buffer_left[(fir_index-fi)&(FIR_TAPS-1)];
+            out_left+= low_pass_fir[iphase][fi]*fir_buffer_left[(fir_index-fi)&(FIR_TAPS-1)];
             out_right+=low_pass_fir[iphase][fi]*fir_buffer_right[(fir_index-fi)&(FIR_TAPS-1)];
           }
         }
@@ -317,11 +317,11 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
           if(enablecompressor) out_right=out_right/(right_max+compressor_max_gain_recip);
         }
         if(enablecompressor) out_left= out_left/(left_max+compressor_max_gain_recip); // Adjust volume with limited maximum gain
+        if(drds) mpx_buffer[i] = 0.0; //do not remove this, the bandwidht will go nuts
         if(paused) {
             out_left = 0;
             if(channels > 1) out_right = 0;
         }
-        if(drds) mpx_buffer[i] = 0; //do not remove this, the bandwidht will go nuts
  
         // Generate the stereo mpx
         if( channels > 1 ) {
