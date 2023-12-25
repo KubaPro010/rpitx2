@@ -73,7 +73,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     int data_index = 0;
 
     int generate_multiplex = 1;
-    int gen_stereo = !disablestereo;
+    int dstereo = disablestereo;
 
     //set the power
     padgpio gpiopad;
@@ -173,7 +173,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 deviation = std::stoi(pollResult.arg);
                 deviation_scale_factor=  0.1 * (deviation );
             } else if(pollResult.res == CONTROL_PIPE_STEREO_SET) {
-                gen_stereo = !pollResult.arg_int;
+                dstereo = !pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_GAIN_SET) {
                 gaim = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSORDECAY_SET) {
@@ -193,7 +193,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             }
         }
 
-			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, gen_stereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex) < 0 ) {
+			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex) < 0 ) {
                     terminate(0);
                 }
                 data_len = DATA_SIZE;
