@@ -389,12 +389,14 @@ void set_rds_rt(char *rt) {
     strncpy(rds_params.rt, rt, 64);
     for(int i=0; i<64; i++) {
         if(rds_params.rt[i] == 0) rds_params.rt[i] = 32;
+        rds_params.rt[i] = rds_char_converter(rds_params.rt[i]);
     }
 }
 
 void set_rds_ps(char *ps) {
     strncpy(rds_params.ps, ps, 8);
     for(int i=0; i<8; i++) {
+        rds_params.ps[i] = rds_char_converter(rds_params.ps[i]);
         if(rds_params.ps[i] == 0) rds_params.ps[i] = 32;
     }
 }
