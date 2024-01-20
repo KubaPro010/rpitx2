@@ -257,146 +257,16 @@ void set_rds_pi(uint16_t pi_code) {
     rds_params.pi = pi_code;
 }
 
-char rds_char_converter(uint16_t src) { // if theres a bug then blame andimik (no offense)
-  switch (src)
-  { 
-    case 0xc2a1: return 0x8E; break; // INVERTED EXCLAMATION MARK
-    case 0xc2a3: return 0xAA; break; // POUND SIGN
-    case 0xc2a7: return 0xBF; break; // SECTION SIGN
-    case 0xc2a9: return 0xA2; break; // COPYRIGHT SIGN
-    case 0xc2aa: return 0xA0; break; // FEMININE ORDINAL INDICATOR
-    case 0xc2b0: return 0xBB; break; // DEGREE SIGN
-    case 0xc2b1: return 0xB4; break; // PLUS-MINUS SIGN
-    case 0xc2b2: return 0xB2; break; // SUPERSCRIPT TWO
-    case 0xc2b3: return 0xB3; break; // SUPERSCRIPT THREE
-    case 0xc2b5: return 0xB8; break; // MICRO SIGN
-    case 0xc2b9: return 0xB1; break; // SUPERSCRIPT ONE
-    case 0xc2ba: return 0xB0; break; // MASCULINE ORDINAL INDICATOR
-    case 0xc2bc: return 0xBC; break; // VULGAR FRACTION ONE QUARTER
-    case 0xc2bd: return 0xBD; break; // VULGAR FRACTION ONE HALF
-    case 0xc2be: return 0xBE; break; // VULGAR FRACTION THREE QUARTERS
-    case 0xc2bf: return 0xB9; break; // INVERTED QUESTION MARK
-    case 0xc380: return 0xC1; break; // LATIN CAPITAL LETTER A WITH GRAVE
-    case 0xc381: return 0xC0; break; // LATIN CAPITAL LETTER A WITH ACUTE
-    case 0xc382: return 0xD0; break; // LATIN CAPITAL LETTER A WITH CIRCUMFLEX
-    case 0xc383: return 0xE0; break; // LATIN CAPITAL LETTER A WITH TILDE
-    case 0xc384: return 0xD1; break; // LATIN CAPITAL LETTER A WITH DIAERESIS
-    case 0xc385: return 0xE1; break; // LATIN CAPITAL LETTER A WITH RING ABOVE
-    case 0xc386: return 0xE2; break; // LATIN CAPITAL LETTER AE
-    case 0xc387: return 0x8B; break; // LATIN CAPITAL LETTER C WITH CEDILLA
-    case 0xc388: return 0xC3; break; // LATIN CAPITAL LETTER E WITH GRAVE
-    case 0xc389: return 0xC2; break; // LATIN CAPITAL LETTER E WITH ACUTE
-    case 0xc38a: return 0xD2; break; // LATIN CAPITAL LETTER E WITH CIRCUMFLEX
-    case 0xc38b: return 0xD3; break; // LATIN CAPITAL LETTER E WITH DIAERESIS
-    case 0xc38c: return 0xC5; break; // LATIN CAPITAL LETTER I WITH GRAVE
-    case 0xc38d: return 0xC4; break; // LATIN CAPITAL LETTER I WITH ACUTE
-    case 0xc38e: return 0xD4; break; // LATIN CAPITAL LETTER I WITH CIRCUMFLEX
-    case 0xc38f: return 0xD5; break; // LATIN CAPITAL LETTER I WITH DIAERESIS
-    case 0xc390: return 0xCE; break; // LATIN CAPITAL LETTER ETH
-    case 0xc391: return 0x8A; break; // LATIN CAPITAL LETTER N WITH TILDE
-    case 0xc392: return 0xC7; break; // LATIN CAPITAL LETTER O WITH GRAVE
-    case 0xc393: return 0xC6; break; // LATIN CAPITAL LETTER O WITH ACUTE
-    case 0xc394: return 0xD6; break; // LATIN CAPITAL LETTER O WITH CIRCUMFLEX
-    case 0xc395: return 0xE6; break; // LATIN CAPITAL LETTER O WITH TILDE
-    case 0xc396: return 0xD7; break; // LATIN CAPITAL LETTER O WITH DIAERESIS
-    case 0xc398: return 0xE7; break; // LATIN CAPITAL LETTER O WITH STROKE
-    case 0xc399: return 0xC9; break; // LATIN CAPITAL LETTER U WITH GRAVE
-    case 0xc39a: return 0xC8; break; // LATIN CAPITAL LETTER U WITH ACUTE
-    case 0xc39b: return 0xD8; break; // LATIN CAPITAL LETTER U WITH CIRCUMFLEX
-    case 0xc39c: return 0xD9; break; // LATIN CAPITAL LETTER U WITH DIAERESIS
-    case 0xc39d: return 0xE5; break; // LATIN CAPITAL LETTER Y WITH ACUTE
-    case 0xc39e: return 0xE8; break; // LATIN CAPITAL LETTER THORN
-    case 0xc3a0: return 0x81; break; // LATIN SMALL LETTER A WITH GRAVE
-    case 0xc3a1: return 0x80; break; // LATIN SMALL LETTER A WITH ACUTE
-    case 0xc3a2: return 0x90; break; // LATIN SMALL LETTER A WITH CIRCUMFLEX
-    case 0xc3a3: return 0xF0; break; // LATIN SMALL LETTER A WITH TILDE
-    case 0xc3a4: return 0x91; break; // LATIN SMALL LETTER A WITH DIAERESIS
-    case 0xc3a5: return 0xF1; break; // LATIN SMALL LETTER A WITH RING ABOVE
-    case 0xc3a6: return 0xF2; break; // LATIN SMALL LETTER AE
-    case 0xc3a7: return 0x9B; break; // LATIN SMALL LETTER C WITH CEDILLA
-    case 0xc3a8: return 0x83; break; // LATIN SMALL LETTER E WITH GRAVE
-    case 0xc3a9: return 0x82; break; // LATIN SMALL LETTER E WITH ACUTE
-    case 0xc3aa: return 0x92; break; // LATIN SMALL LETTER E WITH CIRCUMFLEX
-    case 0xc3ab: return 0x93; break; // LATIN SMALL LETTER E WITH DIAERESIS
-    case 0xc3ac: return 0x85; break; // LATIN SMALL LETTER I WITH GRAVE
-    case 0xc3ad: return 0x84; break; // LATIN SMALL LETTER I WITH ACUTE
-    case 0xc3ae: return 0x94; break; // LATIN SMALL LETTER I WITH CIRCUMFLEX
-    case 0xc3af: return 0x95; break; // LATIN SMALL LETTER I WITH DIAERESIS
-    case 0xc3b0: return 0xEF; break; // LATIN SMALL LETTER ETH
-    case 0xc3b1: return 0x9A; break; // LATIN SMALL LETTER N WITH TILDE
-    case 0xc3b2: return 0x87; break; // LATIN SMALL LETTER O WITH GRAVE
-    case 0xc3b3: return 0x86; break; // LATIN SMALL LETTER O WITH ACUTE
-    case 0xc3b4: return 0x96; break; // LATIN SMALL LETTER O WITH CIRCUMFLEX
-    case 0xc3b5: return 0xF6; break; // LATIN SMALL LETTER O WITH TILDE
-    case 0xc3b6: return 0x97; break; // LATIN SMALL LETTER O WITH DIAERESIS
-    case 0xc3b7: return 0xBA; break; // DIVISION SIGN
-    case 0xc3b8: return 0xF7; break; // LATIN SMALL LETTER O WITH STROKE
-    case 0xc3b9: return 0x89; break; // LATIN SMALL LETTER U WITH GRAVE
-    case 0xc3ba: return 0x88; break; // LATIN SMALL LETTER U WITH ACUTE
-    case 0xc3bb: return 0x98; break; // LATIN SMALL LETTER U WITH CIRCUMFLEX
-    case 0xc3bc: return 0x99; break; // LATIN SMALL LETTER U WITH DIAERESIS
-    case 0xc3bd: return 0xF5; break; // LATIN SMALL LETTER Y WITH ACUTE
-    case 0xc3be: return 0xF8; break; // LATIN SMALL LETTER THORN
-    case 0xc486: return 0xEB; break; // LATIN CAPITAL LETTER C WITH ACUTE
-    case 0xc487: return 0xFB; break; // LATIN SMALL LETTER C WITH ACUTE
-    case 0xc48c: return 0xCB; break; // LATIN CAPITAL LETTER C WITH CARON
-    case 0xc48d: return 0xDB; break; // LATIN SMALL LETTER C WITH CARON
-    case 0xc491: return 0xDE; break; // LATIN SMALL LETTER D WITH STROKE
-    case 0xc49b: return 0xA5; break; // LATIN SMALL LETTER E WITH CARON
-    case 0xc4b0: return 0xB5; break; // LATIN CAPITAL LETTER I WITH DOT ABOVE
-    case 0xc4b1: return 0x9E; break; // LATIN SMALL LETTER DOTLESS I
-    case 0xc4b2: return 0x8F; break; // LATIN CAPITAL LIGATURE IJ
-    case 0xc4b3: return 0x9F; break; // LATIN SMALL LIGATURE IJ
-    case 0xc4bf: return 0xCF; break; // LATIN CAPITAL LETTER L WITH MIDDLE DOT
-    case 0xc580: return 0xDF; break; // LATIN SMALL LETTER L WITH MIDDLE DOT
-    case 0xc584: return 0xB6; break; // LATIN SMALL LETTER N WITH ACUTE
-    case 0xc588: return 0xA6; break; // LATIN SMALL LETTER N WITH CARON
-    case 0xc58a: return 0xE9; break; // LATIN CAPITAL LETTER ENG
-    case 0xc58b: return 0xF9; break; // LATIN SMALL LETTER ENG
-    case 0xc591: return 0xA7; break; // LATIN SMALL LETTER O WITH DOUBLE ACUTE
-    case 0xc592: return 0xE3; break; // LATIN CAPITAL LIGATURE OE
-    case 0xc593: return 0xF3; break; // LATIN SMALL LIGATURE OE
-    case 0xc594: return 0xEA; break; // LATIN CAPITAL LETTER R WITH ACUTE
-    case 0xc595: return 0xFA; break; // LATIN SMALL LETTER R WITH ACUTE
-    case 0xc598: return 0xCA; break; // LATIN CAPITAL LETTER R WITH CARON
-    case 0xc599: return 0xDA; break; // LATIN SMALL LETTER R WITH CARON
-    case 0xc59a: return 0xEC; break; // LATIN CAPITAL LETTER S WITH ACUTE
-    case 0xc59b: return 0xFC; break; // LATIN SMALL LETTER S WITH ACUTE
-    case 0xc59e: return 0x8C; break; // LATIN CAPITAL LETTER S WITH CEDILLA
-    case 0xc59f: return 0x9C; break; // LATIN SMALL LETTER S WITH CEDILLA
-    case 0xc5a0: return 0xCC; break; // LATIN CAPITAL LETTER S WITH CARON
-    case 0xc5a1: return 0xDC; break; // LATIN SMALL LETTER S WITH CARON
-    case 0xc5a6: return 0xEE; break; // LATIN CAPITAL LETTER T WITH STROKE
-    case 0xc5a7: return 0xFE; break; // LATIN SMALL LETTER T WITH STROKE
-    case 0xc5b1: return 0xB7; break; // LATIN SMALL LETTER U WITH DOUBLE ACUTE
-    case 0xc5b5: return 0xF4; break; // LATIN SMALL LETTER W WITH CIRCUMFLEX
-    case 0xc5b7: return 0xE4; break; // LATIN SMALL LETTER Y WITH CIRCUMFLEX
-    case 0xc5b9: return 0xED; break; // LATIN CAPITAL LETTER Z WITH ACUTE
-    case 0xc5ba: return 0xFD; break; // LATIN SMALL LETTER Z WITH ACUTE
-    case 0xc5bd: return 0xCD; break; // LATIN CAPITAL LETTER Z WITH CARON
-    case 0xc5be: return 0xDD; break; // LATIN SMALL LETTER Z WITH CARON
-    case 0xc7a6: return 0xA4; break; // LATIN CAPITAL LETTER G WITH CARON
-    case 0xc7a7: return 0x9D; break; // LATIN SMALL LETTER G WITH CARON
-    case 0xceb1: return 0xA1; break; // GREEK SMALL LETTER ALPHA
-    case 0xceb2: return 0x8D; break; // GREEK SMALL LETTER BETA
-    case 0xcf80: return 0xA8; break; // GREEK SMALL LETTER PI
-    case 0x30 ... 0x7d: return src; break;
-    default: return 0x20; break;
-  }
-}
-
 void set_rds_rt(char *rt) {
     strncpy(rds_params.rt, rt, 64);
     for(int i=0; i<64; i++) {
         if(rds_params.rt[i] == 0) rds_params.rt[i] = 32;
-        rds_params.rt[i] = rds_char_converter(rds_params.rt[i]);
     }
 }
 
 void set_rds_ps(char *ps) {
     strncpy(rds_params.ps, ps, 8);
     for(int i=0; i<8; i++) {
-        rds_params.ps[i] = rds_char_converter(rds_params.ps[i]);
         if(rds_params.ps[i] == 0) rds_params.ps[i] = 32;
     }
 }
