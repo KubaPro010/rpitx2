@@ -199,6 +199,18 @@ ResultAndArg poll_control_pipe() {
 			if(mpx) printf("ON\n"); else printf("OFF\n");
 			resarg.res = CONTROL_PIPE_MPXGEN_SET;
 			resarg.arg_int = mpx;
+		} else if(fifo[0] == 'C' && fifo[1] == 'O' && fifo[2] == 'M') {
+			int compressor = ( strcmp(arg, "ON") == 0 );
+			printf("Set Compressor to ");
+			if(compressor) printf("ON\n"); else printf("OFF\n");
+			resarg.res = CONTROL_PIPE_COMPRESSOR_SET;
+			resarg.arg_int = compressor; //bool is just a fancy work for 0 or 1, atleast here
+		} else if(fifo[0] == 'C' && fifo[1] == 'M' && fifo[2] == 'G') {
+			printf("Set Compressor Max Gain Recip to ");
+			printf(arg);
+			printf("\n");
+			resarg.res = CONTROL_PIPE_COMPRESSORMAXGAINRECIP_SET;
+			resarg.arg = arg;
 		}
 	}
 	return resarg;

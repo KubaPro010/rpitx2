@@ -190,6 +190,10 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 pilot_volume = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_MPXGEN_SET) {
                 generate_multiplex = pollResult.arg_int;
+            } else if(pollResult.res == CONTROL_PIPE_COMPRESSOR_SET) {
+                enablecompressor = pollResult.arg_int;
+            } else if(pollResult.res == CONTROL_PIPE_COMPRESSORMAXGAINRECIP_SET) {
+                compressor_max_gain_recip = std::stof(pollResult.arg);
             }
         }
 
