@@ -133,10 +133,10 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea ho
     uint16_t blocks[GROUP_LENGTH] = {rds_params.pi, 0, 0, 0};
     
     // Generate block content
-    if(! get_rds_ct_group(blocks, ct_clock_enabled)) { // CT (clock time) has priority on other group types (when its on)
+    if(!get_rds_ct_group(blocks, ct_clock_enabled)) { // CT (clock time) has priority on other group types (when its on)
         if(state < 4) {
             blocks[1] = 0x0000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ta << 4 | rds_params.ms << 3 | ps_state;
-            if((ps_state == 3) && stereo) blocks[1] |= 0x0004; // DI = 1 - Stereo
+            if((ps_state == 3) && stereo) blocks[1] |= 0x0004; // DI Stereo, someone explain from where the 0004 comes from and what does "bit d0" mean?
             if(rds_params.af[0]) { // AF
                 if(af_state == 0) { 
 			        blocks[2] = (rds_params.af[0] + 224) << 8 | rds_params.af[1];
