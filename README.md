@@ -145,7 +145,7 @@ See https://github.com/ChristopheJacquet/PiFmRds/blob/master/README.md, it will 
 first, the normal args, like `pifmrds -arg argtoarg?`<br>
 `-compressordecay` - compressor decay, specify in float (like: 0.999, default: 0.999995)<br>
 `-compressorattack` - same thing but attack (default: 1.0)<br>
-`-compressormaxgainrecip` - i dunno (default: 0.1)<br>
+`-compressormaxgainrecip` - i dunno (default: 0.01)<br>
 `-bfr` - by default a 65-108 freq range is defined, a freq outside makes the program crash, this bypasses the range, also it requires a arg, it can be anything as the arg is not parsed, so pass: `-bfr thisbypassescrap`<br>
 `-deviation` - sets how large the fm signal can be, in khz, default is 75khz<br>
 `-raw` - same arg as bfr, but this disables the format of the audio and sets channels and samplerate forcefully<br>
@@ -160,7 +160,7 @@ first, the normal args, like `pifmrds -arg argtoarg?`<br>
 `-preemphasis` - you can pass either `us` or `22`, us will give 75μs and 22μs (why is 22 here? i dunno ask sdr++ creator why he also added 22)<br>
 `-af` - same as pifmadv<br>
 `-rdsvolume` - rds volume, so how many times is the rds "louder"<br>
-`-pilotvolume` - rds volume, so how many times is the stereo pilot "louder" (note: its normalized by 0.1, so if you input it as 1 its really 0.9)<br>
+`-pilotvolume` - pilot volume<br>
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
 `PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
@@ -176,6 +176,8 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `RDV` - gain but not audio but rds gain<br>
 `PAU` - pause, kinda, it will cancel out any audio, you could use `GAI 0` but you could forgor the old gain value, right?<br>
 `PIV` - gain but not audio or rds but stereo pilot gain (default = 0.9)<br>
+`COM` - toggle, like rds but it doesnt toggle the rds, it does toggle the COMPRESSOR<br>
+`CMG` - change compressor max gain recip<br>
 <br>
 and thats all, and remember kids dont pirate
 
