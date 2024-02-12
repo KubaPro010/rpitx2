@@ -143,7 +143,7 @@ We assume that input frequency is tuned on FM station. It is demodulated and mod
 See https://github.com/ChristopheJacquet/PiFmRds/blob/master/README.md, it will show what you can do, but theres MORE, yeah, this ain't some that undeveloped code, this is developed, but whats the quality of the code? lets not talk about that, okay? anyways, let me show you the *features* of this :)
 
 first, the normal args, like `pifmrds -arg argtoarg?`<br>
-if you have a arg with no argume... wait what args with args? anyways like the input of the arg, right? if we'd take `-disablerds`, you need to pass something to it or the arg parser will shit itself, pass in anything, i always do `mhm`, have fuck, i mean fun (blud trying to be funny, blud saing blud, blud missplled saying)
+if you have a arg with no argume... wait what args with args? anyways like the input of the arg, right? if we'd take `-disablerds`, you need to pass something to it or the arg parser will shit itself, pass in anything, i always do `mhm`, have fuck, i mean fun (blud trying to be funny, blud saing blud, blud missplled saying)<br>
 `-compressordecay` - compressor decay, specify in float (like: 0.999, default: 0.999995)<br>
 `-compressorattack` - same thing but attack (default: 1.0)<br>
 `-compressormaxgainrecip` - i dunno (default: 0.01)<br>
