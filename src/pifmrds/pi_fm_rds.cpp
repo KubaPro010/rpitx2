@@ -215,18 +215,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
 }
 
 uint16_t callsignToPI(char* callsign) {
-    uint16_t pi_code = 0;
-    bool w = (piCode >= 21672);
-    callsign =  w ? 'W' : 'K';
-    char* restStr;
-    int rest = piCode - (w ? 21672 : 4096);
-    while (rest) {
-        restStr += 'A' + (rest % 26);
-        rest /= 26;
-    }
-    for (int i = restStr.size() - 1; i >= 0; i--) {
-        callsign += restStr[i];
-    }
+    
 }
 
 int main(int argc, char **argv) {
