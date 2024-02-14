@@ -214,6 +214,14 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     return 0;
 }
 
+uint16_t callsignToPI(char* callsign) {
+    uint16_t pi_code = 0;
+    for (int i = 0; i < 4; i++) {
+        if (callsign[i] >= 'A' && callsign[i] <= 'Z') pi_code += (callsign[i] - 'A') * (i == 0 ? 21672 : (i == 1 ? 676 : (i == 2 ? 26 : 1)));
+        else return 0; // Returning 0 to indicate an error
+    }
+    return pi_code;
+}
 
 int main(int argc, char **argv) {
     char *audio_file = NULL;
@@ -263,6 +271,10 @@ int main(int argc, char **argv) {
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
             pi = (uint16_t) strtol(param, NULL, 16);
+        } else if(strcmp("-rdbscallsign", arg)==0 && param != NULL) {
+            i++;
+            // pi = callsignToPI(arg);
+            printf((char*)callsignToPI(arg);)
         } else if(strcmp("-ps", arg)==0 && param != NULL) {
             i++;
             ps = param;
