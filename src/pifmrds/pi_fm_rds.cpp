@@ -216,11 +216,17 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
 
 uint16_t callsignToPI(char* callsign) {
     uint16_t pi_code = 0;
-    for (int i = 0; i < 4; i++) {
-        if (callsign[i] >= 'A' && callsign[i] <= 'Z') pi_code += (callsign[i] - 'A') * (i == 0 ? 21672 : (i == 1 ? 676 : (i == 2 ? 26 : 1)));
-        else return 0; // Returning 0 to indicate an error
+    bool w = (piCode >= 21672);
+    callsign =  w ? 'W' : 'K';
+    char* restStr;
+    int rest = piCode - (w ? 21672 : 4096);
+    while (rest) {
+        restStr += 'A' + (rest % 26);
+        rest /= 26;
     }
-    return pi_code;
+    for (int i = restStr.size() - 1; i >= 0; i--) {
+        callsign += restStr[i];
+    }
 }
 
 int main(int argc, char **argv) {
