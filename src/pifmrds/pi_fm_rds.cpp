@@ -274,7 +274,9 @@ int main(int argc, char **argv) {
         } else if(strcmp("-rdbscallsign", arg)==0 && param != NULL) {
             i++;
             // pi = callsignToPI(arg);
+            printf("pi:");
             printf((char*)callsignToPI(arg));
+            printf("\n");
         } else if(strcmp("-ps", arg)==0 && param != NULL) {
             i++;
             ps = param;
