@@ -168,6 +168,7 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `CT` - turn ct on or off, but while *runtime*<br>
 `PWR` - same as arg `-power`<br>
 `RTB` - there are 2 rts, they can have both one text of content, you can use this to refresh the current rt, or if you have a sequence of rt texts, you can switch rt a and rtb (rt sets rt a and this sets rt b)<br>
+`MS`  - pass "ON" or "OFF" to signal ms, `MS ON` means music is on, `MS OFF` means that speech is on
 `RDS` - turn on or off rds, same as for example ms<br>
 `DEV` - set deviation while *runtime*<br>
 `GAI` (not gay) - set the gain while *runtime*<br>
