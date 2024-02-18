@@ -13,20 +13,16 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sndfile.h>
-
 extern "C"
 {
 #include "rds.h"
 #include "fm_mpx.h"
 #include "control_pipe.h"
 }
-
 #include <librpitx/librpitx.h>
-
 ngfmdmasync *fmmod;
 #define DATA_SIZE 5000
-static void
-terminate(int num)
+static void terminate(int num)
 {
     delete fmmod;
     fm_mpx_close();
@@ -34,8 +30,7 @@ terminate(int num)
     exit(num);
 }
 
-static void
-fatal(char *fmt, ...)
+static void fatal(char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -45,15 +40,6 @@ fatal(char *fmt, ...)
 }
 
 int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo) {
-    // Catch all signals possible - it is vital we kill the DMA engine
-    // on process exit!
-    // for (int i = 0; i < 64; i++) {
-    //     struct sigaction sa;
-
-    //     memset(&sa, 0, sizeof(sa));
-    //     sa.sa_handler = terminate;
-    //     sigaction(i, &sa, NULL);
-    // }
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = terminate;
@@ -94,18 +80,10 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     set_rds_ta(ta);
     uint16_t count = 0;
     uint16_t count2 = 0;
-    int varying_ps = 0;
-
     if(drds == 1) {
-        printf("RDS Disabled\n");
+        printf("RDS Disabled (you can enable with control fifo with the RDS command)\n");
     } else {
-        if(ps) {
-            set_rds_ps(ps);
-            printf("PI: %04X, PS: \"%s\".\n", pi, ps);
-        } else {
-            printf("PI: %04X, PS: <Varying>.\n", pi);
-            varying_ps = 1;
-        }
+        printf("PI: %04X, PS: \"%s\".\n", pi, ps);
         printf("RT: \"%s\"\n", rt);
 
         if(af_array[0]) {
@@ -128,43 +106,18 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             control_pipe = NULL;
         }
     }
-
-
     printf("Starting to transmit on %3.1f MHz.\n", carrier_freq/1e6);
-
     float deviation_scale_factor;
-    //if( divider ) // PLL modulation
-    {   // note samples are [-10:10]
-
-        // The deviation specifies how wide the signal is (from its lowest bandwidht to its highest, but not including sub-carriers). 
-        // Use 75kHz for WFM (broadcast radio, or 50khz can be used)
-        // and about 2.5kHz for NFM (walkie-talkie style radio)
-        deviation_scale_factor=  0.1 * (deviation ) ; // todo PPM
-    }
+    // The deviation specifies how wide the signal is (from its lowest bandwidht to its highest, but not including sub-carriers). 
+    // Use 75kHz for WFM (broadcast radio, or 50khz can be used)
+    // and about 2.5kHz for NFM (walkie-talkie style radio)
+    deviation_scale_factor=  0.1 * (deviation) ; // todo PPM
     int paused = 0;
     for (;;)
 	{
-        if(drds == 0) {
-            // Default (varying) PS
-            if(varying_ps) {
-                if(count == 512) {
-                    snprintf(myps, 9, "%08d", count2);
-                    set_rds_ps(myps);
-                    count2++;
-                }
-                if(count == 1024) {
-                    set_rds_ps("RPi-Live");
-                    count = 0;
-                }
-                count++;
-            }
-        }
-
         if(control_pipe) {
             ResultAndArg pollResult = poll_control_pipe();
-            if(pollResult.res == CONTROL_PIPE_PS_SET) {
-                varying_ps = 0;
-            } else if(pollResult.res == CONTROL_PIPE_RDS_SET) {
+            if(pollResult.res == CONTROL_PIPE_RDS_SET) {
                 drds = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_PWR_SET) {
                 padgpio gpiopad;
@@ -196,21 +149,13 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 compressor_max_gain_recip = std::stof(pollResult.arg);
             }
         }
-
-			if( fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex) < 0 ) {
-                    terminate(0);
-                }
-                data_len = DATA_SIZE;
-				for(int i=0;i< data_len;i++)
-			{
-
-            	devfreq[i] = data[i]*deviation_scale_factor;
-
-
-            }
-			fmmod->SetFrequencySamples(devfreq,data_len);
+        if(fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex) < 0 ) terminate(0);
+        data_len = DATA_SIZE;
+        for(int i=0;i< data_len;i++) {
+            devfreq[i] = data[i]*deviation_scale_factor;
+        }
+        fmmod->SetFrequencySamples(devfreq,data_len);
 	}
-
     return 0;
 }
 
@@ -218,7 +163,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
 int main(int argc, char **argv) {
     char *audio_file = NULL;
     char *control_pipe = NULL;
-    uint32_t carrier_freq = 100000000;
+    uint32_t carrier_freq = 100000000; //100 mhz
     char *ps = "Pi-FmSa";
     char *rt = "Broadcasting on a Raspberry Pi: Simply Advanced";
     uint16_t pi = 0x1234;
@@ -258,8 +203,7 @@ int main(int argc, char **argv) {
         } else if(strcmp("-freq", arg)==0 && param != NULL) {
             i++;
             carrier_freq = 1e6 * atof(param);
-            if((carrier_freq < 64e6 || carrier_freq > 108e6) && !bypassfreqrange)
-               fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for UKF radios, such as the UNITRA Jowita or other old band FM Radios)\n");
+            if((carrier_freq < 64e6 || carrier_freq > 108e6) && !bypassfreqrange) fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for UKF radios, such as the UNITRA Jowita or other old band FM Radios)\n");
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
             pi = (uint16_t) strtol(param, NULL, 16);
