@@ -36,4 +36,4 @@ typedef struct {
 
 extern int open_control_pipe(char *filename);
 extern int close_control_pipe();
-extern ResultAndArg poll_control_pipe();
+extern ResultAndArg poll_control_pipe(bool log);

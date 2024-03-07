@@ -39,7 +39,7 @@ static void fatal(char *fmt, ...)
     terminate(0);
 }
 
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo) {
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo, bool log) {
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = terminate;
@@ -80,33 +80,35 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     set_rds_ta(ta);
     uint16_t count = 0;
     uint16_t count2 = 0;
-    if(drds == 1) {
-        printf("RDS Disabled (you can enable with control fifo with the RDS command)\n");
-    } else {
-        printf("PI: %04X, PS: \"%s\".\n", pi, ps);
-        printf("RT: \"%s\"\n", rt);
+    if(log) {
+        if(drds == 1) {
+            printf("RDS Disabled (you can enable with control fifo with the RDS command)\n");
+        } else {
+            printf("PI: %04X, PS: \"%s\".\n", pi, ps);
+            printf("RT: \"%s\"\n", rt);
 
-        if(af_array[0]) {
-            set_rds_af(af_array);
-            printf("AF: ");
-            int f;
-            for(f = 1; f < af_array[0]+1; f++) {
-                printf("%f Mhz ", (float)(af_array[f]+875)/10);
+            if(af_array[0]) {
+                set_rds_af(af_array);
+                printf("AF: ");
+                int f;
+                for(f = 1; f < af_array[0]+1; f++) {
+                    printf("%f Mhz ", (float)(af_array[f]+875)/10);
+                }
+                printf("\n");
             }
-            printf("\n");
         }
     }
 
     // Initialize the control pipe reader
     if(control_pipe) {
         if(open_control_pipe(control_pipe) == 0) {
-            printf("Reading control commands on %s.\n", control_pipe);
+            if(log) printf("Reading control commands on %s.\n", control_pipe);
         } else {
-            printf("Failed to open control pipe: %s.\n", control_pipe);
+            if(log) printf("Failed to open control pipe: %s.\n", control_pipe);
             control_pipe = NULL;
         }
     }
-    printf("Starting to transmit on %3.1f MHz.\n", carrier_freq/1e6);
+    if(log) printf("Starting to transmit on %3.1f MHz.\n", carrier_freq/1e6);
     float deviation_scale_factor;
     // The deviation specifies how wide the signal is (from its lowest bandwidht to its highest, but not including sub-carriers). 
     // Use 75kHz for WFM (broadcast radio, or 50khz can be used)
@@ -116,7 +118,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     for (;;)
 	{
         if(control_pipe) {
-            ResultAndArg pollResult = poll_control_pipe();
+            ResultAndArg pollResult = poll_control_pipe(log);
             if(pollResult.res == CONTROL_PIPE_RDS_SET) {
                 drds = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_PWR_SET) {
@@ -174,6 +176,7 @@ int main(int argc, char **argv) {
     int enable_compressor = 1;
     float rds_volume = 1.0;
     float pilot_volume = 0.9;
+    int log = 1;
     int ta = 0;
     int tp = 0;
     int af_size = 0;
@@ -243,6 +246,9 @@ int main(int argc, char **argv) {
             // } else {
             //     gpiopin = pinnum;
             // }
+        } else if(strcmp("-disablelogging", arg)==0) {
+            i++;
+            log = 0;
         } else if(strcmp("-ta", arg)==0) {
             i++;
             ta = 1;
@@ -332,6 +338,6 @@ int main(int argc, char **argv) {
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, dstereo);
+    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, dstereo, (log == 1 ? true : false));
     terminate(errcode);
 }
