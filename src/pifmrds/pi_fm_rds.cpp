@@ -39,7 +39,7 @@ static void fatal(char *fmt, ...)
     terminate(0);
 }
 
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo, int log) {
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, int disablestereo, int log) {
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = terminate;
@@ -137,12 +137,8 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 compressor_attack = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_CT_SET) {
                 rds_ct_enabled = pollResult.arg_int;
-            } else if(pollResult.res == CONTROL_PIPE_RDSVOL_SET) {
-                rds_volume = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_PAUSE_SET) {
                 paused = pollResult.arg_int;
-            } else if(pollResult.res == CONTROL_PIPE_PILVOL_SET) {
-                pilot_volume = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_MPXGEN_SET) {
                 generate_multiplex = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSOR_SET) {
@@ -151,7 +147,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 compressor_max_gain_recip = std::stof(pollResult.arg);
             }
         }
-        if(fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex) < 0 ) terminate(0);
+        if(fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, gaim, enablecompressor, rds_ct_enabled, 1.0, paused, 0.9, generate_multiplex) < 0 ) terminate(0);
         data_len = DATA_SIZE;
         for(int i=0;i< data_len;i++) {
             devfreq[i] = data[i]*deviation_scale_factor;
@@ -174,8 +170,6 @@ int main(int argc, char **argv) {
     float compressor_attack = 1.0;
     float compressor_max_gain_recip = 0.01;
     int enable_compressor = 1;
-    float rds_volume = 1.0;
-    float pilot_volume = 0.9;
     int log = 1;
     int ta = 0;
     int tp = 0;
@@ -188,11 +182,9 @@ int main(int argc, char **argv) {
     float gain = 1;
     int rawSampleRate = 44100;
     int rawChannels = 2;
-    int compressorchanges = 0;
     double preemp = 50e-6; //eu
     int deviation = 75000;
     int alternative_freq[100] = {};
-    int bypassfreqrange = 0;
     int ct = 1;
     float cutofffreq = 16200;
     // Parse command-line arguments
@@ -206,7 +198,7 @@ int main(int argc, char **argv) {
         } else if(strcmp("-freq", arg)==0 && param != NULL) {
             i++;
             carrier_freq = 1e6 * atof(param);
-            if((carrier_freq < 64e6 || carrier_freq > 108e6) && !bypassfreqrange) fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for UKF radios, such as the UNITRA Jowita or other old band FM Radios)\n");
+            if((carrier_freq < 64e6 || carrier_freq > 108e6)) fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for UKF radios, such as the UNITRA Jowita or other old band FM Radios)\n");
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
             pi = (uint16_t) strtol(param, NULL, 16);
@@ -219,42 +211,21 @@ int main(int argc, char **argv) {
         } else if(strcmp("-compressordecay", arg)==0 && param != NULL) {
             i++;
             compressor_decay = atof(param);
-            compressorchanges = 1;
         } else if(strcmp("-compressorattack", arg)==0 && param != NULL) {
             i++;
             compressor_attack = atof(param);
-            compressorchanges = 1;
         } else if(strcmp("-compressormaxgainrecip", arg)==0 && param != NULL) {
             i++;
             compressor_max_gain_recip = atof(param);
-            compressorchanges = 1;
-        } else if(strcmp("-rdsvolume", arg)==0 && param != NULL) {
-            i++;
-            rds_volume = atof(param);
-        } else if(strcmp("-pilotvolume", arg)==0 && param != NULL) {
-            i++;
-            pilot_volume = atof(param);
         } else if(strcmp("-pty", arg)==0 && param != NULL) {
             i++;
             pty = atoi(param);
-        } else if(strcmp("-gpiopin", arg)==0 && param != NULL) {
-            i++;
-            printf("GPIO pin setting disabled, mod librpitx and pifmsa (pifm simply advanced) for this");
-            // int pinnum = atoi(param);
-            // if (!(pinnum == 4 || pinnum == 20 || pinnum == 32 || pinnum == 34 || pinnum == 6)) {
-            //     fatal("Invalid gpio pin, allowed: 4, 20, 32, 34, 6");
-            // } else {
-            //     gpiopin = pinnum;
-            // }
         } else if(strcmp("-disablelogging", arg)==0) {
             i++;
             log = 0;
         } else if(strcmp("-ta", arg)==0) {
             i++;
             ta = 1;
-        } else if(strcmp("-bfr", arg)==0) {
-            i++;
-            bypassfreqrange = 1;
         } else if(strcmp("-tp", arg)==0) {
             i++;
             tp = 1;
@@ -263,14 +234,7 @@ int main(int argc, char **argv) {
             control_pipe = param;
         } else if(strcmp("-deviation", arg)==0 && param != NULL) {
             i++;
-            if(strcmp("small", param)==0) {
-                deviation = 50000;
-            } else if(strcmp("nfm", param)==0) {
-                deviation = 2500;
-            }
-            else {
-                deviation = atoi(param);
-            }
+            deviation = atoi(param);
         } else if(strcmp("-rawchannels", arg)==0 && param != NULL) {
             i++;
             rawChannels = atoi(param);
@@ -278,8 +242,8 @@ int main(int argc, char **argv) {
             i++;
             rawSampleRate = atoi(param);
         } else if(strcmp("-cutofffreq", arg)==0 && param != NULL) {
-                i++;
-                cutofffreq = atoi(param);
+            i++;
+            cutofffreq = atoi(param);
         } else if(strcmp("-audiogain", arg)==0 && param != NULL) {
             i++;
             gain = atoi(param);
@@ -320,16 +284,13 @@ int main(int argc, char **argv) {
             af_size++;
             alternative_freq[af_size] = (int)(10*atof(param))-875;
             if(alternative_freq[af_size] < 1 || alternative_freq[af_size] > 204)
-                fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n"); //honestly i have no idea why 87.5 and 108 isn't in here, i copied this code, okay?
+                fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n");
         }
         else {
             fatal("Unrecognised argument: %s.\n"
             "Syntax: pi_fm_rds [-freq freq] [-audio file] [-pi pi_code]\n"
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000] [-tp] [-ta]\n", arg);
         }
-    }
-    if(compressorchanges) {
-        printf("You've changed the compressor settings, just don't set it too low, so the deviation won't go crazy\n");
     }
     if(!enable_compressor) {
         printf("DUDE YOU ARE CRAZY?\n");
@@ -338,6 +299,6 @@ int main(int argc, char **argv) {
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, dstereo, log);
+    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, dstereo, log);
     terminate(errcode);
 }

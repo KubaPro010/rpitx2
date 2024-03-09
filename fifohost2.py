@@ -1,4 +1,4 @@
-import socket
+import socket #for pifmrds, when wanting to send rds data, this may come useful :)
 
 HOST = '0.0.0.0'
 PORT = 9997         # Choose an available port

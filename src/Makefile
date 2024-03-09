@@ -1,4 +1,4 @@
-all: ../pisstv ../piopera ../pifsq ../pichirp ../sendiq ../tune ../freedv ../pocsag ../spectrumpaint ../pifmrds ../rpitx ../corel8 ../pift8 ../sendook ../morse ../foxhunt ../pirtty
+all: ../pisstv ../piopera ../pifsq ../pichirp ../sendiq ../tune ../freedv ../pocsag ../pifmrds ../corel8 ../pift8 ../sendook ../morse ../foxhunt ../pirtty
 
 CFLAGS	?= -Wall -g -O2 -Wno-unused-variable
 CXXFLAGS ?= -std=c++11 -Wall -g -O2 -Wno-unused-variable
@@ -53,20 +53,13 @@ LDFLAGS_Pissb	= $(LDFLAGS) -lsndfile -lliquid
 ../pocsag: pocsag/pocsag.cpp 
 	$(CXX) $(CXXFLAGS) -o ../pocsag pocsag/pocsag.cpp $(LDFLAGS)
 
-../spectrumpaint: spectrumpaint/spectrum.cpp 
-	$(CXX) $(CXXFLAGS) -o ../spectrumpaint spectrumpaint/spectrum.cpp $(LDFLAGS)
-
 ../pifmrds: pifmrds/rds.c pifmrds/waveforms.c pifmrds/pi_fm_rds.cpp pifmrds/fm_mpx.c pifmrds/control_pipe.c 
 	$(CC) $(CFLAGS) -c -o pifmrds/rds.o pifmrds/rds.c
 	$(CC) $(CFLAGS) -c -o pifmrds/control_pipe.o pifmrds/control_pipe.c
 	$(CC) $(CFLAGS) -c -o pifmrds/waveforms.o pifmrds/waveforms.c
-#	$(CC) $(CFLAGS) -c -o pifmrds/rds_wav.o pifmrds/rds_wav.c
 	$(CC) $(CFLAGS) -c -o pifmrds/fm_mpx.o pifmrds/fm_mpx.c
 	#$(CC) -o pifmrds/rds_wav pifmrds/rds_wav.o pifmrds/rds.o pifmrds/waveforms.o pifmrds/fm_mpx.o -lm -lsndfile
 	$(CXX) $(CXXFLAGS) -Wno-write-strings -o ../pifmrds pifmrds/rds.o pifmrds/waveforms.o pifmrds/pi_fm_rds.cpp pifmrds/fm_mpx.o pifmrds/control_pipe.o -lm -lsndfile -lrt -lpthread -L/opt/vc/lib -lrpitx
-
-../rpitx: rpitxv1/rpitx.cpp 
-	$(CXX) $(CXXFLAGS) -Wno-write-strings -o ../rpitx rpitxv1/rpitx.cpp $(LDFLAGS)
 
 ../corel8: corel8/corel8.cpp corel8/costas8.h 
 	$(CXX) $(CXXFLAGS) -Wno-write-strings -o ../corel8 corel8/corel8.cpp $(LDFLAGS)
@@ -91,7 +84,7 @@ CFLAGS_Pidcf77	= -Wall -g -O2 -Wno-unused-variable
 ../pidcf77 : ../dcf77/pidcf77.c
 	$(CC) $(CFLAGS_Piam) -o ../pidcf77 ../dcf77/pidcf77.c  $(LDFLAGS)
 clean:
-	rm -f  ../dvbrf ../sendiq ../pissb ../pisstv ../pifsq ../pifm ../piam ../pidcf77 ../pichirp ../tune ../freedv ../piopera ../spectrumpaint ../pocsag ../pifmrds ../rpitx ../sendook
+	rm -f  ../dvbrf ../sendiq ../pissb ../pisstv ../pifsq ../pifm ../piam ../pidcf77 ../pichirp ../tune ../freedv ../piopera ../pocsag ../pifmrds ../rpitx ../sendook
 
 install: all
 	install -m 0755 ../pisstv /usr/bin
