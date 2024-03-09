@@ -37,7 +37,7 @@ you wanna update? sure, just run `./compile.sh` if you have a error type in `chm
 
 # Hardware
 ![bpf](/doc/bpf-warning.png)
-###### note: you don't need it, i've been transmitting since summer 2023 without it, and no one knocked at my door, but your country laws can be stricter
+**note: you *probably* don't need it, i've been transmitting since summer 2023 without it, and no one knocked at my door, but your country laws can be stricter**
 
 | Raspberry Model      | Status  |
 | ---------------------|:-------:|
