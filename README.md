@@ -161,7 +161,7 @@ if you have a arg with no argume... wait what args with args? anyways like the i
 `-preemphasis` - you can pass either `us` or `22`, us will give 75μs and 22μs (why is 22 here? i dunno ask sdr++ creator why he also added 22)<br>
 `-af` - same as pifmadv<br>
 `-rdsvolume` - rds volume, so how many times is the rds "louder"<br>
-`-pilotvolume` - pilot volume<br>
+`-pilotvolume` - pilot volume<br><br>
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
 `PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
@@ -189,18 +189,19 @@ It has been mostly untested, but i've tested it on 95 mhz, with a 79 cm antenna,
 
 # Transmitter Power
 By default the Raspberry Pi outputs 4 mA on a gpio pin, but here it gets overriden to max, which is about 16 mA, some apps have a setting to change the power, here is a sheet of the power levels and their correspondent radiated power: (NOTE: RADIATED POWER, NOT ERP, TO HAVE THE EXACT TX POWER OF A TRANSMITTER, THE ANTENNA EFFIECENCY AND GAIN WOULD NEED TO BE COUNTED IN THE CALCULATION)
-##### 0 = 6.6 mW
-##### 1 = 13.2 mW
-##### 2 = 19.8 mW
-##### 3 = 26.4 mW
-##### 4 = 33.0 mW
-##### 5 = 39.6 mW
-##### 6 = 46.2 mW
-##### 7 = 52.8 mW
+<br>**0 = 6.6 mW**
+<br>**1 = 13.2 mW**
+<br>**2 = 19.8 mW**
+<br>**3 = 26.4 mW**
+<br>**4 = 33.0 mW**
+<br>**5 = 39.6 mW**
+<br>**6 = 46.2 mW**
+<br>**7 = 52.8 mW**<br>
+milliwatt, not to be confused with megawatt, if it would be megawatts then your antenna, pi, power supply and the surrondings would dissapear
 
 # To continue
 **rpitx2** is a generic RF transmitter. There is a lot of modulation to do with it and also documentation to make all that easy to contribute. This will be the next step ! Feel free to inspect scripts, change parameters (frequencies, audio input, pictures...). 
 
 # Credits
 All rights of the original authors reserved.
-I try to include all licences and authors in sourcecode. Need to write all references in this section.  
+F5OEO tried to include all licences and authors in sourcecode
