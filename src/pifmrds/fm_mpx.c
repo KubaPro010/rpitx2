@@ -201,7 +201,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
 int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume, int generate_multiplex) {
-    *audio_buffer = 0.0; //in order to avoild what i call "frame looping", so the exact same thing isnt played, if the audio stream is cut off 
+    *audio_buffer = 0.0; //in order to avoild what i call "frame looping", so the exact same thing isnt played, if the audio stream is cut off, audio also has frames like video, shocking right? so what happens if we have the same thing? we litrally transmit the exact same audio as the last time, its like if you'd create a tone generator with matching freqs and volumes, the same thing now and before 
     int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
     if(!drds && generate_multiplex) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
 
