@@ -201,6 +201,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
 int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume, int generate_multiplex) {
+    audio_buffer = 0.0; //in order to avoild what i call "frame looping", so the exact same thing isnt played, if the audio stream is cut off 
     int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
     if(!drds && generate_multiplex) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
 
@@ -210,7 +211,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
         if(audio_pos >= downsample_factor) {
             audio_pos -= downsample_factor;
             
-            if(audio_len <= channels ) {
+            if(audio_len <=channels ) {
                 for(int j=0; j<2; j++) { // one retry
                     audio_len = sf_read_float(inf, audio_buffer, length);
                     if (audio_len < 0) {
