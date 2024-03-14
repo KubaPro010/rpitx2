@@ -7,7 +7,7 @@ LDFLAGS += -lrpitx -lm -lrt -lpthread
 CXX ?= c++
 CC ?= cc
 
-INTSTALL_DIR ?= /usr/local/bin
+INSTALL_DIR ?= /usr/local/bin
 
 CFLAGS_Pissb	= -Wall -g -O2 -Wno-unused-variable
 LDFLAGS_Pissb	= $(LDFLAGS) -lsndfile -lliquid
