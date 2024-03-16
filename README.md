@@ -140,7 +140,7 @@ We can also live transmitting a received band frequency. Here the input frequenc
 We assume that input frequency is tuned on FM station. It is demodulated and modulate to SSB on 434MHZ. SSB is not HiFi, so prefere to choose a talk radio, music sounds like bit weird !
 
 # PiFMRds usage
-See https://github.com/ChristopheJacquet/PiFmRds/blob/master/README.md, it will show what you can do, but theres MORE, yeah, this ain't some that undeveloped code, this is developed, but whats the quality of the code? lets not talk about that, okay? anyways, let me show you the *features* of this :)
+See https://github.com/ChristopheJacquet/PiFmRds/blob/master/README.md and https://github.com/miegl/PiFmAdv/blob/master/README.md, it will show what you can do, but theres MORE, yeah, this ain't some that undeveloped code, this is developed, but whats the quality of the code? lets not talk about that, okay? anyways, let me show you the *features* of this :)
 
 first, the normal args, like `pifmrds -arg argtoarg?`<br>
 if you have a arg with no argume... wait what args with args? anyways like the input of the arg, right? if we'd take `-disablerds`, you need to pass something to it or the arg parser will shit itself, pass in anything, i always do `mhm`, have fuck, i mean fun (blud trying to be funny, blud saing blud, blud missplled saying)<br>
@@ -158,7 +158,7 @@ if you have a arg with no argume... wait what args with args? anyways like the i
 `-disablerds` - same arg as bfr, pass this in and no rds anymore<br>
 `-disablecompressor` - same as bfr, dont pass this please, if your audio is loud enough<br>
 `-disablect` - disable rds ct if you'd want for some reason<br>
-`-preemphasis` - you can pass either `us` or `22`, us will give 75μs and 22μs (why is 22 here? i dunno ask sdr++ creator why he also added 22)<br>
+`-preemphasis` - you can enter 0 or off for disabled, or us (75μs), default is 50μs, you can also enter any num and have that μs of pre-emp<br>
 `-af` - same as pifmadv<br>
 `-rdsvolume` - rds volume, so how many times is the rds "louder"<br>
 `-pilotvolume` - pilot volume<br><br>
