@@ -154,7 +154,7 @@ if you have a arg with no argume... wait what args with args? anyways like the i
 `-rawsamplerate` - same stuff but sample rate<br>
 `-cutofffreq` - fm broadcast uses a cut off freq around 16-18 khz, to avoid interferance with the 19khz stereo pilot<br>
 `-audiogain` - audio too loud or too quiet? use this, this defines how many times the audio can be<br>
-`-power` - for now works only for rpi3, but you can change the code very easy to fix it for your pi<br>
+`-power` - but you can change the code very easy to fix it for your pi<br>
 `-disablerds` - same arg as bfr, pass this in and no rds anymore<br>
 `-disablecompressor` - same as bfr, dont pass this please, if your audio is loud enough<br>
 `-disablect` - disable rds ct if you'd want for some reason<br>
