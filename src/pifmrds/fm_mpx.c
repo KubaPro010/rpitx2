@@ -24,8 +24,6 @@
     monaural or stereo audio.
 */
 
-// #define ExperimentalLimiter
-
 #include <sndfile.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -74,14 +72,12 @@ float left_max=1, right_max=1;  // start compressor with low gain
 
 SNDFILE *inf;
 
-#ifdef ExperimentalLimiter
 float limiter(float input, float threshold) {
     if (fabsf(input) > threshold) {
         return (input > 0) ? threshold : -threshold;
     }
     return input;
 }
-#endif
 
 float *alloc_empty_buffer(size_t length) {
     float *p =(float *) malloc(length * sizeof(float));
@@ -333,10 +329,8 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
             if(channels > 1) out_right = 0;
         }
  
-        #ifdef ExperimentalLimiter
-        out_left = limiter(out_left, 10); //chatgpt says that its 20db
-        if( channels > 1 ) out_right = limiter(out_right, 10);
-        #endif
+        out_left = limiter(out_left, 0.8); //chatgpt says that its -1.9382 db, amplified a mp3 2000 times, without this it was fucking huge it took like a mhz but with this, about 20khz
+        if( channels > 1 ) out_right = limiter(out_right, 0.8);
 
         // Generate the stereo mpx
         if( channels > 1 ) {
