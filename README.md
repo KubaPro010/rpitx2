@@ -139,7 +139,8 @@ We can also live transmitting a received band frequency. Here the input frequenc
 ### Relay with transmodulation ###
 We assume that input frequency is tuned on FM station. It is demodulated and modulate to SSB on 434MHZ. SSB is not HiFi, so prefere to choose a talk radio, music sounds like bit weird !
 
-# PiFMRds usage
+# PiFMRds
+## Usage
 See https://github.com/ChristopheJacquet/PiFmRds/blob/master/README.md and https://github.com/miegl/PiFmAdv/blob/master/README.md, it will show what you can do, but theres MORE, yeah, this ain't some that undeveloped code, this is developed, but whats the quality of the code? lets not talk about that, okay? anyways, let me show you the *features* of this :)
 
 first, the normal args, like `pifmrds -arg argtoarg?`<br>
@@ -182,6 +183,9 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `CMG` - change compressor max gain recip<br>
 <br>
 and thats all, and remember kids dont pirate
+
+## Features
+what makes this better you may ask, you might have seen some features in usage already, as of 22.03.24 (DD.MM.YY) a limiter was implemented alongside the compressor, this can be used if the compressor is set too low/high or it is disabled altogether, from around 500 khz of bandwidht to about 200 khz of bandwidht, this was tested with a wav file amplified 2000 times, still the sound was distorted but the band wasn't atleast
 
 
 # Range
