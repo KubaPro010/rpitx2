@@ -72,11 +72,15 @@ float left_max=1, right_max=1;  // start compressor with low gain
 
 SNDFILE *inf;
 
-float limiter(float input, float threshold) {
-    if (fabsf(input) > threshold) {
-        return (input > 0) ? threshold : -threshold;
+float limiter(float input, float threshold, int enable) {
+    if(enable == 1) {
+        if (fabsf(input) > threshold) {
+            return (input > 0) ? threshold : -threshold;
+        }
+        return input;
+    } else {
+        return input;
     }
-    return input;
 }
 
 float *alloc_empty_buffer(size_t length) {
@@ -329,8 +333,8 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
             if(channels > 1) out_right = 0;
         }
  
-        out_left = limiter(out_left, 0.8); //chatgpt says that its -1.9382 db, amplified a mp3 2000 times, without this it was fucking huge it took like a mhz but with this, about 20khz
-        if( channels > 1 ) out_right = limiter(out_right, 0.8);
+        out_left = limiter(out_left, 0.8, 1); //chatgpt says that its -1.9382 db, amplified a mp3 2000 times, without this it was fucking huge it took like a mhz but with this, about 20khz
+        if( channels > 1 ) out_right = limiter(out_right, 0.8, 1);
 
         // Generate the stereo mpx
         if( channels > 1 ) {
