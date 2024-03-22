@@ -39,7 +39,7 @@ static void fatal(char *fmt, ...)
     terminate(0);
 }
 
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo, int log, int limiter_threshold) {
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo, int log, float limiter_threshold) {
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = terminate;
