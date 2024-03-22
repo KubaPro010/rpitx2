@@ -209,7 +209,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume, int generate_multiplex) {
+int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume, int generate_multiplex, float limiter_threshold) {
     *audio_buffer = 0.0;
     int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
     if(!drds && generate_multiplex) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
@@ -333,8 +333,8 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
             if(channels > 1) out_right = 0;
         }
  
-        out_left = limiter(out_left, 0.8, 1); //chatgpt says that its -1.9382 db, amplified a mp3 2000 times, without this it was fucking huge it took like a mhz but with this, about 20khz
-        if( channels > 1 ) out_right = limiter(out_right, 0.8, 1);
+        out_left = limiter(out_left, limiter_threshold, 1); //chatgpt says that 0.8 is -1.9382 db, amplified a mp3 2000 times, without this it was fucking huge it took like a mhz but with this, about 20khz
+        if( channels > 1 ) out_right = limiter(out_right, limiter_threshold, 1);
 
         // Generate the stereo mpx
         if( channels > 1 ) {

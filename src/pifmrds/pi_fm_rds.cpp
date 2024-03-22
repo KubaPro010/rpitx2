@@ -39,7 +39,7 @@ static void fatal(char *fmt, ...)
     terminate(0);
 }
 
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo, int log) {
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo, int log, int limiter_threshold) {
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = terminate;
@@ -149,9 +149,11 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 enablecompressor = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSORMAXGAINRECIP_SET) {
                 compressor_max_gain_recip = std::stof(pollResult.arg);
+            } else if(pollResult.res == CONTROL_PIPE_LIMITERTHRESHOLD_SET) {
+                limiter_threshold = std::stof(pollResult.arg);
             }
         }
-        if(fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex) < 0 ) terminate(0);
+        if(fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex, limiter_threshold) < 0 ) terminate(0);
         data_len = DATA_SIZE;
         for(int i=0;i< data_len;i++) {
             devfreq[i] = data[i]*deviation_scale_factor;
@@ -176,6 +178,7 @@ int main(int argc, char **argv) {
     int enable_compressor = 1;
     float rds_volume = 1.0;
     float pilot_volume = 0.9;
+    float limiter_threshold = 0.8;
     int log = 1;
     int ta = 0;
     int tp = 0;
@@ -189,6 +192,7 @@ int main(int argc, char **argv) {
     int rawSampleRate = 44100;
     int rawChannels = 2;
     int compressorchanges = 0;
+    int limiterchanges = 0;
     double preemp = 50e-6; //eu
     int deviation = 75000;
     int alternative_freq[100] = {};
@@ -228,6 +232,13 @@ int main(int argc, char **argv) {
             i++;
             compressor_max_gain_recip = atof(param);
             compressorchanges = 1;
+        } else if(strcmp("-limiterthreshold", arg)==0 && param != NULL) {
+            i++;
+            limiter_threshold = atof(param);
+            limiterchanges = 1;
+            if(1 && limiter_threshold > 10) { //if you dont want this for some reason than change the 1 to a 0
+                fatal("Nuh uh (limiter threshold cant be bigger than 10)");
+            }
         } else if(strcmp("-rdsvolume", arg)==0 && param != NULL) {
             i++;
             rds_volume = atof(param);
@@ -287,7 +298,7 @@ int main(int argc, char **argv) {
             i++;
             int tpower = atoi(param);
             if(tpower > 7 || tpower < 0) fatal("Power can be between 0 and 7");
-            else power = tpower; //OMG SUCH ONE LINER
+            else power = tpower;
         } else if(strcmp("-raw", arg)==0) {
             i++;
             raw = 1;
@@ -308,7 +319,7 @@ int main(int argc, char **argv) {
             if(strcmp("us", param)==0) {
                 preemp = 75e-6; //usa
             } else if(strcmp("eu", param)==0) {
-                printf("eu default but ok\n");
+                printf("premp eu default but ok\n");
                 preemp = 50e-6;
             } else if(strcmp("off", param)==0 || strcmp("0", param)==0) {
                 preemp = 0; //disabled
@@ -331,6 +342,13 @@ int main(int argc, char **argv) {
     if(compressorchanges) {
         printf("You've changed the compressor settings, just don't set it too low, so the deviation won't go crazy\n");
     }
+    if(limiterchanges) {
+        if(limiter_threshold > 0.8) {
+            printf("You changed the limiter settings, audio might be quiet now");
+        } else { //we've incremented it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! (69 lol)
+            printf("You changed the limiter settings, be careful.");
+        }
+    }
     if(!enable_compressor) {
         printf("DUDE YOU ARE CRAZY?\n");
     }
@@ -338,6 +356,6 @@ int main(int argc, char **argv) {
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, dstereo, log);
+    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, dstereo, log, limiter_threshold);
     terminate(errcode);
 }

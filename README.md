@@ -162,7 +162,8 @@ if you have a arg with no argume... wait what args with args? anyways like the i
 `-preemphasis` - you can enter 0 or off for disabled, or us (75μs), default is 50μs, you can also enter any num and have that μs of pre-emp<br>
 `-af` - same as pifmadv<br>
 `-rdsvolume` - rds volume, so how many times is the rds "louder"<br>
-`-pilotvolume` - pilot volume<br><br>
+`-pilotvolume` - pilot volume<br>
+`-limiterthreshold` - limiter threshold, limits to 10<br><br>
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
 `PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
@@ -181,6 +182,7 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `PIV` - gain but not audio or rds but stereo pilot gain (default = 0.9)<br>
 `COM` - toggle, like rds but it doesnt toggle the rds, it does toggle the COMPRESSOR<br>
 `CMG` - change compressor max gain recip<br>
+`LIM` - same as that arg<br>
 <br>
 and thats all, and remember kids dont pirate
 
