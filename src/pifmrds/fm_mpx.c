@@ -24,6 +24,8 @@
     monaural or stereo audio.
 */
 
+// #define ExperimentalLimiter
+
 #include <sndfile.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -72,7 +74,14 @@ float left_max=1, right_max=1;  // start compressor with low gain
 
 SNDFILE *inf;
 
-
+#ifdef ExperimentalLimiter
+float limiter(float input, float threshold) {
+    if (fabsf(input) > threshold) {
+        return (input > 0) ? threshold : -threshold;
+    }
+    return input;
+}
+#endif
 
 float *alloc_empty_buffer(size_t length) {
     float *p =(float *) malloc(length * sizeof(float));
@@ -201,7 +210,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
 int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume, int generate_multiplex) {
-    *audio_buffer = 0.0; //in order to avoild what i call "frame looping", so the exact same thing isnt played, if the audio stream is cut off, audio also has frames like video, shocking right? so what happens if we have the same thing? we litrally transmit the exact same audio as the last time, its like if you'd create a tone generator with matching freqs and volumes, the same thing now and before 
+    *audio_buffer = 0.0;
     int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
     if(!drds && generate_multiplex) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
 
@@ -324,6 +333,11 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
             if(channels > 1) out_right = 0;
         }
  
+        #ifdef ExperimentalLimiter
+        out_left = limiter(out_left, 10); //chatgpt says that its 20db
+        if( channels > 1 ) out_right = limiter(out_right, 10);
+        #endif
+
         // Generate the stereo mpx
         if( channels > 1 ) {
             if(!disablestereo) {
@@ -332,18 +346,14 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                         mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
                             4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
                         pilot_volume*carrier_19[phase_19];                  // Stereo pilot tone
-
                         phase_19++;
                         phase_38++;
                         if(phase_19 >= 12) phase_19 = 0;
                         if(phase_38 >= 6) phase_38 = 0;
                     } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
                         mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal (L+R)
-                            4.05 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
+                            4.05 * (out_left-out_right); // Stereo difference signal
                             //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!! (its missplelled correctly probably just like misspelled)
-
-                        phase_3125++;
-                        if(phase_3125 >= 6) phase_3125 = 0;
                     }
                 }
             } else {
@@ -370,7 +380,6 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
         audio_pos++;   
         
     }
-    
     return 0;
 }
 
