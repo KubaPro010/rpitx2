@@ -1,4 +1,4 @@
-if you wanna use pifmrds, then scroll down to pifmrds usage ([here](#pifmrds-usage))
+if you wanna use pifmrds, then scroll down to pifmrds usage ([here](#usage))
 ![rpitx banner](/doc/rpitxlogo.png)
 # About rpitx2
 **rpitx2** is a general radio frequency transmitter for Raspberry Pi which doesn't require any other hardware unless filter to avoid interference. It can handle frequencies from 5 KHz up to 1500 MHz.
