@@ -163,7 +163,7 @@ if you have a arg with no argume... wait what args with args? anyways like the i
 `-af` - same as pifmadv<br>
 `-rdsvolume` - rds volume, so how many times is the rds "louder"<br>
 `-pilotvolume` - pilot volume<br>
-`-limiterthreshold` - limiter threshold, limits to 10<br><br>
+`-limiterthreshold` - limiter threshold, limits to 10, i think that its in linear ratio, so the algorithm to convert from db is gonna be 10 ** (db/20)<br><br>
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
 `PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
