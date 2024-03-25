@@ -7,8 +7,8 @@ DEFAULT_WAV_FILE_MONO_LOC=src/resources/SAMPLE_MONO_AUDIO.wav
 DEFAULT_WAV_FILE_STEREO_LOC=src/resources/SAMPLE_STEREO_AUDIO.wav
 DEFAULT_RF_FREEDV_FILE_LOC=src/resources/SAMPLE_FREEDV.rf
 DEFAULT_POCSAG_MESSAGE="1:YOURCALL\n2: Hello world"
-DEFAULT_OPERA_CALLSIGN="F5OEO"
-DEFAULT_RTTY_MESSAGE="HELLO WORLD FROM RPITX"
+DEFAULT_OPERA_CALLSIGN="rpitx2"
+DEFAULT_RTTY_MESSAGE="HELLO WORLD FROM RPITX2"
 LAST_ITEM="0 Tune"
 
 do_check_file_existance() 
@@ -181,7 +181,7 @@ do_freq_setup
 			
 			5\ *) do_file_choose ".wav (16 bit per sample, 48000 sample rate, mono)" "$DEFAULT_WAV_FILE_MONO_LOC"
 			if [ $abort_action -eq 0 ]; then
-				"./testnfm.sh" "$OUTPUT_FREQ""e3" "$FILE_LOC" >/dev/null 2>/dev/null &
+				"./testnfm.sh" "$OUTPUT_FREQ""e6" "$FILE_LOC" >/dev/null 2>/dev/null &
 				do_status
 			fi
 			;;
@@ -195,7 +195,7 @@ do_freq_setup
 			
 			7\ *) do_file_choose ".wav (16 bit per sample, 48000 sample rate, mono)" "$DEFAULT_WAV_FILE_MONO_LOC"
 			if [ $abort_action -eq 0 ]; then
-				"./testam.sh" "$OUTPUT_FREQ""e3" "$FILE_LOC" >/dev/null 2>/dev/null &
+				"./testam.sh" "$OUTPUT_FREQ""e6" "$FILE_LOC" >/dev/null 2>/dev/null &
 				do_status
 			fi
 			;;
