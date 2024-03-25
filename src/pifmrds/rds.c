@@ -238,7 +238,7 @@ void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled,
         
         
         // modulate at 57 kHz
-        // use phase for this
+        // use phase for this (we need something better than this, so i dont see transmitting on 95 mhz rds alone on 95.15
         switch(phase) {
             case 0:
             case 2: sample = 0; break;
