@@ -248,7 +248,7 @@ ResultAndArg poll_control_pipe(int log) {
 			resarg.res = CONTROL_PIPE_COMPRESSORMAXGAINRECIP_SET;
 			resarg.arg = arg;
 		} else if(fifo[0] == 'L' && fifo[1] == 'I' && fifo[2] == 'M') {
-			if(std::stof(arg) < 4) {
+			if(atof(arg) < 4) {
 				if(log==1) {
 					printf("Set Limiter Threshold to ");
 					printf(arg);
