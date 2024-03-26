@@ -189,6 +189,8 @@ and thats all, and remember kids dont pirate
 ## Features
 what makes this better you may ask, you might have seen some features in usage already, as of 22.03.24 (DD.MM.YY) a limiter was implemented alongside the compressor, this can be used if the compressor is set too low/high or it is disabled altogether, from around 500 khz of bandwidht to about 200 khz of bandwidht, this was tested with a wav file amplified 2000 times, still the sound was distorted but the band wasn't atleast
 
+edit: as of 26.03.24 a clipper was added with a threshold of 1 (linear pcm)
+
 
 # Range
 It has been mostly untested, but i've tested it on 95 mhz, with a 79 cm antenna, the range depending on the directionality, transmitter elavation, it can reach about 300 meters
