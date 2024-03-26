@@ -24,8 +24,6 @@
     monaural or stereo audio.
 */
 
-// #define ExperimentalClipper
-
 #include <sndfile.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -74,16 +72,15 @@ float left_max=1, right_max=1;  // start compressor with low gain
 
 SNDFILE *inf;
 
-#ifdef ExperimentalClipper
-float clip(float x, float threshold) {
-    if (x > threshold) {
+float clip(float input, float threshold) {
+    if (input > threshold) {
         return threshold;
-    } else if (x < -threshold) {
+    } else if (input < -threshold) {
         return -threshold;
     }
     return x;
 }
-#endif
+
 float limiter(float input, float threshold, int enable) {
     if(enable == 1) {
         if (fabsf(input) > threshold) {
@@ -339,7 +336,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
           if(enablecompressor) out_right=out_right/(right_max+compressor_max_gain_recip);
         }
         if(enablecompressor) out_left= out_left/(left_max+compressor_max_gain_recip); // Adjust volume with limited maximum gain
-        if(drds) mpx_buffer[i] = 0.0; //do not remove this, the bandwidht will go nuts
+        if(drds) mpx_buffer[i] = 0.0;
         if(paused) {
             out_left = 0;
             if(channels > 1) out_right = 0;
@@ -348,10 +345,8 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
         out_left = limiter(out_left, limiter_threshold, 1); //chatgpt says that 0.8 is -1.9382 db, amplified a mp3 2000 times, without this it was fucking huge it took like a mhz but with this, about 20khz
         if( channels > 1 ) out_right = limiter(out_right, limiter_threshold, 1);
 
-        #ifdef ExperimentalClipper
-        out_left = clip(out_left, limiter_threshold); //for now limiter threshold, will get its own variable
-        if(channels>1) out_right = clip(out_right, limiter_threshold);
-        #endif
+        out_left = clip(out_left, 1); //max is gonna be 1.0 (0 db), lowest is -1.0 (-inf db)
+        if(channels>1) out_right = clip(out_right, 1);
 
         // Generate the stereo mpx
         if( channels > 1 ) {

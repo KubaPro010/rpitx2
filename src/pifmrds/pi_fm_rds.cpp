@@ -236,8 +236,8 @@ int main(int argc, char **argv) {
             i++;
             limiter_threshold = atof(param);
             limiterchanges = 1;
-            if(1 && limiter_threshold > 10) { //if you dont want this for some reason than change the 1 to a 0
-                fatal("Nuh uh (limiter threshold cant be bigger than 10)");
+            if(1 && limiter_threshold > 4) { //if you dont want this for some reason than change the 1 to a 0
+                fatal("Nuh uh (limiter threshold cant be bigger than 4)\n");
             }
         } else if(strcmp("-rdsvolume", arg)==0 && param != NULL) {
             i++;
@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
             pty = atoi(param);
         } else if(strcmp("-gpiopin", arg)==0 && param != NULL) {
             i++;
-            printf("GPIO pin setting disabled, mod librpitx and pifmsa (pifm simply advanced) for this");
+            printf("GPIO pin setting disabled, mod librpitx and pifmsa (pifm simply advanced) for this\n");
             // int pinnum = atoi(param);
             // if (!(pinnum == 4 || pinnum == 20 || pinnum == 32 || pinnum == 34 || pinnum == 6)) {
             //     fatal("Invalid gpio pin, allowed: 4, 20, 32, 34, 6");
