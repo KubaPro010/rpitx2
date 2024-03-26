@@ -78,7 +78,7 @@ float clip(float input, float threshold) {
     } else if (input < -threshold) {
         return -threshold;
     }
-    return x;
+    return input;
 }
 
 float limiter(float input, float threshold, int enable) {
