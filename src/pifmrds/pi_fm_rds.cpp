@@ -344,9 +344,9 @@ int main(int argc, char **argv) {
     }
     if(limiterchanges) {
         if(limiter_threshold > 0.8) {
-            printf("You changed the limiter settings, audio might be quiet now");
+            printf("You changed the limiter settings, audio might be quiet now\n");
         } else { //we've incremented it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! (69 lol)
-            printf("You changed the limiter settings, be careful.");
+            printf("You changed the limiter settings, be careful.\n");
         }
     }
     if(!enable_compressor) {
