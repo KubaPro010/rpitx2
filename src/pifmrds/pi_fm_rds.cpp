@@ -78,6 +78,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     set_rds_ms(1);
     set_rds_tp(tp);
     set_rds_ta(ta);
+    set_rds_di(DI_STEREO);
     uint16_t count = 0;
     uint16_t count2 = 0;
     if(log) {
