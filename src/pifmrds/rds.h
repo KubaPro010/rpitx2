@@ -21,6 +21,11 @@
 #ifndef RDS_H
 #define RDS_H
 
+//taken from bartek's MicroRDS https://github.com/barteqcz/MicroRDS/blob/main/src/rds.h#L30
+#define DI_STEREO	(1 << 0) /* 1 - Stereo */
+#define DI_AH		(1 << 1) /* 2 - Artificial Head */
+#define DI_COMPRESSED	(1 << 2) /* 4 - Compressed */
+#define DI_DPTY		(1 << 3) /* 8 - Dynamic PTY */
 
 #include <stdint.h>
 
@@ -34,6 +39,7 @@ extern void set_rds_af(int *af_array);
 extern void set_rds_tp(int tp);
 extern void set_rds_ms(int ms);
 extern void set_rds_ab(int ab);
+extern void set_rds_di(int di);
 
 
 #endif /* RDS_H */
