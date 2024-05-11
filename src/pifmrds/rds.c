@@ -156,7 +156,10 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea ho
             ps_state++;
             if(ps_state >= 4) ps_state = 0;
         } else { // Type 2A groups
-            blocks[1] = 0x2000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ab << 4 | rt_state;
+	    //ill explain text in rds, rds does not have the full string, you have segments, which are 4 character parts, the 64 character rt is split into 16 of those (rt_state), the rt is really lets say AAAABBBBCCCC, a rds group has the 2nd segment with the string "hell", so its now AAAAhellCCCC, we get a next group, 3rd with "o!  " "so AAAAhello!  ", we get a 1st as "hi:  ", so "hi:  |hell|o!  |",i am unsure if this is actually it for 100% but that how i understand it
+            //micro rds does also have a problem with stray charcters, as it will try to set the number of segments to actually use instead of some text followed spaces, like a dot followed by 63 spaces, why send 15 segment full of spaces when you can have 1 segment with data? so it would use a single segment with a dot, it will speed up the speed of loading of the rt text, but there will be stray characters, because of generaly how does the transmission work, here spaces would replace the stray characters, but micrords fixes it with toggling the A/B every set, clever huh?
+	    //ps also works like that but it has 2 characters per segment instead, so AABBCCDD because if it had 4 then it would take 2 segments as ps is small
+	    blocks[1] = 0x2000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ab << 4 | rt_state;
             blocks[2] = rds_params.rt[rt_state*4+0] << 8 | rds_params.rt[rt_state*4+1];
             blocks[3] = rds_params.rt[rt_state*4+2] << 8 | rds_params.rt[rt_state*4+3];
             rt_state++;
