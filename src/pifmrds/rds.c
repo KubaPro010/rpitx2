@@ -30,16 +30,17 @@
 #define GROUP_LENGTH 4
 
 struct {
-    uint16_t pi;
-    int ta;
-    int pty;
-    int tp;
-    int ms;
-    int ab;
-    int di;
-    char ps[PS_LENGTH];
-    char rt[RT_LENGTH];
-    int af[100];
+	uint16_t pi;
+	uint8_t ta;
+	uint8_t pty;
+	uint8_t tp;
+	uint8_t ms;
+	uint8_t ab;
+	uint8_t di;
+	char ps[PS_LENGTH];
+	char rt[RT_LENGTH];
+	int af[100];
+	uint16_t ecc;
 } rds_params = { 0 };
 /* Here, the first member of the struct must be a scalar to avoid a
    warning on -Wmissing-braces with GCC < 4.8.3 
@@ -154,7 +155,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) {
             blocks[3] = rds_params.ps[ps_state*2] << 8 | rds_params.ps[ps_state*2+1];
             ps_state++;
             if(ps_state >= 4) ps_state = 0; //max segments
-        } else { // Type 2A groups
+        } else if(state < 6) { // Type 2A groups
 	    //ill explain text in rds, rds does not have the full string, you have segments, which are 4 character parts, the 64 character rt is split into 16 of those (rt_state), the rt is really lets say AAAABBBBCCCC, a rds group has the 2nd segment with the string "hell", so its now AAAAhellCCCC, we get a next group, 3rd with "o!  " "so AAAAhello!  ", we get a 1st as "hi:  ", so "hi:  |hell|o!  |",i am unsure if this is actually it for 100% but that how i understand it
             //micro rds does also have a problem with stray charcters, as it will try to set the number of segments to actually use instead of some text followed spaces, like a dot followed by 63 spaces, why send 15 segment full of spaces when you can have 1 segment with data? so it would use a single segment with a dot, it will speed up the speed of loading of the rt text, but there will be stray characters, because of generaly how does the transmission work, here spaces would replace the stray characters, but micrords fixes it with toggling the A/B every set, clever huh?
 	    //ps also works like that but it has 2 characters per segment instead, so AABBCCDD because if it had 4 then it would take 2 segments as ps is small
@@ -163,10 +164,14 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) {
             blocks[3] = rds_params.rt[rt_state*4+2] << 8 | rds_params.rt[rt_state*4+3];
             rt_state++;
             if(rt_state >= 16) rt_state = 0; //max segments
-        }
+        } else if(state == 6) { //ECC
+		blocks[1] = (1 << 12) | rds_params.tp << 10 | rds_params.pty << 5;
+		blocks[2] = rds_params.ecc;
+	}
+	//expected sequence: (0A 0A 0A 0A 2A 2A 1A) this sequence should supply us the whole ps, 8 characters of rt and ecc
     
         state++;
-        if(state >= 6) state = 0;
+        if(state >= 7) state = 0;
     }
     
     // Calculate the checkword for each block and emit the bits
@@ -305,4 +310,8 @@ void set_rds_ab(int ab) {
 
 void set_rds_di(int di) {
 	rds_params.di = di;
+}
+
+void set_rds_ecc(int ecc) {
+	rds_params.ecc = ecc;
 }
