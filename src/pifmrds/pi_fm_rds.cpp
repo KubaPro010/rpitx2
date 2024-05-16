@@ -47,7 +47,6 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
     sigaction(SIGKILL, &sa, NULL);
-    sigaction(SIGHUP, &sa, NULL); //https://www.gnu.org/software/libc/manual/html_node/Termination-Signals.html
     sigaction(SIGPWR, &sa, NULL);
     sigaction(SIGTSTP, &sa, NULL);
     sigaction(SIGSEGV, &sa, NULL); //seg fault
@@ -79,6 +78,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     set_rds_tp(tp);
     set_rds_ta(ta);
     set_rds_di(DI_STEREO);
+    set_rds_ecc(0);
     uint16_t count = 0;
     uint16_t count2 = 0;
     if(log) {
