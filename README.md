@@ -1,3 +1,4 @@
+**THIS IS THE DEVELOPMENT BRANCH!**
 if you wanna use pifmrds, then scroll down to pifmrds usage ([here](#usage))
 ![rpitx banner](/doc/rpitxlogo.png)
 # About rpitx2
@@ -23,7 +24,7 @@ sudo apt-get install git
 You can now clone the repository. A script (install.sh) is there for easy installation. You could inspect it and make steps manually in case of any doubt. You can note that /boot/config.txt should be prompt to be modified during the installation. If it is not accepted, **rpitx2** will be unstable.  
 
 ```sh
-git clone https://github.com/KubaPro010/rpitx2
+git clone https://github.com/KubaPro010/rpitx2 -b dev
 cd rpitx2
 ./install.sh
 ```
@@ -163,7 +164,10 @@ if you have a arg with no argume... wait what args with args? anyways like the i
 `-af` - same as pifmadv<br>
 `-rdsvolume` - rds volume, so how many times is the rds "louder"<br>
 `-pilotvolume` - pilot volume<br>
-`-limiterthreshold` - limiter threshold, limits to 10, i think that its in linear ratio, so the algorithm to convert from db is gonna be 10 ** (db/20)<br><br>
+`-limiterthreshold` - limiter threshold, limits to 10, i think that its in linear ratio, so the algorithm to convert from db is gonna be 10 ** (db/20)<br>
+`-di` - sets the di, usually just set this to 1 so you have stereo<br>
+`-ecc` - you wanna really want them to know you country for some reason? use this to set the ecc, so when i use a 0x3000 pi code i won't get 10 countries i'll just get the worst one, for example i can set it to E2 which is poland! - **DEV**<br>
+<br>
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
 `PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
@@ -183,8 +187,10 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `COM` - toggle, like rds but it doesnt toggle the rds, it does toggle the COMPRESSOR<br>
 `CMG` - change compressor max gain recip<br>
 `LIM` - same as that arg<br>
+`ECC` - same as arg<br>
+`DI` - sam as arg - **DEV**<br>
 <br>
-and thats all, and remember kids dont pirate
+thats all, and remember kids dont pirate
 
 ## Features
 what makes this better you may ask, you might have seen some features in usage already, as of 22.03.24 (DD.MM.YY) a limiter was implemented alongside the compressor, this can be used if the compressor is set too low/high or it is disabled altogether, from around 500 khz of bandwidht to about 200 khz of bandwidht, this was tested with a wav file amplified 2000 times, still the sound was distorted but the band wasn't atleast
