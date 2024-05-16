@@ -39,7 +39,7 @@ static void fatal(char *fmt, ...)
     terminate(0);
 }
 
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo, int log, float limiter_threshold) {
+int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo, int log, float limiter_threshold, int di, uint16_t ecc) { //man this is so fucking long
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = terminate;
@@ -77,8 +77,8 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     set_rds_ms(1);
     set_rds_tp(tp);
     set_rds_ta(ta);
-    set_rds_di(DI_STEREO);
-    set_rds_ecc(0);
+    set_rds_di(di);
+    set_rds_ecc(ecc);
     uint16_t count = 0;
     uint16_t count2 = 0;
     if(log) {
@@ -155,13 +155,13 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             }
         }
         if(fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex, limiter_threshold) < 0 ) terminate(0);
-        data_len = DATA_SIZE;
-        for(int i=0;i< data_len;i++) {
-            devfreq[i] = data[i]*deviation_scale_factor;
-        }
-        fmmod->SetFrequencySamples(devfreq,data_len);
+        	data_len = DATA_SIZE;
+        	for(int i=0;i< data_len;i++) {
+            		devfreq[i] = data[i]*deviation_scale_factor;
+        	}
+        	fmmod->SetFrequencySamples(devfreq,data_len);
 	}
-    return 0;
+    	return 0;
 }
 
 
@@ -200,6 +200,8 @@ int main(int argc, char **argv) {
     int bypassfreqrange = 0;
     int ct = 1;
     float cutofffreq = 16200;
+	uint16_t ecc = 0;
+	int di = DI_STEREO;
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
         char *arg = argv[i];
@@ -211,10 +213,13 @@ int main(int argc, char **argv) {
         } else if(strcmp("-freq", arg)==0 && param != NULL) {
             i++;
             carrier_freq = 1e6 * atof(param);
-            if((carrier_freq < 64e6 || carrier_freq > 108e6) && !bypassfreqrange) fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for UKF radios, such as the UNITRA Jowita or other old band FM Radios)\n");
+            if((carrier_freq < 64e6 || carrier_freq > 108e6) && !bypassfreqrange) fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for old communist radios, such as the UNITRA Jowita or other old band FM Radios)\n");
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
-            pi = (uint16_t) strtol(param, NULL, 16);
+            pi = (uint16_t)strtol(param, NULL, 16);
+		} else if(strcmp("-ecc", arg)==0 && param != NULL) {
+            i++;
+            ecc = (uint16_t)strtol(param, NULL, 16);
         } else if(strcmp("-ps", arg)==0 && param != NULL) {
             i++;
             ps = param;
@@ -249,6 +254,9 @@ int main(int argc, char **argv) {
         } else if(strcmp("-pty", arg)==0 && param != NULL) {
             i++;
             pty = atoi(param);
+		} else if(strcmp("-di", arg)==0 && param != NULL) {
+            i++;
+            di = atoi(param);
         } else if(strcmp("-gpiopin", arg)==0 && param != NULL) {
             i++;
             printf("GPIO pin setting disabled, mod librpitx and pifmsa (pifm simply advanced) for this\n");
@@ -357,6 +365,6 @@ int main(int argc, char **argv) {
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, dstereo, log, limiter_threshold);
+    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, dstereo, log, limiter_threshold, di, ecc);
     terminate(errcode);
 }
