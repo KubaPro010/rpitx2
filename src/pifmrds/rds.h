@@ -21,11 +21,16 @@
 #ifndef RDS_H
 #define RDS_H
 
-//taken from bartek's MicroRDS https://github.com/barteqcz/MicroRDS/blob/main/src/rds.h#L30
+//taken from bartek's MicroRDS https://github.com/barteqcz/MicroRDS/blob/main/src/rds.h
 #define DI_STEREO	(1 << 0) /* 1 - Stereo */
 #define DI_AH		(1 << 1) /* 2 - Artificial Head */
 #define DI_COMPRESSED	(1 << 2) /* 4 - Compressed */
 #define DI_DPTY		(1 << 3) /* 8 - Dynamic PTY */
+
+#define AF_CODE_FILLER		205
+#define AF_CODE_NO_AF		224
+#define AF_CODE_NUM_AFS_BASE	AF_CODE_NO_AF
+#define AF_CODE_LFMF_FOLLOWS	250
 
 #include <stdint.h>
 
