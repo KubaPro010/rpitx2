@@ -90,8 +90,8 @@ int get_rds_ct_group(uint16_t *blocks, int enabled) {
     time_t now;
     struct tm *utc;
     
-    now = time (NULL);
-    utc = gmtime (&now);
+    now = time(NULL);
+    utc = gmtime(&now);
 
     if(!enabled) {
         latest_minutes = utc->tm_min; //oh wait it won't anyway
@@ -106,7 +106,7 @@ int get_rds_ct_group(uint16_t *blocks, int enabled) {
                         (int)((utc->tm_year - l) * 365.25) +
                         (int)((utc->tm_mon + 2 + l*12) * 30.6001);
         
-        blocks[1] = 0x4400 | (mjd>>15);
+        blocks[1] = rds_params.tp << 10 | rds_params.pty << 5 | 4 << 12 | (mjd>>15); //they forgot the tp and pty, does pifmadv have this? yes
         blocks[2] = (mjd<<1) | (utc->tm_hour>>4);
         blocks[3] = (utc->tm_hour & 0xF)<<12 | utc->tm_min<<6;
         
@@ -115,9 +115,7 @@ int get_rds_ct_group(uint16_t *blocks, int enabled) {
         int offset = utc->tm_gmtoff / (30 * 60);
         blocks[3] |= abs(offset);
         if(offset < 0) blocks[3] |= 0x20;
-        
-        //printf("Generated CT: %04X %04X %04X\n", blocks[1], blocks[2], blocks[3]);
-        return 1;
+	return 1;
     } else return 0;
 }
 
@@ -126,8 +124,7 @@ int get_rds_ct_group(uint16_t *blocks, int enabled) {
    pattern. 'ps_state' and 'rt_state' keep track of where we are in the PS (0A) sequence
    or RT (2A) sequence, respectively.
 */
-
-void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea how to do ptyn and decoder id
+void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) {
     static int state = 0;
     static int ps_state = 0;
     static int rt_state = 0;
@@ -137,33 +134,35 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea ho
     // Generate block content
     if(!get_rds_ct_group(blocks, ct_clock_enabled)) { // CT (clock time) has priority on other group types (when its on)
         if(state < 4) {
-            blocks[1] = 0x0000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ta << 4 | rds_params.ms << 3 | ps_state;
-            if((ps_state == 3) && stereo) blocks[1] |= (rds_params.di << 2); //also yes i did see the bitshift 2 in micro rds, code for stereo is in binary 0001, bit shift 2 is 0100 which is equal to 0x0004
+            blocks[1] = rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ta << 4 | rds_params.ms << 3 | ps_state;
+            if(ps_state == 3) blocks[1] |= ((rds_params.di & 0x01) << 2); //also yes i did see the bitshift 2 in micro rds, code for stereo is in binary 0001, bit shift 2 is 0100 which is equal to 0x0004
             if(rds_params.af[0]) { // AF
                 if(af_state == 0) { 
-			        blocks[2] = (rds_params.af[0] + 224) << 8 | rds_params.af[1];
+			blocks[2] = (rds_params.af[0] + AF_CODE_NUM_AFS_BASE) << 8 | rds_params.af[1];
+		} else {
+                	if(rds_params.af[af_state+1]) {
+			        blocks[2] = rds_params.af[af_state] << 8 | rds_params.af[af_state+1];
 		        } else {
-                    if(rds_params.af[af_state+1]) {
-				        blocks[2] = rds_params.af[af_state] << 8 | rds_params.af[af_state+1];
-			        } else {
-				        blocks[2] = rds_params.af[af_state] << 8 | 0xCD;
-			        }
+			        blocks[2] = rds_params.af[af_state] << 8 | AF_CODE_FILLER;
 		        }
+		}
                 af_state = af_state + 2;
-		        if(af_state > rds_params.af[0]) af_state = 0;
-            }
+		if(af_state > rds_params.af[0]) af_state = 0;
+            } else {
+		    blocks[2] = AF_CODE_NO_AF << 8 | AF_CODE_FILLER; //handle no af, if we didnt do this, block 2 would be empty
+	    }
             blocks[3] = rds_params.ps[ps_state*2] << 8 | rds_params.ps[ps_state*2+1];
             ps_state++;
-            if(ps_state >= 4) ps_state = 0;
+            if(ps_state >= 4) ps_state = 0; //max segments
         } else { // Type 2A groups
 	    //ill explain text in rds, rds does not have the full string, you have segments, which are 4 character parts, the 64 character rt is split into 16 of those (rt_state), the rt is really lets say AAAABBBBCCCC, a rds group has the 2nd segment with the string "hell", so its now AAAAhellCCCC, we get a next group, 3rd with "o!  " "so AAAAhello!  ", we get a 1st as "hi:  ", so "hi:  |hell|o!  |",i am unsure if this is actually it for 100% but that how i understand it
             //micro rds does also have a problem with stray charcters, as it will try to set the number of segments to actually use instead of some text followed spaces, like a dot followed by 63 spaces, why send 15 segment full of spaces when you can have 1 segment with data? so it would use a single segment with a dot, it will speed up the speed of loading of the rt text, but there will be stray characters, because of generaly how does the transmission work, here spaces would replace the stray characters, but micrords fixes it with toggling the A/B every set, clever huh?
 	    //ps also works like that but it has 2 characters per segment instead, so AABBCCDD because if it had 4 then it would take 2 segments as ps is small
-	    blocks[1] = 0x2000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ab << 4 | rt_state;
+	    blocks[1] = (2 << 12) | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ab << 4 | rt_state;
             blocks[2] = rds_params.rt[rt_state*4+0] << 8 | rds_params.rt[rt_state*4+1];
             blocks[3] = rds_params.rt[rt_state*4+2] << 8 | rds_params.rt[rt_state*4+3];
             rt_state++;
-            if(rt_state >= 16) rt_state = 0;
+            if(rt_state >= 16) rt_state = 0; //max segments
         }
     
         state++;
@@ -190,7 +189,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea ho
    envelope with a 57 kHz carrier, which is very efficient as 57 kHz is 4 times the
    sample frequency we are working at (228 kHz).
  */
-void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled, float sample_volume) {
+void get_rds_samples(float *buffer, int count, int ct_clock_enabled, float sample_volume) {
     static int bit_buffer[BITS_PER_GROUP];
     static int bit_pos = BITS_PER_GROUP;
     static float sample_buffer[SAMPLE_BUFFER_SIZE] = {0};
@@ -208,7 +207,7 @@ void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled,
     for(int i=0; i<count; i++) {
         if(sample_count >= SAMPLES_PER_BIT) {
             if(bit_pos >= BITS_PER_GROUP) {
-                get_rds_group(bit_buffer, stereo, ct_clock_enabled);
+                get_rds_group(bit_buffer, ct_clock_enabled);
                 bit_pos = 0;
             }
             
