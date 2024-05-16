@@ -164,7 +164,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) {
             blocks[3] = rds_params.rt[rt_state*4+2] << 8 | rds_params.rt[rt_state*4+3];
             rt_state++;
             if(rt_state >= 16) rt_state = 0; //max segments
-        } else if(state == 6) { //ECC
+        } else if(state == 6 && rds_params.ecc != 0) { //ECC
 		blocks[1] = (1 << 12) | rds_params.tp << 10 | rds_params.pty << 5;
 		blocks[2] = rds_params.ecc;
 	}
