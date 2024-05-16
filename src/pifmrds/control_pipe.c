@@ -69,14 +69,12 @@ ResultAndArg poll_control_pipe(int log) {
 			set_rds_rt(arg);
 			if(log==1) printf("RT A set to: \"%s\"\n", arg);
 			resarg.res = CONTROL_PIPE_RT_SET;
-		}
-        else if(fifo[0] == 'P' && fifo[1] == 'I') {
+		} else if(fifo[0] == 'P' && fifo[1] == 'I') {
 			arg[4] = 0;
 			set_rds_pi((uint16_t) strtol(arg, NULL, 16));
 			if(log==1) printf("PI set to: \"%s\"\n", arg);
 			resarg.res = CONTROL_PIPE_PI_SET;
-		}
-		else if(fifo[0] == 'T' && fifo[1] == 'A') {
+		} else if(fifo[0] == 'T' && fifo[1] == 'A') {
 			int ta = ( strcmp(arg, "ON") == 0 );
 			set_rds_ta(ta);
 			if(log==1) {
@@ -84,8 +82,7 @@ ResultAndArg poll_control_pipe(int log) {
 				if(ta) printf("ON\n"); else printf("OFF\n");
 			}
 			resarg.res = CONTROL_PIPE_TA_SET;
-		}
-		else if(fifo[0] == 'T' && fifo[1] == 'P') {
+		} else if(fifo[0] == 'T' && fifo[1] == 'P') {
 			int tp = ( strcmp(arg, "ON") == 0 );
 			set_rds_tp(tp);
 			if(log==1) {
@@ -93,8 +90,7 @@ ResultAndArg poll_control_pipe(int log) {
 				if(tp) printf("ON\n"); else printf("OFF\n");
 			}
 			resarg.res = CONTROL_PIPE_TP_SET;
-		}
-		else if(fifo[0] == 'M' && fifo[1] == 'S') {
+		} else if(fifo[0] == 'M' && fifo[1] == 'S') {
 			int ms = ( strcmp(arg, "ON") == 0 );
 			set_rds_ms(ms);
 			if(log==1) {
@@ -102,8 +98,7 @@ ResultAndArg poll_control_pipe(int log) {
 				if(ms) printf("ON\n"); else printf("OFF\n");
 			}
 			resarg.res = CONTROL_PIPE_MS_SET;
-		}
-		else if(fifo[0] == 'A' && fifo[1] == 'B') {
+		} else if(fifo[0] == 'A' && fifo[1] == 'B') {
 			int ab = ( strcmp(arg, "ON") == 0 );
 			set_rds_ab(ab);
 			if(log==1) {
@@ -111,6 +106,15 @@ ResultAndArg poll_control_pipe(int log) {
 				if(ab) printf("ON\n"); else printf("OFF\n");
 			}
 			resarg.res = CONTROL_PIPE_AB_SET;
+		} else if(fifo[0] == 'D' && fifo[1] == 'I') {
+			int di = atoi(arg);
+			set_rds_di(di);
+			if(log==1) {
+				printf("Set DI to ");
+				printf(di); //yes i am that lazy
+				printf("\n");
+			}
+			resarg.res = 25;
 		} else if(fifo[0] == 'C' && fifo[1] == 'T') {
 			int ct = ( strcmp(arg, "ON") == 0 );
 			if(log==1) {
@@ -261,6 +265,11 @@ ResultAndArg poll_control_pipe(int log) {
 					printf("Limiter threshold was not set, thresholds larger than 4 are not allowed\n");
 				}
 			}
+		} else if(fifo[0] == 'E' && fifo[1] == 'C' && fifo[2] == 'C') {
+			arg[2] = 0;
+			set_rds_ecc((uint16_t)strtol(arg, NULL, 16));
+			if(log==1) printf("ECC set to: \"%s\"\n", arg);
+			resarg.res = 26;
 		}
 	}
 	return resarg;
