@@ -136,7 +136,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) {
     if(!get_rds_ct_group(blocks, ct_clock_enabled)) { // CT (clock time) has priority on other group types (when its on)
         if(state < 4) {
             blocks[1] = rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ta << 4 | rds_params.ms << 3 | ps_state;
-            if(ps_state == 3) blocks[1] |= ((rds_params.di & 0x01) << 2); //also yes i did see the bitshift 2 in micro rds, code for stereo is in binary 0001, bit shift 2 is 0100 which is equal to 0x0004
+            blocks[1] |= ((rds_params.di & 0x01) << 2); //also yes i did see the bitshift 2 in micro rds, code for stereo is in binary 0001, bit shift 2 is 0100 which is equal to 0x0004
             if(rds_params.af[0]) { // AF
                 if(af_state == 0) { 
 			blocks[2] = (rds_params.af[0] + AF_CODE_NUM_AFS_BASE) << 8 | rds_params.af[1];
