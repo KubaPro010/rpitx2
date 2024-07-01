@@ -46,9 +46,9 @@ float low_pass_fir[FIR_PHASES][FIR_TAPS];
 
 float carrier_38[] = {0.0, 0.8660254037844386, 0.8660254037844388, 1.2246467991473532e-16, -0.8660254037844384, -0.8660254037844386};
 
-float carrier_19[] = {0.0, 0.5, 0.8660254037844386, 1.0, 0.8660254037844388, 0.5, 1.2246467991473532e-16, -0.5, -0.8660254037844384, -1.0, -0.8660254037844386, -0.5}; //can someone generate a 31.25 khz carrier?
+float carrier_19[] = {0.0, 0.5, 0.8660254037844386, 1.0, 0.8660254037844388, 0.5, 1.2246467991473532e-16, -0.5, -0.8660254037844384, -1.0, -0.8660254037844386, -0.5};
 
-float carrier_3125[] = {0.0, 0.8660254037844386, 0.8660254037844388, 1.2246467991473532e-16, -0.8660254037844384, -0.8660254037844386};
+float carrier_3125[] = {0.0, 0.7586133425663026, 0.9885355334735083, 0.5295297022607088, -0.29851481100169425, -0.918519035014914, -0.898390981891979, -0.2521582503964708};
 
 int phase_38 = 0;
 int phase_3125 = 0;
@@ -362,8 +362,10 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                         if(phase_38 >= 6) phase_38 = 0;
                     } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
                         mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal (L+R)
-                            4.05 * (out_left-out_right); // Stereo difference signal
+                            4.05 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
                             //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!! (its missplelled correctly probably just like misspelled)
+			phase_3125++;
+			if(phase_3125 >= 8) phase_3125 = 0;
                     }
                 }
             } else {
