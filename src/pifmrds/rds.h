@@ -30,6 +30,7 @@ extern void set_rds_rt(char *rt);
 extern void set_rds_ps(char *ps);
 extern void set_rds_ta(int ta);
 extern void set_rds_pty(int pty);
+extern void set_rds_di(int di);
 extern void set_rds_af(int *af_array);
 extern void set_rds_tp(int tp);
 extern void set_rds_ms(int ms);

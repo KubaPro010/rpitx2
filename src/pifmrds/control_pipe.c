@@ -119,7 +119,19 @@ ResultAndArg poll_control_pipe(int log) {
 			}
 			resarg.arg_int = ct;
 			resarg.res = CONTROL_PIPE_CT_SET;
-		}
+		} else if(fifo[0] == 'D' && fifo[1] == 'I') {
+			int di = atoi(arg);
+			if (di >= 0 && di <= 0xF) {
+				set_rds_di(di);
+				if(log==1) {
+					printf("Set DI to %d\n", di)
+				}
+			}
+			else {
+				printf("Wrong DI range, range is 0-15\n");
+			}
+			resarg.res = CONTROL_PIPE_GENERIC_SET;
+		} 
 	} else if(strlen(fifo) > 4 && fifo[3] == ' ') {
 		char *arg = fifo+4;
 		resarg.arg = fifo+4;

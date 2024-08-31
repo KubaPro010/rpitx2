@@ -78,6 +78,11 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     set_rds_ms(1);
     set_rds_tp(tp);
     set_rds_ta(ta);
+    if(dstereo == 1) {
+        set_rds_di(0);
+    } else {
+        set_rds_di(1);
+    }
     uint16_t count = 0;
     uint16_t count2 = 0;
     if(log) {
@@ -170,7 +175,7 @@ int main(int argc, char **argv) {
     uint32_t carrier_freq = 100000000; //100 mhz
     char *ps = "Pi-FmSa";
     char *rt = "Broadcasting on a Raspberry Pi: Simply Advanced";
-    uint16_t pi = 0x1234;
+    uint16_t pi = 0x00ff;
     int pty = 0;
     float compressor_decay = 0.999995;
     float compressor_attack = 1.0;
@@ -198,7 +203,7 @@ int main(int argc, char **argv) {
     int alternative_freq[100] = {};
     int bypassfreqrange = 0;
     int ct = 1;
-    float cutofffreq = 15000; // up to standart
+    float cutofffreq = 15000; // up to standard
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
         char *arg = argv[i];

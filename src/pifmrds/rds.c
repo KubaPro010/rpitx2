@@ -39,6 +39,7 @@ struct {
     char ps[PS_LENGTH];
     char rt[RT_LENGTH];
     int af[100];
+    int di;
 } rds_params = { 0 };
 /* Here, the first member of the struct must be a scalar to avoid a
    warning on -Wmissing-braces with GCC < 4.8.3 
@@ -125,7 +126,7 @@ int get_rds_ct_group(uint16_t *blocks, int enabled) {
    pattern. 'ps_state' and 'rt_state' keep track of where we are in the PS (0A) sequence
    or RT (2A) sequence, respectively.
 */
-void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea how to do ptyn and decoder id
+void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //ptyn?
     static int state = 0;
     static int ps_state = 0;
     static int rt_state = 0;
@@ -136,7 +137,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea ho
     if(!get_rds_ct_group(blocks, ct_clock_enabled)) { // CT (clock time) has priority on other group types (when its on)
         if(state < 4) {
             blocks[1] = 0x0000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ta << 4 | rds_params.ms << 3 | ps_state;
-            if((ps_state == 3) && stereo) blocks[1] |= 0x0004; // DI Stereo, someone explain from where the 0004 comes from and what does "bit d0" mean?
+            blocks[1] |= ((rds_params.di >> (3 - ps_state)) & 0x01) << 2; // from micrords
             if(rds_params.af[0]) { // AF
                 if(af_state == 0) { 
 			        blocks[2] = (rds_params.af[0] + 224) << 8 | rds_params.af[1]; // Send number of AFs and the first AF
@@ -280,6 +281,10 @@ void set_rds_af(int *af_array) {
 
 void set_rds_pty(int pty) {
 	rds_params.pty = pty;
+}
+
+void set_rds_di(int di) {
+    rds_params.di = di;
 }
 
 void set_rds_ta(int ta) {
