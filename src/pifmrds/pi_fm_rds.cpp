@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
     int enable_compressor = 1;
     float rds_volume = 1.0;
     float pilot_volume = 0.9;
-    float limiter_threshold = 0.8;
+    float limiter_threshold = 0.9;
     int log = 1;
     int ta = 0;
     int tp = 0;
@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
     int alternative_freq[100] = {};
     int bypassfreqrange = 0;
     int ct = 1;
-    float cutofffreq = 16200;
+    float cutofffreq = 15000; // up to standart
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
         char *arg = argv[i];

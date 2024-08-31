@@ -105,7 +105,7 @@ int get_rds_ct_group(uint16_t *blocks, int enabled) {
                         (int)((utc->tm_year - l) * 365.25) +
                         (int)((utc->tm_mon + 2 + l*12) * 30.6001);
         
-        blocks[1] = 0x4400 | (mjd>>15);
+        blocks[1] = 0x4400 | rds_params.tp << 10 | rds_params.pty << 5 | (mjd>>15);
         blocks[2] = (mjd<<1) | (utc->tm_hour>>4);
         blocks[3] = (utc->tm_hour & 0xF)<<12 | utc->tm_min<<6;
         
@@ -139,12 +139,12 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea ho
             if((ps_state == 3) && stereo) blocks[1] |= 0x0004; // DI Stereo, someone explain from where the 0004 comes from and what does "bit d0" mean?
             if(rds_params.af[0]) { // AF
                 if(af_state == 0) { 
-			        blocks[2] = (rds_params.af[0] + 224) << 8 | rds_params.af[1];
+			        blocks[2] = (rds_params.af[0] + 224) << 8 | rds_params.af[1]; // Send number of AFs and the first AF
 		        } else {
-                    if(rds_params.af[af_state+1]) {
-				        blocks[2] = rds_params.af[af_state] << 8 | rds_params.af[af_state+1];
+                    if(rds_params.af[af_state+1]) { // If we have something next
+				        blocks[2] = rds_params.af[af_state] << 8 | rds_params.af[af_state+1]; // We send this and the 2nd one
 			        } else {
-				        blocks[2] = rds_params.af[af_state] << 8 | 0xCD;
+				        blocks[2] = rds_params.af[af_state] << 8 | 0xCD; // No? then we just send this one
 			        }
 		        }
                 af_state = af_state + 2;
@@ -162,7 +162,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //no idea ho
         }
     
         state++;
-        if(state >= 6) state = 0;
+        if(state >= 8) state = 0;
     }
     
     // Calculate the checkword for each block and emit the bits
@@ -238,7 +238,6 @@ void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled,
         
         
         // modulate at 57 kHz
-        // use phase for this (we need something better than this, so i dont see transmitting on 95 mhz rds alone on 95.15
         switch(phase) {
             case 0:
             case 2: sample = 0; break;

@@ -48,7 +48,7 @@ float carrier_38[] = {0.0, 0.8660254037844386, 0.8660254037844388, 1.22464679914
 
 float carrier_19[] = {0.0, 0.5, 0.8660254037844386, 1.0, 0.8660254037844388, 0.5, 1.2246467991473532e-16, -0.5, -0.8660254037844384, -1.0, -0.8660254037844386, -0.5};
 
-float carrier_3125[] = {0.0, 0.7586133425663026, 0.9885355334735083, 0.5295297022607088, -0.29851481100169425, -0.918519035014914, -0.898390981891979, -0.2521582503964708};
+float carrier_3125[] = {0.0, 0.7586133425663026, 0.9885355334735083, 0.5295297022607088, -0.29851481100169425, -0.918519035014914, -0.898390981891979, -0.2521582503964708}; // sine wave
 
 int phase_38 = 0;
 int phase_3125 = 0;
@@ -292,7 +292,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
           }
         }
 
-        //Add the gain
+        // Multiply by the gain
         out_left = out_left * gain;
         if(channels > 1) out_right = out_right * gain;
 		
@@ -342,7 +342,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
             if(channels > 1) out_right = 0;
         }
  
-        out_left = limiter(out_left, limiter_threshold, 1); //chatgpt says that 0.8 is -1.9382 db, amplified a mp3 2000 times, without this it was fucking huge it took like a mhz but with this, about 20khz
+        out_left = limiter(out_left, limiter_threshold, 1);
         if( channels > 1 ) out_right = limiter(out_right, limiter_threshold, 1);
 
         out_left = clip(out_left, 1); //max is gonna be 1.0 (0 db), lowest is -1.0 (-inf db)
@@ -364,8 +364,8 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                         mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal (L+R)
                             4.05 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
                             //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!! (its missplelled correctly probably just like misspelled)
-			phase_3125++;
-			if(phase_3125 >= 8) phase_3125 = 0;
+			            phase_3125++;
+			            if(phase_3125 >= 8) phase_3125 = 0;
                     }
                 }
             } else {
