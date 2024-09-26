@@ -13,7 +13,7 @@ _Created by Evariste Courjaud F5OEO. See Licence for using it.
 
 # Installation
 
-Assuming a Raspbian Lite installation (raspios-bookworm) : [https://www.raspberrypi.org/downloads/raspbian/](https://www.raspberrypi.com/software/operating-systems/#raspberry-pi-os-32-bit)
+Assuming a Raspberry Pi OS Lite installation (raspios-bookworm) : [https://www.raspberrypi.org/downloads/raspbian/](https://www.raspberrypi.com/software/operating-systems/#raspberry-pi-os-32-bit)
 
 Be sure to have git package installed :
 ```sh
@@ -33,11 +33,11 @@ That's it !
 sudo reboot
 ```
 # Update
-you wanna update? sure, just run `./compile.sh` if you have a error type in `chmod +x ./compile.sh` and there you go it will update and compile!
+you wanna update? sure, just run `./compile.sh` if you have a error, type in `chmod +x ./compile.sh` and there you go it will update and compile!
 
 # Hardware
 ![bpf](/doc/bpf-warning.png)
-**note: you *probably* don't need it, i've been transmitting since summer 2023 without it, and no one knocked at my door, but your country laws can be stricter**
+**note: you *probably* don't need it, i've been transmitting since summer 2023 without it, and no one knocked at my door, but your country laws can be stricter and if you live where a lot of people do**
 
 | Raspberry Model      | Status  |
 | ---------------------|:-------:|
@@ -50,9 +50,9 @@ you wanna update? sure, just run `./compile.sh` if you have a error type in `chm
 | Pi3B|OK|
 | Pi3B+|OK|
 | Pi3A+|OK|
-| Pi4|Partial (system may crash completly)|
-| Pi400|Partial (system probably will crash completly)|
-| Pi5|Doesn't work (doesn't work but I'm trying to fix it, but now I'm too stupid)|
+| Pi4|Sure (maybe)|
+| Pi400|Sure (maybe)|
+| Pi5|No.|
 
 Plug a wire on GPIO 4, means Pin 7 of the GPIO header ([header P1](http://elinux.org/RPi_Low-level_peripherals#General_Purpose_Input.2FOutput_.28GPIO.29)). This acts as the antenna. The optimal length of the wire depends the frequency you want to transmit on, but it works with a few centimeters for local testing. (Use [this](https://www.omnicalculator.com/physics/dipole) to calculate the lenght, make sure to use the 1/4 wave setting, as for 1/2 wave you'd need a impedance transformator, and these are not cheap [also yes, i learned it the hard way after having to cut my antenna])
 
@@ -147,23 +147,21 @@ first, the normal args, like `pifmrds -arg argtoarg?`<br>
 if you have a arg with no argume... wait what args with args? anyways like the input of the arg, right? if we'd take `-disablerds`, you need to pass something to it or the arg parser will shit itself, pass in anything, i always do `mhm`, have fuck, i mean fun (blud trying to be funny, blud saing blud, blud missplled saying)<br>
 `-compressordecay` - compressor decay, specify in float (like: 0.999, default: 0.999995)<br>
 `-compressorattack` - same thing but attack (default: 1.0)<br>
-`-compressormaxgainrecip` - i dunno (default: 0.01)<br>
-`-bfr` - by default a 65-108 freq range is defined, a freq outside makes the program crash, this bypasses the range, also it requires a arg, it can be anything as the arg is not parsed, so pass: `-bfr thisbypassescrap`<br>
-`-deviation` - sets how large the fm signal can be, in khz, default is 75khz<br>
+`-compressormaxgainrecip` - internally, it does something with division, so this is to not do devision by 0 (default: 0.01)<br>
+`-bfr` - by default a 65-108 freq range is defined, a freq outside makes the program crash, this bypasses the range, also it requires a arg, it can be anything as the arg is not parsed, so pass: `-bfr thisbypassescrap` (tl;dr: unlocks full band of rpitx)<br>
+`-deviation` - sets how much does the fm signal deviates from its center freq, in khz, default is 75khz<br>
 `-raw` - same arg as bfr, but this disables the format of the audio and sets channels and samplerate forcefully<br>
 `-rawchannels` - change the sample rate if raw<br>
 `-rawsamplerate` - same stuff but sample rate<br>
-`-cutofffreq` - fm broadcast uses a cut off freq around 16-18 khz, to avoid interferance with the 19khz stereo pilot<br>
-`-audiogain` - audio too loud or too quiet? use this, this defines how many times the audio can be<br>
-`-power` - but you can change the code very easy to fix it for your pi<br>
+`-cutofffreq` - fm broadcast uses a cut off freq of 15 khz, to avoid interferance with the 19khz stereo pilot, however if you do wanna get more freqs then just change this i guess<br>
+`-audiogain` - audio too loud or too quiet? use this, this defines how many times the audio can be (example: `-audiogain 2`)<br>
 `-disablerds` - same arg as bfr, pass this in and no rds anymore<br>
-`-disablecompressor` - same as bfr, dont pass this please, if your audio is loud enough<br>
-`-disablect` - disable rds ct if you'd want for some reason<br>
-`-preemphasis` - you can enter 0 or off for disabled, or us (75μs), default is 50μs, you can also enter any num and have that μs of pre-emp<br>
+`-disablecompressor` - same as bfr, dont pass this please as that is a bad idea<br>
+`-disablect` - disable rds ct if you've decided that you have too much of a shitty clock<br>
+`-preemphasis` - you can enter 0 or off for disabled, or us (75μs), default is 50μs, you can also enter any num and have that μs of pre-emp, (example: `-preemphasis us`, `-preemphasis 22`)<br>
 `-af` - same as pifmadv<br>
-`-rdsvolume` - rds volume, so how many times is the rds "louder"<br>
-`-pilotvolume` - pilot volume<br>
-`-limiterthreshold` - limiter threshold, limits to 10, i think that its in linear ratio, so the algorithm to convert from db is gonna be 10 ** (db/20)<br><br>
+`-rdsvolume` - rds volume, so how many times is the rds "louder", this can potentially increase rds range<br>
+`-limiterthreshold` - limiter threshold, limits to 10, i think that its in linear ratio, so the algorithm to convert from db is gonna be 10 ** (db/20) (actually its pcm value)<br><br>
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
 `PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
@@ -205,7 +203,7 @@ By default the Raspberry Pi outputs 4 mA on a gpio pin, but here it gets overrid
 <br>**5 = 39.6 mW**
 <br>**6 = 46.2 mW**
 <br>**7 = 52.8 mW**<br>
-milliwatt, not to be confused with megawatt, if it would be megawatts then your antenna, pi, power supply and the surrondings would dissapear
+milliwatt, not to be confused with megawatt, if it would be megawatts then your antenna, pi, power supply and the surrondings would disapear
 
 # To continue
 **rpitx2** is a generic RF transmitter. There is a lot of modulation to do with it and also documentation to make all that easy to contribute. This will be the next step ! Feel free to inspect scripts, change parameters (frequencies, audio input, pictures...). 
@@ -213,3 +211,4 @@ milliwatt, not to be confused with megawatt, if it would be megawatts then your 
 # Credits
 All rights of the original authors reserved.
 F5OEO tried to include all licences and authors in sourcecode
+KubaPro010 modified existing code from F5OEO
