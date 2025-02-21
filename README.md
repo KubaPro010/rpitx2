@@ -177,7 +177,6 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `COA` - change compressor attack<br>
 `RDV` - gain but not audio but rds gain<br>
 `PAU` - pause, kinda, it will cancel out any audio, you could use `GAI 0` but you could forgor the old gain value, right?<br>
-`PIV` - gain but not audio or rds but stereo pilot gain (default = 0.9)<br>
 `COM` - toggle, like rds but it doesnt toggle the rds, it does toggle the COMPRESSOR<br>
 `CMG` - change compressor max gain recip<br>
 `LIM` - same as that arg<br>

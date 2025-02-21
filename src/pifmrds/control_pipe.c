@@ -227,14 +227,6 @@ ResultAndArg poll_control_pipe(int log) {
 			}
 			resarg.res = CONTROL_PIPE_PAUSE_SET;
 			resarg.arg_int = togg;
-		} else if(fifo[0] == 'P' && fifo[1] == 'I' && fifo[2] == 'V') {
-			if(log==1) {
-				printf("Set Stereo Pilot Volume to ");
-				printf(arg);
-				printf("\n");
-			}
-			resarg.res = CONTROL_PIPE_PILVOL_SET;
-			resarg.arg = arg;
 		} else if(fifo[0] == 'M' && fifo[1] == 'P' && fifo[2] == 'X') {
 			int mpx = ( strcmp(arg, "ON") == 0 );
 			if(log==1) {

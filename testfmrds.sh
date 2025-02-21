@@ -1,3 +1,3 @@
 #!/bin/sh
 
-sudo ./pifmrds -bfr sekretnawiadomosc -freq "$1" -audio "$2
+sudo ./pifmrds -bfr secretmessage -freq "$1" -audio "$2

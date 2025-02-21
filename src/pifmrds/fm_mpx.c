@@ -24,6 +24,7 @@
     monaural or stereo audio.
 */
 
+#include "fm_mpx.h"
 #include <sndfile.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -42,7 +43,6 @@ size_t length;
 
 // coefficients of the low-pass FIR filter
 float low_pass_fir[FIR_PHASES][FIR_TAPS];
-
 
 float carrier_38[] = {0.0, 0.8660254037844386, 0.8660254037844388, 1.2246467991473532e-16, -0.8660254037844384, -0.8660254037844386};
 
@@ -148,14 +148,13 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
         // Choose a cutoff frequency for the low-pass FIR filter
         if(in_samplerate/2 < cutoff_freq) cutoff_freq = in_samplerate/2 * .8;
    
-
         // Create the low-pass FIR filter, with pre-emphasis
-        double window, firlowpass, firpreemph , sincpos;
+        double window, firlowpass, firpreemph, sincpos;
         double taup, deltap, bp, ap, a0, a1, b1;
         if(preemphasis != 0) {
         // IIR pre-emphasis filter
         // Reference material:    http://jontio.zapto.org/hda1/preempiir.pdf
-            double tau=preemphasis; //why? well im gonna listen to rule: "if it works dont touch it"
+            double tau=preemphasis;
             double delta=1/(2*PI*20000);//double delta=1.96e-6;
             taup=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*tau*(in_samplerate*FIR_PHASES) ));
             deltap=1.0/(2.0*(in_samplerate*FIR_PHASES))/tan(  1.0/(2*delta*(in_samplerate*FIR_PHASES) ));
@@ -215,13 +214,12 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
     return 0;
 }
 
-
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
-int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume, int generate_multiplex, float limiter_threshold) {
+int fm_mpx_get_samples(float *mpx_buffer, fm_mpx_data *data) {
     *audio_buffer = 0.0;
-    int stereo_capable = (channels > 1) && (!disablestereo); //chatgpt
-    if(!drds && generate_multiplex) get_rds_samples(mpx_buffer, length, stereo_capable, rds_ct_enabled, rds_volume);
+    int stereo_capable = (channels > 1) && (!data->disablestereo);
+    if(!data->drds && data->generate_multiplex) get_rds_samples(mpx_buffer, length, stereo_capable, data->rds_ct_enabled, data->rds_volume);
 
     if(inf == NULL) return 0; // if there is no audio, stop here
     
@@ -293,8 +291,8 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
         }
 
         // Multiply by the gain
-        out_left = out_left * gain;
-        if(channels > 1) out_right = out_right * gain;
+        out_left = out_left * data->gain;
+        if(channels > 1) out_right = out_right * data->gain;
 		
         // Simple broadcast compressor
         // 
@@ -308,11 +306,11 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
         left_abs=fabsf(out_left);
         if( left_abs>left_max ) 
         {
-           left_max+= (left_abs-left_max)*compressor_attack; 
+           left_max+= (left_abs-left_max)*data->compressor_attack; 
         }
         else
         {
-           left_max*=compressor_decay; 
+           left_max*=data->compressor_decay; 
         }
 
         if( channels > 1 )
@@ -320,11 +318,11 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
           right_abs=fabsf(out_right);
           if( right_abs>right_max ) 
           {
-             right_max+= (right_abs-right_max)*compressor_attack;
+             right_max+= (right_abs-right_max)*data->compressor_attack;
           }
           else
           {
-             right_max*=compressor_decay;
+             right_max*=data->compressor_decay;
           }
           if( 1 )// Experimental joint compressor mode
           {
@@ -333,37 +331,37 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
               else if( left_max < right_max ) 
                   left_max=right_max;
           }
-          if(enablecompressor) out_right=out_right/(right_max+compressor_max_gain_recip);
+          if(data->enablecompressor) out_right=out_right/(right_max+data->compressor_max_gain_recip); // Adjust volume with limited maximum gain
         }
-        if(enablecompressor) out_left= out_left/(left_max+compressor_max_gain_recip); // Adjust volume with limited maximum gain
-        if(drds) mpx_buffer[i] = 0.0;
-        if(paused) {
+        if(data->enablecompressor) out_left= out_left/(left_max+data->compressor_max_gain_recip); // Adjust volume with limited maximum gain
+        if(data->drds) mpx_buffer[i] = 0.0;
+        if(data->paused) {
             out_left = 0;
             if(channels > 1) out_right = 0;
         }
  
-        out_left = limiter(out_left, limiter_threshold, 1);
-        if( channels > 1 ) out_right = limiter(out_right, limiter_threshold, 1);
+        out_left = limiter(out_left, data->limiter_threshold, 1);
+        if( channels > 1 ) out_right = limiter(out_right, data->limiter_threshold, 1);
 
         out_left = clip(out_left, 1); //max is gonna be 1.0 (0 db), lowest is -1.0 (-inf db)
         if(channels>1) out_right = clip(out_right, 1);
 
         // Generate the stereo mpx
         if( channels > 1 ) {
-            if(!disablestereo) {
+            if(!data->disablestereo) {
                 if(generate_multiplex) {
                     if(1) {
-                        mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal
-                            4.05 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
-                        pilot_volume*carrier_19[phase_19];                  // Stereo pilot tone
+                        // 4.5 and 0.9 are the volumes, thats because we dont have 75000 khz of deviation, instead we have 7500 khz, so that needs to be louder by 10 times than normal
+                        mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal
+                            4.5 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
+                        0.9*carrier_19[phase_19];                  // Stereo pilot tone
                         phase_19++;
                         phase_38++;
                         if(phase_19 >= 12) phase_19 = 0;
                         if(phase_38 >= 6) phase_38 = 0;
                     } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
-                        mpx_buffer[i] +=  4.05*(out_left+out_right) + // Stereo sum signal (L+R)
-                            4.05 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
-                            //NO PIOT TONE!!!!!!!!!!!!!!!!!!!!!!!!!!!! (its missplelled correctly probably just like misspelled)
+                        mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal (L+R)
+                            4.5 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
 			            phase_3125++;
 			            if(phase_3125 >= 8) phase_3125 = 0;
                     }
@@ -372,7 +370,7 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
                 if(generate_multiplex) {
                     mpx_buffer[i] =  
                         mpx_buffer[i] +
-                        4.05*(out_left+out_right);      // Unmodulated L+R signal
+                        4.5*(out_left+out_right);      // Unmodulated L+R signal
                 }
             }
         }
@@ -381,12 +379,12 @@ int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, floa
             if(generate_multiplex) {
                 mpx_buffer[i] =  
                     mpx_buffer[i] +
-                    4.05*out_left;      // Unmodulated monophonic signal
+                    4.5*out_left;      // Unmodulated monophonic signal
             }
         } 
         if(!generate_multiplex) {
             mpx_buffer[i] = 
-                0.0; //nothing, rpitx works like this (i think): theres a array with data and rpitx goes thought it to transmit it, now here the functions with the mpx_buffer such as this one update the array, but what if the array is not updated? well, then it keeps transmitting the exact same thing, it doesnt update whats its transmitting, no really, take a sdr and remove this and turn off the mpx gen, if no music then look at rds
+                0.0;
         }
             
         audio_pos++;   

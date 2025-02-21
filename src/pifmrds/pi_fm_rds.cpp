@@ -39,7 +39,38 @@ static void fatal(char *fmt, ...)
     terminate(0);
 }
 
-int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt, char *control_pipe, int pty, int *af_array, int raw, int drds, double preemp, int power, int rawSampleRate, int rawChannels, int deviation, int ta, int tp, float cutoff_freq, float gaim, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int enablecompressor, int rds_ct_enabled, float rds_volume, float pilot_volume, int disablestereo, int log, float limiter_threshold) {
+typedef struct tx_data {
+    uint32_t carrier_freq;
+    char *audio_file;
+    uint16_t pi;
+    char *ps;
+    char *rt;
+    char *control_pipe;
+    int pty;
+    int *af_array;
+    int raw;
+    int drds;
+    double preemp;
+    int power;
+    int rawSampleRate;
+    int rawChannels;
+    int deviation;
+    int ta;
+    int tp;
+    float cutoff_freq;
+    float audio_gain;
+    float compressor_decay;
+    float compressor_attack;
+    float compressor_max_gain_recip;
+    int enablecompressor;
+    int rds_ct_enabled;
+    float rds_volume;
+    int disablestereo;
+    int log;
+    float limiter_threshold;
+} tx_data;
+
+int tx(tx_data *data) {
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = terminate;
@@ -59,25 +90,34 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     int data_index = 0;
 
     int generate_multiplex = 1;
-    int dstereo = disablestereo;
+    int dstereo = data->disablestereo;
+    int drds = data->drds;
+    float audio_gain = data->audio_gain;
+    float compressor_decay = data->compressor_decay;
+    float compressor_attack = data->compressor_attack;
+    float compressor_max_gain_recip = data->compressor_max_gain_recip;
+    int enablecompressor = data->enablecompressor;
+    int rds_ct_enabled = data->rds_ct_enabled;
+    float rds_volume = data->rds_volume;
+    float limiter_threshold = data->limiter_threshold;
 
     //set the power
     padgpio gpiopad;
-    gpiopad.setlevel(power);
+    gpiopad.setlevel(data->power);
 
     // Initialize the baseband generator
-    if(fm_mpx_open(audio_file, DATA_SIZE, raw, preemp, rawSampleRate, rawChannels, cutoff_freq) < 0) return 1;
+    if(fm_mpx_open(data->audio_file, DATA_SIZE, data->raw, data->preemp, data->rawSampleRate, data->rawChannels, data->cutoff_freq) < 0) return 1;
 
     // Initialize the RDS modulator
     char myps[9] = {0};
-    set_rds_pi(pi);
-    set_rds_ps(ps);
-    set_rds_rt(rt);
-    set_rds_pty(pty);
+    set_rds_pi(data->pi);
+    set_rds_ps(data->ps);
+    set_rds_rt(data->rt);
+    set_rds_pty(data->pty);
     set_rds_ab(0);
-    set_rds_ms(1);
-    set_rds_tp(tp);
-    set_rds_ta(ta);
+    set_rds_ms(1); // yes
+    set_rds_tp(data->tp);
+    set_rds_ta(data->ta);
     if(dstereo == 1) {
         set_rds_di(0);
     } else {
@@ -85,7 +125,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     }
     uint16_t count = 0;
     uint16_t count2 = 0;
-    if(log) {
+    if(data->log) {
         if(drds == 1) {
             printf("RDS Disabled (you can enable with control fifo with the RDS command)\n");
         } else {
@@ -93,11 +133,11 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
             printf("RT: \"%s\"\n", rt);
 
             if(af_array[0]) {
-                set_rds_af(af_array);
+                set_rds_af(data->af_array);
                 printf("AF: ");
                 int f;
-                for(f = 1; f < af_array[0]+1; f++) {
-                    printf("%f Mhz ", (float)(af_array[f]+875)/10);
+                for(f = 1; f < data->af_array[0]+1; f++) {
+                    printf("%f Mhz ", (float)(data->af_array[f]+875)/10);
                 }
                 printf("\n");
             }
@@ -105,24 +145,24 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
     }
 
     // Initialize the control pipe reader
-    if(control_pipe) {
-        if(open_control_pipe(control_pipe) == 0) {
-            if(log) printf("Reading control commands on %s.\n", control_pipe);
+    if(data->control_pipe) {
+        if(open_control_pipe(data->control_pipe) == 0) {
+            if(data->log) printf("Reading control commands on %s.\n", data->control_pipe);
         } else {
-            if(log) printf("Failed to open control pipe: %s.\n", control_pipe);
-            control_pipe = NULL;
+            if(data->log) printf("Failed to open control pipe: %s.\n", data->control_pipe);
+            data->control_pipe = NULL;
         }
     }
-    if(log) printf("Starting to transmit on %3.1f MHz.\n", carrier_freq/1e6);
+    if(data->log) printf("Starting to transmit on %3.1f MHz.\n", carrier_freq/1e6);
     float deviation_scale_factor;
     // The deviation specifies how wide the signal is (from its lowest bandwidht to its highest, but not including sub-carriers). 
     // Use 75kHz for WFM (broadcast radio, or 50khz can be used)
     // and about 2.5kHz for NFM (walkie-talkie style radio)
-    deviation_scale_factor=  0.1 * (deviation) ; // todo PPM
+    deviation_scale_factor=  0.1 * (data->deviation);
     int paused = 0;
     for (;;)
 	{
-        if(control_pipe) {
+        if(data->control_pipe) {
             ResultAndArg pollResult = poll_control_pipe(log);
             if(pollResult.res == CONTROL_PIPE_RDS_SET) {
                 drds = pollResult.arg_int;
@@ -130,12 +170,12 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 padgpio gpiopad;
                 gpiopad.setlevel(pollResult.arg_int);
             } else if(pollResult.res == CONTROL_PIPE_DEVIATION_SET) {
-                deviation = std::stoi(pollResult.arg);
-                deviation_scale_factor=  0.1 * (deviation );
+                data->deviation = std::stoi(pollResult.arg);
+                deviation_scale_factor=  0.1 * (data->deviation);
             } else if(pollResult.res == CONTROL_PIPE_STEREO_SET) {
                 dstereo = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_GAIN_SET) {
-                gaim = std::stof(pollResult.arg);
+                audio_gain = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSORDECAY_SET) {
                 compressor_decay = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSORATTACK_SET) {
@@ -146,8 +186,6 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 rds_volume = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_PAUSE_SET) {
                 paused = pollResult.arg_int;
-            } else if(pollResult.res == CONTROL_PIPE_PILVOL_SET) {
-                pilot_volume = std::stof(pollResult.arg);
             } else if(pollResult.res == CONTROL_PIPE_MPXGEN_SET) {
                 generate_multiplex = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_COMPRESSOR_SET) {
@@ -158,7 +196,7 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
                 limiter_threshold = std::stof(pollResult.arg);
             }
         }
-        if(fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, gaim, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex, limiter_threshold) < 0 ) terminate(0);
+        if(fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, audio_gain, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex, limiter_threshold) < 0 ) terminate(0);
         data_len = DATA_SIZE;
         for(int i=0;i< data_len;i++) {
             devfreq[i] = data[i]*deviation_scale_factor;
@@ -170,40 +208,44 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
 
 
 int main(int argc, char **argv) {
-    char *audio_file = NULL;
-    char *control_pipe = NULL;
-    uint32_t carrier_freq = 100000000; //100 mhz
-    char *ps = "Pi-FmSa";
-    char *rt = "Broadcasting on a Raspberry Pi: Simply Advanced";
-    uint16_t pi = 0x00ff;
-    int pty = 0;
-    float compressor_decay = 0.999995;
-    float compressor_attack = 1.0;
-    float compressor_max_gain_recip = 0.01;
-    int enable_compressor = 1;
-    float rds_volume = 1.0;
-    float pilot_volume = 0.9;
-    float limiter_threshold = 0.9;
-    int log = 1;
-    int ta = 0;
-    int tp = 0;
+    tx_data data = {
+        .audio_file = NULL,
+        .control_pipe = NULL,
+        .carrier_freq = 100000000,
+        .ps = "Pi-FmSa",
+        .rt = "Broadcasting on a Raspberry Pi: Simply Advanced",
+        .pi = 0x00ff,
+        .pty = 0,
+        .compressor_decay = 0.999995,
+        .compressor_attack = 1.0,
+        .compressor_max_gain_recip = 0.01,
+        .enablecompressor = 1,
+        .rds_volume = 1.0,
+        .limiter_threshold = 0.9,
+        .log = 1,
+        .ta = 0,
+        .tp = 0,
+        .af_array = {0},
+        .raw = 0,
+        .drds = 0,
+        .disablestereo = 0,
+        .power = 7,
+        .audio_gain = 1,
+        .rawSampleRate = 44100,
+        .rawChannels = 2,
+        .preemp = 50e-6,
+        .deviation = 75000,
+        .rds_ct_enabled = 1,
+        .cutoff_freq = 15000,
+    };
+
     int af_size = 0;
     int gpiopin = 4;
-    int raw = 0;
-    int drds = 0;
-    int dstereo = 0;
-    int power = 7;
-    float gain = 1;
-    int rawSampleRate = 44100;
-    int rawChannels = 2;
     int compressorchanges = 0;
     int limiterchanges = 0;
-    double preemp = 50e-6; //eu
-    int deviation = 75000;
+
     int alternative_freq[100] = {};
     int bypassfreqrange = 0;
-    int ct = 1;
-    float cutofffreq = 15000; // up to standard
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
         char *arg = argv[i];
@@ -211,48 +253,45 @@ int main(int argc, char **argv) {
         if(arg[0] == '-' && i+1 < argc) param = argv[i+1];
         if((strcmp("-audio", arg)==0) && param != NULL) {
             i++;
-            audio_file = param;
+            data.audio_file = param;
         } else if(strcmp("-freq", arg)==0 && param != NULL) {
             i++;
-            carrier_freq = 1e6 * atof(param);
-            if((carrier_freq < 64e6 || carrier_freq > 108e6) && !bypassfreqrange) fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108. (going that low for UKF radios, such as the UNITRA Jowita or other old band FM Radios)\n");
+            data.carrier_freq = (uint32_t)(atof(param)*1e6);
+            if(data.carrier_freq < 64e6 || data.carrier_freq > 108e6) fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108.\n");
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
-            pi = (uint16_t) strtol(param, NULL, 16);
+            data.pi = atoi(param);
         } else if(strcmp("-ps", arg)==0 && param != NULL) {
             i++;
-            ps = param;
+            data.ps = param;
         } else if(strcmp("-rt", arg)==0 && param != NULL) {
             i++;
-            rt = param;
+            data.rt = param;
         } else if(strcmp("-compressordecay", arg)==0 && param != NULL) {
             i++;
-            compressor_decay = atof(param);
+            data.compressor_decay = atof(param);
             compressorchanges = 1;
         } else if(strcmp("-compressorattack", arg)==0 && param != NULL) {
             i++;
-            compressor_attack = atof(param);
+            data.compressor_attack = atof(param);
             compressorchanges = 1;
         } else if(strcmp("-compressormaxgainrecip", arg)==0 && param != NULL) {
             i++;
-            compressor_max_gain_recip = atof(param);
+            data.compressor_max_gain_recip = atof(param);
             compressorchanges = 1;
         } else if(strcmp("-limiterthreshold", arg)==0 && param != NULL) {
             i++;
-            limiter_threshold = atof(param);
+            data.limiter_threshold = atof(param);
             limiterchanges = 1;
-            if(1 && limiter_threshold > 4) { //if you dont want this for some reason than change the 1 to a 0
-                fatal("Nuh uh (limiter threshold cant be bigger than 4)\n");
+            if(data.limiter_threshold > 3.5) {
+                fatal("Limiter threshold too high!\n");
             }
         } else if(strcmp("-rdsvolume", arg)==0 && param != NULL) {
             i++;
-            rds_volume = atof(param);
-        } else if(strcmp("-pilotvolume", arg)==0 && param != NULL) {
-            i++;
-            pilot_volume = atof(param);
+            data.rds_volume = atof(param);
         } else if(strcmp("-pty", arg)==0 && param != NULL) {
             i++;
-            pty = atoi(param);
+            data.pty = atoi(param);
         } else if(strcmp("-gpiopin", arg)==0 && param != NULL) {
             i++;
             printf("GPIO pin setting disabled, mod librpitx and pifmsa (pifm simply advanced) for this\n");
@@ -264,61 +303,61 @@ int main(int argc, char **argv) {
             // }
         } else if(strcmp("-disablelogging", arg)==0) {
             i++;
-            log = 0;
+            data.log = 0;
         } else if(strcmp("-ta", arg)==0) {
             i++;
-            ta = 1;
+            data.ta = 1;
         } else if(strcmp("-bfr", arg)==0) {
             i++;
             bypassfreqrange = 1;
         } else if(strcmp("-tp", arg)==0) {
             i++;
-            tp = 1;
+            data.tp = 1;
         } else if(strcmp("-ctl", arg)==0 && param != NULL) {
             i++;
-            control_pipe = param;
+            data.control_pipe = param;
         } else if(strcmp("-deviation", arg)==0 && param != NULL) {
             i++;
-            if(strcmp("small", param)==0) {
-                deviation = 50000;
+            if(strcmp("mono", param)==0) {
+                data.deviation = 50000;
             } else if(strcmp("nfm", param)==0) {
-                deviation = 2500;
+                data.deviation = 2500;
             }
             else {
-                deviation = atoi(param);
+                data.deviation = atoi(param);
             }
         } else if(strcmp("-rawchannels", arg)==0 && param != NULL) {
             i++;
-            rawChannels = atoi(param);
+            data.rawChannels = atoi(param);
         } else if(strcmp("-rawsamplerate", arg)==0 && param != NULL) {
             i++;
-            rawSampleRate = atoi(param);
+            data.rawSampleRate = atoi(param);
         } else if(strcmp("-cutofffreq", arg)==0 && param != NULL) {
-                i++;
-                cutofffreq = atoi(param);
+            i++;
+            data.cutoff_freq = atof(param);
         } else if(strcmp("-audiogain", arg)==0 && param != NULL) {
             i++;
-            gain = atoi(param);
+            data.audio_gain = atof(param);
         } else if(strcmp("-power", arg)==0 && param != NULL) {
             i++;
             int tpower = atoi(param);
             if(tpower > 7 || tpower < 0) fatal("Power can be between 0 and 7");
-            else power = tpower;
+            data.power = tpower;
         } else if(strcmp("-raw", arg)==0) {
             i++;
-            raw = 1;
+            data.raw = 1;
         } else if(strcmp("-disablerds", arg)==0) {
             i++;
-            drds = 1;
+            data.drds = 1;
         } else if(strcmp("-disablestereo", arg)==0) {
             i++;
-            dstereo = 1;
+            data.disablestereo = 1;
         } else if(strcmp("-disablecompressor", arg)==0) {
             i++;
-            enable_compressor = 0;
+            data.enablecompressor = 0;
         } else if(strcmp("-disablect", arg)==0) {
             i++;
-            ct = 0;
+            data.rds_ct_enabled = 0;
         } else if(strcmp("-preemphasis", arg)==0 && param != NULL) {
             i++;
             if(strcmp("us", param)==0) {
@@ -336,7 +375,8 @@ int main(int argc, char **argv) {
             af_size++;
             alternative_freq[af_size] = (int)(10*atof(param))-875;
             if(alternative_freq[af_size] < 1 || alternative_freq[af_size] > 204)
-                fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n"); //honestly i have no idea why 87.5 and 108 isn't in here, i copied this code, okay?
+                fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n");
+            data.af_array = alternative_freq;
         }
         else {
             fatal("Unrecognised argument: %s.\n"
@@ -344,23 +384,11 @@ int main(int argc, char **argv) {
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000] [-tp] [-ta]\n", arg);
         }
     }
-    if(compressorchanges) {
-        printf("You've changed the compressor settings, just don't set it too low, so the deviation won't go crazy\n");
-    }
-    if(limiterchanges) {
-        if(limiter_threshold > 0.8) {
-            printf("You changed the limiter settings, audio might be quiet now\n");
-        } else { //we've incremented it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! (69 lol)
-            printf("You changed the limiter settings, be careful.\n");
-        }
-    }
-    if(!enable_compressor) {
-        printf("DUDE YOU ARE CRAZY?\n");
-    }
+
     alternative_freq[0] = af_size;
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
-    fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false);
-    int errcode = tx(carrier_freq, audio_file, pi, ps, rt, control_pipe, pty, alternative_freq, raw, drds, preemp, power, rawSampleRate, rawChannels, deviation, ta, tp, cutofffreq, gain, compressor_decay, compressor_attack, compressor_max_gain_recip, enable_compressor, ct, rds_volume, pilot_volume, dstereo, log, limiter_threshold);
+    fmmod=new ngfmdmasync(data.carrier_freq,228000,14,FifoSize, false);
+    int errcode = tx(&data);
     terminate(errcode);
 }

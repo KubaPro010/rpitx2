@@ -21,6 +21,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels, float cutoff_freq);
-extern int fm_mpx_get_samples(float *mpx_buffer, int drds, float compressor_decay, float compressor_attack, float compressor_max_gain_recip, int disablestereo, float gain, int enablecompressor, int rds_ct_enabled, float rds_volume, int paused, float pilot_volume, int generate_multiplex, float limiter_threshold);
-extern int fm_mpx_close();
+typedef struct {
+    int drds;
+    float compressor_decay;
+    float compressor_attack;
+    float compressor_max_gain_recip;
+    int disablestereo;
+    float gain;
+    int enablecompressor;
+    int rds_ct_enabled;
+    float rds_volume;
+    int paused;
+    float pilot_volume;
+    int generate_multiplex;
+    float limiter_threshold;
+} fm_mpx_data;
+
+int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int rawSampleRate, int rawChannels, float cutoff_freq);
+int fm_mpx_get_samples(float *mpx_buffer, fm_mpx_data *data);
+int fm_mpx_close();

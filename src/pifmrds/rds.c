@@ -137,7 +137,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //ptyn?
     if(!get_rds_ct_group(blocks, ct_clock_enabled)) { // CT (clock time) has priority on other group types (when its on)
         if(state < 4) {
             blocks[1] = 0x0000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ta << 4 | rds_params.ms << 3 | ps_state;
-            blocks[1] |= ((rds_params.di >> (3 - ps_state)) & 0x01) << 2; // from micrords
+            blocks[1] |= ((rds_params.di >> (3 - ps_state)) & 0x01) << 2;
             if(rds_params.af[0]) { // AF
                 if(af_state == 0) { 
 			        blocks[2] = (rds_params.af[0] + 224) << 8 | rds_params.af[1]; // Send number of AFs and the first AF
