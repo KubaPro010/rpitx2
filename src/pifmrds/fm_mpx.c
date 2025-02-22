@@ -35,7 +35,6 @@
 
 #define PI 3.14159265359
 
-
 #define FIR_PHASES    (32)
 #define FIR_TAPS      (32) // MUST be a power of 2 for the circular buffer
 
@@ -54,7 +53,6 @@ int phase_38 = 0;
 int phase_3125 = 0;
 int phase_19 = 0;
 
-
 float downsample_factor;
 
 int raw_;
@@ -68,7 +66,7 @@ float fir_buffer_left[FIR_TAPS] = {0};
 float fir_buffer_right[FIR_TAPS] = {0};
 int fir_index = 0;
 int channels;
-float left_max=1, right_max=1;  // start compressor with low gain
+float left_max=0, right_max=0;  // start compressor with low gain
 
 SNDFILE *inf;
 
@@ -334,55 +332,44 @@ int fm_mpx_get_samples(float *mpx_buffer, fm_mpx_data *data) {
           if(data->enablecompressor) out_right=out_right/(right_max+data->compressor_max_gain_recip); // Adjust volume with limited maximum gain
         }
         if(data->enablecompressor) out_left= out_left/(left_max+data->compressor_max_gain_recip); // Adjust volume with limited maximum gain
-        if(data->drds) mpx_buffer[i] = 0.0;
+        if(data->drds) mpx_buffer[i] = 0.0; // before this, there is just rds here, so we can set it to 0
         if(data->paused) {
             out_left = 0;
             if(channels > 1) out_right = 0;
         }
  
         out_left = limiter(out_left, data->limiter_threshold, 1);
-        if( channels > 1 ) out_right = limiter(out_right, data->limiter_threshold, 1);
+        if( channels==2) out_right = limiter(out_right, data->limiter_threshold, 1);
 
         out_left = clip(out_left, 1); //max is gonna be 1.0 (0 db), lowest is -1.0 (-inf db)
-        if(channels>1) out_right = clip(out_right, 1);
+        if(channels==2) out_right = clip(out_right, 1);
 
         // Generate the stereo mpx
-        if( channels > 1 ) {
-            if(!data->disablestereo) {
-                if(generate_multiplex) {
-                    if(1) {
-                        // 4.5 and 0.9 are the volumes, thats because we dont have 75000 khz of deviation, instead we have 7500 khz, so that needs to be louder by 10 times than normal
-                        mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal
-                            4.5 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
-                        0.9*carrier_19[phase_19];                  // Stereo pilot tone
-                        phase_19++;
-                        phase_38++;
-                        if(phase_19 >= 12) phase_19 = 0;
-                        if(phase_38 >= 6) phase_38 = 0;
-                    } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
-                        mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal (L+R)
-                            4.5 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
-			            phase_3125++;
-			            if(phase_3125 >= 8) phase_3125 = 0;
-                    }
-                }
-            } else {
-                if(generate_multiplex) {
-                    mpx_buffer[i] =  
-                        mpx_buffer[i] +
-                        4.5*(out_left+out_right);      // Unmodulated L+R signal
-                }
+        if(channels == 2 && !data->disablestereo) {
+            if(1) {
+                // 4.5 and 0.9 are the volumes, thats because we dont have 75000 khz of deviation, instead we have 7500 khz, so that needs to be louder by 10 times than normal
+                mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal
+                    4.5 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
+                0.9*carrier_19[phase_19];                  // Stereo pilot tone
+                phase_19++;
+                phase_38++;
+                if(phase_19 >= 12) phase_19 = 0;
+                if(phase_38 >= 6) phase_38 = 0;
+            } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
+                mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal (L+R)
+                    4.5 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
+                phase_3125++;
+                if(phase_3125 >= 8) phase_3125 = 0;
             }
-        }
-        else
+        } else if(channels == 1 || data->disablestereo)
         {
-            if(generate_multiplex) {
+            if(data->generate_multiplex) {
                 mpx_buffer[i] =  
                     mpx_buffer[i] +
                     4.5*out_left;      // Unmodulated monophonic signal
             }
         } 
-        if(!generate_multiplex) {
+        if(!data->generate_multiplex) {
             mpx_buffer[i] = 
                 0.0;
         }
