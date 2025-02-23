@@ -196,7 +196,21 @@ int tx(tx_data *data) {
                 limiter_threshold = std::stof(pollResult.arg);
             }
         }
-        if(fm_mpx_get_samples(data, drds, compressor_decay, compressor_attack, compressor_max_gain_recip, dstereo, audio_gain, enablecompressor, rds_ct_enabled, rds_volume, paused, pilot_volume, generate_multiplex, limiter_threshold) < 0 ) terminate(0);
+        fm_mpx_data *data2;
+        data2 = (fm_mpx_data *)malloc(sizeof(fm_mpx_data));
+        data2->drds = drds;
+        data2->compressor_decay = compressor_decay;
+        data2->compressor_attack = compressor_attack;
+        data2->compressor_max_gain_recip = compressor_max_gain_recip;
+        data2->dstereo = dstereo;
+        data2->audio_gain = audio_gain;
+        data2->enablecompressor = enablecompressor;
+        data2->rds_ct_enabled = rds_ct_enabled;
+        data2->rds_volume = rds_volume;
+        data2->paused = paused;
+        data2->generate_multiplex = generate_multiplex;
+        data2->limiter_threshold = limiter_threshold;
+        if(fm_mpx_get_samples(data, data2) < 0 ) terminate(0);
         data_len = DATA_SIZE;
         for(int i=0;i< data_len;i++) {
             devfreq[i] = data[i]*deviation_scale_factor;
