@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include "waveforms.h"
 
+float carrier_57[] = {0.0, 1.0, 1.2246467991473532e-16, -1.0}; // sine wave at 57 kHz, 228 kHz sample rate, 4 samples because 57 kHz is 4 times the sample rate
+
 #define RT_LENGTH 64
 #define PS_LENGTH 8
 #define GROUP_LENGTH 4
@@ -237,14 +239,8 @@ void get_rds_samples(float *buffer, int count, int stereo, int ct_clock_enabled,
         out_sample_index++;
         if(out_sample_index >= SAMPLE_BUFFER_SIZE) out_sample_index = 0;
         
-        
         // modulate at 57 kHz
-        switch(phase) {
-            case 0:
-            case 2: sample = 0; break;
-            case 1: break;
-            case 3: sample = -sample; break;
-        }
+        sample = sample * carrier_57[phase];
         phase++;
         if(phase >= 4) phase = 0;
         
