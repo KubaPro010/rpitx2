@@ -47,7 +47,7 @@ typedef struct tx_data {
     char *rt;
     char *control_pipe;
     int pty;
-    int *af_array;
+    int af_array[100];
     int raw;
     int drds;
     double preemp;
