@@ -25,6 +25,7 @@
 */
 
 #include "fm_mpx.h"
+#include <stddef.h>
 #include <sndfile.h>
 #include <stdlib.h>
 #include <strings.h>
