@@ -375,14 +375,14 @@ int main(int argc, char **argv) {
         } else if(strcmp("-preemphasis", arg)==0 && param != NULL) {
             i++;
             if(strcmp("us", param)==0) {
-                preemp = 75e-6; //usa
+                data.preemp = 75e-6;
             } else if(strcmp("eu", param)==0) {
                 printf("premp eu default but ok\n");
-                preemp = 50e-6;
+                data.preemp = 50e-6;
             } else if(strcmp("off", param)==0 || strcmp("0", param)==0) {
-                preemp = 0; //disabled
+                data.preemp = 0;
             } else {
-                preemp = atof(param) * 1e-6;
+                data.preemp = atof(param) * 1e-6;
             }
         } else if(strcmp("-af", arg)==0 && param != NULL) {
             i++;
