@@ -129,10 +129,10 @@ int tx(tx_data *data) {
         if(drds == 1) {
             printf("RDS Disabled (you can enable with control fifo with the RDS command)\n");
         } else {
-            printf("PI: %04X, PS: \"%s\".\n", pi, ps);
-            printf("RT: \"%s\"\n", rt);
+            printf("PI: %04X, PS: \"%s\".\n", data->pi, data->ps);
+            printf("RT: \"%s\"\n", data->rt);
 
-            if(af_array[0]) {
+            if(data->af_array[0]) {
                 set_rds_af(data->af_array);
                 printf("AF: ");
                 int f;
@@ -153,7 +153,7 @@ int tx(tx_data *data) {
             data->control_pipe = NULL;
         }
     }
-    if(data->log) printf("Starting to transmit on %3.1f MHz.\n", carrier_freq/1e6);
+    if(data->log) printf("Starting to transmit on %3.1f MHz.\n", data->carrier_freq/1e6);
     float deviation_scale_factor;
     // The deviation specifies how wide the signal is (from its lowest bandwidht to its highest, but not including sub-carriers). 
     // Use 75kHz for WFM (broadcast radio, or 50khz can be used)
@@ -163,7 +163,7 @@ int tx(tx_data *data) {
     for (;;)
 	{
         if(data->control_pipe) {
-            ResultAndArg pollResult = poll_control_pipe(log);
+            ResultAndArg pollResult = poll_control_pipe(data->log);
             if(pollResult.res == CONTROL_PIPE_RDS_SET) {
                 drds = pollResult.arg_int;
             } else if(pollResult.res == CONTROL_PIPE_PWR_SET) {
@@ -223,34 +223,34 @@ int tx(tx_data *data) {
 
 int main(int argc, char **argv) {
     tx_data data = {
-        .audio_file = NULL,
-        .control_pipe = NULL,
         .carrier_freq = 100000000,
+        .audio_file = NULL,
+        .pi = 0x00ff,
         .ps = "Pi-FmSa",
         .rt = "Broadcasting on a Raspberry Pi: Simply Advanced",
-        .pi = 0x00ff,
+        .control_pipe = NULL,
         .pty = 0,
+        .af_array = {0},
+        .raw = 0,
+        .drds = 0,
+        .preemp = 50e-6,
+        .power = 7,
+        .rawSampleRate = 44100,
+        .rawChannels = 2,
+        .deviation = 75000,
+        .ta = 0,
+        .tp = 0,
+        .cutoff_freq = 15000,
+        .audio_gain = 1,
         .compressor_decay = 0.999995,
         .compressor_attack = 1.0,
         .compressor_max_gain_recip = 0.01,
         .enablecompressor = 1,
-        .rds_volume = 1.0,
-        .limiter_threshold = 0.9,
-        .log = 1,
-        .ta = 0,
-        .tp = 0,
-        .af_array = {0},
-        .raw = 0,
-        .drds = 0,
-        .disablestereo = 0,
-        .power = 7,
-        .audio_gain = 1,
-        .rawSampleRate = 44100,
-        .rawChannels = 2,
-        .preemp = 50e-6,
-        .deviation = 75000,
         .rds_ct_enabled = 1,
-        .cutoff_freq = 15000,
+        .rds_volume = 1.0,
+        .disablestereo = 0,
+        .log = 1,
+        .limiter_threshold = 0.9,
     };
 
     int af_size = 0;
