@@ -390,7 +390,7 @@ int main(int argc, char **argv) {
             alternative_freq[af_size] = (int)(10*atof(param))-875;
             if(alternative_freq[af_size] < 1 || alternative_freq[af_size] > 204)
                 fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n");
-            data.af_array = alternative_freq;
+            memcpy(data.af_array, alternative_freq, sizeof(alternative_freq));
         }
         else {
             fatal("Unrecognised argument: %s.\n"
