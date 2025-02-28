@@ -124,7 +124,7 @@ ResultAndArg poll_control_pipe(int log) {
 			if (di >= 0 && di <= 0xF) {
 				set_rds_di(di);
 				if(log==1) {
-					printf("Set DI to %d\n", di)
+					printf("Set DI to %d\n", di);
 				}
 			}
 			else {
