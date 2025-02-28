@@ -362,7 +362,7 @@ int fm_mpx_get_samples(float *mpx_buffer, fm_mpx_data *data) {
                 phase_3125++;
                 if(phase_3125 >= 8) phase_3125 = 0;
             }
-        } else if(channels == 1 || data->disablestereo)
+        } else if(channels == 1 || data->dstereo)
         {
             if(data->generate_multiplex) {
                 mpx_buffer[i] =  
