@@ -28,13 +28,12 @@ typedef struct {
     float compressor_decay;
     float compressor_attack;
     float compressor_max_gain_recip;
-    int disablestereo;
-    float gain;
+    int dstereo;
+    float audio_gain;
     int enablecompressor;
     int rds_ct_enabled;
     float rds_volume;
     int paused;
-    float pilot_volume;
     int generate_multiplex;
     float limiter_threshold;
 } fm_mpx_data;
