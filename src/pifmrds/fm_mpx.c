@@ -217,7 +217,7 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 // 10 after.
 int fm_mpx_get_samples(float *mpx_buffer, fm_mpx_data *data) {
     *audio_buffer = 0.0;
-    int stereo_capable = (channels > 1) && (!data->disablestereo);
+    int stereo_capable = (channels > 1) && (!data->dstereo);
     if(!data->drds && data->generate_multiplex) get_rds_samples(mpx_buffer, length, stereo_capable, data->rds_ct_enabled, data->rds_volume);
 
     if(inf == NULL) return 0; // if there is no audio, stop here
@@ -290,8 +290,8 @@ int fm_mpx_get_samples(float *mpx_buffer, fm_mpx_data *data) {
         }
 
         // Multiply by the gain
-        out_left = out_left * data->gain;
-        if(channels > 1) out_right = out_right * data->gain;
+        out_left = out_left * data->audio_gain;
+        if(channels > 1) out_right = out_right * data->audio_gain;
 		
         // Simple broadcast compressor
         // 
@@ -346,7 +346,7 @@ int fm_mpx_get_samples(float *mpx_buffer, fm_mpx_data *data) {
         if(channels==2) out_right = clip(out_right, 1);
 
         // Generate the stereo mpx
-        if(channels == 2 && !data->disablestereo) {
+        if(channels == 2 && !data->dstereo) {
             if(1) {
                 // 4.5 and 0.9 are the volumes, thats because we dont have 75000 khz of deviation, instead we have 7500 khz, so that needs to be louder by 10 times than normal
                 mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal
