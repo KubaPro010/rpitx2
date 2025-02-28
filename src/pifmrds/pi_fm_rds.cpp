@@ -84,7 +84,7 @@ int tx(tx_data *data) {
     sigaction(SIGSEGV, &sa, NULL); //seg fault
     
     // Data structures for baseband data
-    float data[DATA_SIZE];
+    float audio_data[DATA_SIZE];
 	float devfreq[DATA_SIZE];
     int data_len = 0;
     int data_index = 0;
@@ -210,10 +210,10 @@ int tx(tx_data *data) {
         data2->paused = paused;
         data2->generate_multiplex = generate_multiplex;
         data2->limiter_threshold = limiter_threshold;
-        if(fm_mpx_get_samples(data, data2) < 0 ) terminate(0);
+        if(fm_mpx_get_samples(audio_data, data2) < 0 ) terminate(0);
         data_len = DATA_SIZE;
         for(int i=0;i< data_len;i++) {
-            devfreq[i] = data[i]*deviation_scale_factor;
+            devfreq[i] = audio_data[i]*deviation_scale_factor;
         }
         fmmod->SetFrequencySamples(devfreq,data_len);
 	}
