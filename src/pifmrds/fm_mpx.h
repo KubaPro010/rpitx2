@@ -21,6 +21,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stddef.h>
+
 typedef struct {
     int drds;
     float compressor_decay;
