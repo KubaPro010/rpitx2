@@ -216,7 +216,9 @@ int fm_mpx_open(char *filename, size_t len, int raw, double preemphasis, int raw
 // samples provided by this function are in 0..10: they need to be divided by
 // 10 after.
 int fm_mpx_get_samples(float *mpx_buffer, fm_mpx_data *data) {
-    *audio_buffer = 0.0;
+    if (audio_buffer != NULL) {
+        *audio_buffer = 0.0;
+    }
     int stereo_capable = (channels > 1) && (!data->dstereo);
     if(!data->drds && data->generate_multiplex) get_rds_samples(mpx_buffer, length, stereo_capable, data->rds_ct_enabled, data->rds_volume);
 
