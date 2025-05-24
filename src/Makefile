@@ -1,4 +1,4 @@
-all: ../pisstv ../piopera ../pifsq ../pichirp ../sendiq ../tune ../freedv ../pocsag ../spectrumpaint ../pifmrds ../rpitx ../corel8 ../pift8 ../sendook ../morse ../foxhunt ../pirtty
+all: ../pisstv ../piopera ../pifsq ../pichirp ../pilora ../sendiq ../tune ../freedv ../pocsag ../spectrumpaint ../pifmrds ../rpitx ../corel8 ../pift8 ../sendook ../morse ../foxhunt ../pirtty
 
 CFLAGS	?= -Wall -g -O2 -Wno-unused-variable
 CXXFLAGS ?= -std=c++11 -Wall -g -O2 -Wno-unused-variable
@@ -33,6 +33,9 @@ LDFLAGS_Pissb	= $(LDFLAGS) -lsndfile -lliquid
 
 ../pichirp : chirp/chirp.cpp 
 	$(CXX) $(CXXFLAGS) -o ../pichirp chirp/chirp.cpp $(LDFLAGS) 
+
+../pilora : lora/lora.cpp 
+	$(CXX) $(CXXFLAGS) -o ../pilora lora/lora.cpp $(LDFLAGS) 
 
 ../morse : morse/morse.cpp 
 	$(CXX) $(CXXFLAGS) -o ../morse morse/morse.cpp  $(LDFLAGS)
@@ -98,7 +101,7 @@ CFLAGS_Pidcf77	= -Wall -g -O2 -Wno-unused-variable
 ../pidcf77 : ../dcf77/pidcf77.c
 	$(CC) $(CFLAGS_Piam) -o ../pidcf77 ../dcf77/pidcf77.c  $(LDFLAGS)
 clean:
-	rm -f  ../dvbrf ../sendiq ../pissb ../pisstv ../pifsq ../pifm ../piam ../pidcf77 ../pichirp ../tune ../freedv ../piopera ../spectrumpaint ../pocsag ../pifmrds ../rpitx ../sendook
+	rm -f  ../dvbrf ../sendiq ../pissb ../pisstv ../pifsq ../pifm ../piam ../pidcf77 ../pichirp ../pilora ../tune ../freedv ../piopera ../spectrumpaint ../pocsag ../pifmrds ../rpitx ../sendook
 
 install: all
 	install -m 0755 ../pisstv $(INSTALL_DIR)
@@ -107,6 +110,7 @@ install: all
 	install -m 0755 ../piopera $(INSTALL_DIR)
 	install -m 0755 ../pifsq $(INSTALL_DIR)
 	install -m 0755 ../pichirp $(INSTALL_DIR)
+	install -m 0755 ../pilora $(INSTALL_DIR)
 	install -m 0755 ../sendiq $(INSTALL_DIR)
 	install -m 0755 ../tune $(INSTALL_DIR)
 	install -m 0755 ../freedv $(INSTALL_DIR)
