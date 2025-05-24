@@ -29,9 +29,9 @@ private:
     
 public:
     LoRaModulator(LoRaConfig cfg, int sr) : config(cfg), sample_rate(sr) {
-        symbols_per_second = config.bandwidth / (1 << config.spreading_factor);
-        symbol_time = (1 << config.spreading_factor) / config.bandwidth;
-        samples_per_symbol = sample_rate * symbol_time;
+        symbols_per_second = static_cast<float>(config.bandwidth) / (1 << config.spreading_factor);
+        symbol_time = 1.0f / symbols_per_second;
+        samples_per_symbol = static_cast<int>(sample_rate * symbol_time);
     }
     
     // Convert binary string to symbols
@@ -90,12 +90,7 @@ public:
                 freq_offset += (symbol_value * config.bandwidth) / (1 << config.spreading_factor);
                 
                 // Wrap frequency if it exceeds bandwidth
-                while(freq_offset > bandwidth_half) {
-                    freq_offset -= config.bandwidth;
-                }
-                while(freq_offset < -bandwidth_half) {
-                    freq_offset += config.bandwidth;
-                }
+                freq_offset = fmod(freq_offset + bandwidth_half, config.bandwidth) - bandwidth_half;
             } else {
                 // Downchirp: frequency decreases linearly
                 float progress = (float)i / num_samples;
