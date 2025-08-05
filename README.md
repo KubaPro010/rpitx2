@@ -1,4 +1,5 @@
 if you wanna use pifmrds, then scroll down to pifmrds usage ([here](#usage))
+also im not gonna be adding stuff here, because for fm i've moved onto BH1415F based transmitters (CZE-7C), with that i use a chinese PCM5122 dac (allo boss dac driver), and on the pi 3b, i have my fm95, rds95 running with cutting edge features (rds95 has 9-bit af codes, while no other open-source encoder has)
 ![rpitx banner](/doc/rpitxlogo.png)
 # About rpitx2
 **rpitx2** is a general radio frequency transmitter for Raspberry Pi which doesn't require any other hardware unless filter to avoid interference. It can handle frequencies from 5 KHz up to 1500 MHz.
