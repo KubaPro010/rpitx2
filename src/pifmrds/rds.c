@@ -139,6 +139,8 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //ptyn?
 		        }
                 af_state = af_state + 2;
 		        if(af_state > rds_params.af[0]) af_state = 0;
+            } else {
+                blocks[2] = 244 << 8 | 0xCD; // 244 is the base, since 244+0 is still 244, 0 AFs, the CD is just a filler
             }
             blocks[3] = rds_params.ps[ps_state*2] << 8 | rds_params.ps[ps_state*2+1];
             ps_state++;

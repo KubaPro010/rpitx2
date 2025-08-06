@@ -52,3 +52,5 @@ Thumbs.db
 # Libraries
 lib/
 lib64/
+
+src/pifmrds/rds_test
