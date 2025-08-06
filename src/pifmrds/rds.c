@@ -24,12 +24,9 @@
 #include <time.h>
 #include <stdlib.h>
 #include "waveforms.h"
+#include "rds.h"
 
 float carrier_57[] = {0.0, 1.0, 1.2246467991473532e-16, -1.0}; // sine wave at 57 kHz, 228 kHz sample rate, 4 samples because 57 kHz is 4 times the sample rate
-
-#define RT_LENGTH 64
-#define PS_LENGTH 8
-#define GROUP_LENGTH 4
 
 struct {
     uint16_t pi;
@@ -51,16 +48,6 @@ struct {
 /* The RDS error-detection code generator polynomial is
    x^10 + x^8 + x^7 + x^5 + x^4 + x^3 + x^0
 */
-#define POLY 0x1B9
-#define POLY_DEG 10
-#define MSB_BIT 0x8000
-#define BLOCK_SIZE 16
-
-#define BITS_PER_GROUP (GROUP_LENGTH * (BLOCK_SIZE+POLY_DEG))
-#define SAMPLES_PER_BIT 192
-#define FILTER_SIZE (sizeof(waveform_biphase)/sizeof(float))
-#define SAMPLE_BUFFER_SIZE (SAMPLES_PER_BIT + FILTER_SIZE)
-
 
 uint16_t offset_words[] = {0x0FC, 0x198, 0x168, 0x1B4};
 // We don't handle offset word C' here for the sake of simplicity
