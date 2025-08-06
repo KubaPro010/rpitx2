@@ -163,6 +163,7 @@ if you have a arg with no argume... wait what args with args? anyways like the i
 `-af` - same as pifmadv<br>
 `-rdsvolume` - rds volume, so how many times is the rds "louder", this can potentially increase rds range<br>
 `-limiterthreshold` - limiter threshold, limits to 10, i think that its in linear ratio, so the algorithm to convert from db is gonna be 10 ** (db/20) (actually its pcm value)<br><br>
+`-ecc` - see the control pipe entry
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
 `PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
@@ -181,6 +182,7 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `COM` - toggle, like rds but it doesnt toggle the rds, it does toggle the COMPRESSOR<br>
 `CMG` - change compressor max gain recip<br>
 `LIM` - same as that arg<br>
+`ECC` - sets the EXTENDED COUNTRY CODE, i don't know why would you need this, but it's here, look at a RDS standard like the [EN50067](https://flerken.zapto.org:8440/EN50067_RDS_Standard.pdf) and look at page 71
 <br>
 and thats all, and remember kids dont pirate
 
