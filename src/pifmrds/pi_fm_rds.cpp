@@ -390,7 +390,6 @@ int main(int argc, char **argv) {
             alternative_freq[af_size] = (int)(10*atof(param))-875;
             if(alternative_freq[af_size] < 1 || alternative_freq[af_size] > 204)
                 fatal("Alternative Frequency has to be set in range of 87.6 Mhz - 107.9 Mhz\n");
-            memcpy(data.af_array, alternative_freq, sizeof(alternative_freq));
         }
         else {
             fatal("Unrecognised argument: %s.\n"
@@ -400,6 +399,7 @@ int main(int argc, char **argv) {
     }
 
     alternative_freq[0] = af_size;
+    memcpy(data.af_array, alternative_freq, sizeof(alternative_freq));
     int FifoSize=DATA_SIZE*2;
     //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(data.carrier_freq,228000,14,FifoSize, false);

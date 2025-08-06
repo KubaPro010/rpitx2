@@ -10,7 +10,7 @@ extern "C"
 int main() {
     set_rds_pi(0xff);
     set_rds_ps("TEST");
-    int af_array[] = {0, 1, 2, 3};
+    int af_array[] = {3, 2, 1, 0};
     set_rds_af(af_array);
     for(int i = 0; i < 32; i++) {
         int buffer[BITS_PER_GROUP];
