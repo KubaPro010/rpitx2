@@ -49,6 +49,6 @@ extern void set_rds_af(int *af_array);
 extern void set_rds_tp(int tp);
 extern void set_rds_ms(int ms);
 extern void set_rds_ab(int ab);
-
+extern void set_rds_ecc(uint16_t ecc);
 
 #endif /* RDS_H */

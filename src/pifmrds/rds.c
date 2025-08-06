@@ -30,6 +30,7 @@ float carrier_57[] = {0.0, 1.0, 1.2246467991473532e-16, -1.0}; // sine wave at 5
 
 struct {
     uint16_t pi;
+    uint16_t ecc;
     int ta;
     int pty;
     int tp;
@@ -145,16 +146,21 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //ptyn?
             blocks[3] = rds_params.ps[ps_state*2] << 8 | rds_params.ps[ps_state*2+1];
             ps_state++;
             if(ps_state >= 4) ps_state = 0;
-        } else { // Type 2A groups
+        } else if(state < 8) { // Type 2A groups
             blocks[1] = 0x2000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ab << 4 | rt_state;
             blocks[2] = rds_params.rt[rt_state*4+0] << 8 | rds_params.rt[rt_state*4+1];
             blocks[3] = rds_params.rt[rt_state*4+2] << 8 | rds_params.rt[rt_state*4+3];
             rt_state++;
             if(rt_state >= 16) rt_state = 0;
+        } else {
+            blocks[1] = 0x1000 | rds_params.tp << 10 | rds_params.pty << 5;
+            blocks[2] = rds_params.ecc; // Things like LIC would require the first 1-3 bits set, but ecc has just 0s there
+            // block 3 unused
         }
     
         state++;
-        if(state >= 8) state = 0;
+        if(state >= 8 && rds_params.ecc == 0) state = 0;
+        if(state >= 9 && rds_params.ecc != 0) state = 0;
     }
     
     // Calculate the checkword for each block and emit the bits
@@ -286,4 +292,8 @@ void set_rds_ms(int ms) {
 
 void set_rds_ab(int ab) {
 	rds_params.ab = ab;
+}
+
+void set_rds_ecc(uint16_t ecc) {
+	rds_params.ecc = ecc;
 }

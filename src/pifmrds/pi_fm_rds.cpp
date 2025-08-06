@@ -43,30 +43,31 @@ typedef struct tx_data {
     uint32_t carrier_freq;
     char *audio_file;
     uint16_t pi;
+    uint16_t ecc;
     char *ps;
     char *rt;
     char *control_pipe;
-    int pty;
+    uint8_t pty;
     int af_array[100];
-    int raw;
-    int drds;
-    double preemp;
+    uint8_t raw;
+    uint8_t drds;
+    float preemp;
     int power;
     int rawSampleRate;
     int rawChannels;
     int deviation;
-    int ta;
-    int tp;
+    uint8_t ta;
+    uint8_t tp;
     float cutoff_freq;
     float audio_gain;
     float compressor_decay;
     float compressor_attack;
     float compressor_max_gain_recip;
-    int enablecompressor;
-    int rds_ct_enabled;
+    uint8_t enablecompressor;
+    uint8_t rds_ct_enabled;
     float rds_volume;
-    int disablestereo;
-    int log;
+    uint8_t disablestereo;
+    uint8_t log;
     float limiter_threshold;
 } tx_data;
 
@@ -111,6 +112,7 @@ int tx(tx_data *data) {
     // Initialize the RDS modulator
     char myps[9] = {0};
     set_rds_pi(data->pi);
+    set_rds_ecc(data->ecc);
     set_rds_ps(data->ps);
     set_rds_rt(data->rt);
     set_rds_pty(data->pty);
@@ -129,7 +131,7 @@ int tx(tx_data *data) {
         if(drds == 1) {
             printf("RDS Disabled (you can enable with control fifo with the RDS command)\n");
         } else {
-            printf("PI: %04X, PS: \"%s\".\n", data->pi, data->ps);
+            printf("PI: %04X, ECC: %02X, PS: \"%s\".\n", data->pi, data->ecc, data->ps);
             printf("RT: \"%s\"\n", data->rt);
 
             if(data->af_array[0]) {
@@ -226,6 +228,7 @@ int main(int argc, char **argv) {
         .carrier_freq = 100000000,
         .audio_file = NULL,
         .pi = 0x00ff,
+        .ecc = 0x0,
         .ps = "Pi-FmSa",
         .rt = "Broadcasting on a Raspberry Pi: Simply Advanced",
         .control_pipe = NULL,
@@ -275,6 +278,9 @@ int main(int argc, char **argv) {
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
             data.pi = atoi(param);
+        } else if(strcmp("-ecc", arg)==0 && param != NULL) {
+            i++;
+            data.ecc = atoi(param);
         } else if(strcmp("-ps", arg)==0 && param != NULL) {
             i++;
             data.ps = param;
@@ -393,7 +399,7 @@ int main(int argc, char **argv) {
         }
         else {
             fatal("Unrecognised argument: %s.\n"
-            "Syntax: pi_fm_rds [-freq freq] [-audio file] [-pi pi_code]\n"
+            "Syntax: pi_fm_rds [-freq freq] [-audio file] [-pi pi_code] [-ecc ecc_code]\n"
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000] [-tp] [-ta]\n", arg);
         }
     }

@@ -48,10 +48,7 @@ float carrier_38[] = {0.0, 0.8660254037844386, 0.8660254037844388, 1.22464679914
 
 float carrier_19[] = {0.0, 0.5, 0.8660254037844386, 1.0, 0.8660254037844388, 0.5, 1.2246467991473532e-16, -0.5, -0.8660254037844384, -1.0, -0.8660254037844386, -0.5};
 
-float carrier_3125[] = {0.0, 0.7586133425663026, 0.9885355334735083, 0.5295297022607088, -0.29851481100169425, -0.918519035014914, -0.898390981891979, -0.2521582503964708}; // sine wave
-
 int phase_38 = 0;
-int phase_3125 = 0;
 int phase_19 = 0;
 
 float downsample_factor;
@@ -349,21 +346,14 @@ int fm_mpx_get_samples(float *mpx_buffer, fm_mpx_data *data) {
 
         // Generate the stereo mpx
         if(channels == 2 && !data->dstereo) {
-            if(1) {
-                // 4.5 and 0.9 are the volumes, thats because we dont have 75000 khz of deviation, instead we have 7500 khz, so that needs to be louder by 10 times than normal
-                mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal
-                    4.5 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
-                0.9*carrier_19[phase_19];                  // Stereo pilot tone
-                phase_19++;
-                phase_38++;
-                if(phase_19 >= 12) phase_19 = 0;
-                if(phase_38 >= 6) phase_38 = 0;
-            } else { // polar stereo (https://forums.stereotool.com/viewtopic.php?t=6233, https://personal.utdallas.edu/~dlm/3350%20comm%20sys/ITU%20std%20on%20FM%20--%20R-REC-BS.450-3-200111-I!!PDF-E.pdf)
-                mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal (L+R)
-                    4.5 * carrier_3125[phase_3125] * (out_left-out_right); // Stereo difference signal
-                phase_3125++;
-                if(phase_3125 >= 8) phase_3125 = 0;
-            }
+            // 4.5 and 0.9 are the volumes, thats because we dont have 75000 khz of deviation, instead we have 7500 khz, so that needs to be louder by 10 times than normal
+            mpx_buffer[i] +=  4.5*(out_left+out_right) + // Stereo sum signal
+                4.5 * carrier_38[phase_38] * (out_left-out_right) + // Stereo difference signal
+            0.9*carrier_19[phase_19];                  // Stereo pilot tone
+            phase_19++;
+            phase_38++;
+            if(phase_19 >= 12) phase_19 = 0;
+            if(phase_38 >= 6) phase_38 = 0;
         } else if(channels == 1 || data->dstereo)
         {
             if(data->generate_multiplex) {

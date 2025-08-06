@@ -152,6 +152,11 @@ ResultAndArg poll_control_pipe(int log) {
 				printf("Wrong PTY identifier! The PTY range is 0 - 31.\n");
 			}
 			resarg.res = CONTROL_PIPE_PTY_SET;
+		} else if(fifo[0] == 'E' && fifo[1] == 'C' && fifo[2] == 'C') {
+			arg[3] = 0;
+			set_rds_ecc((uint16_t) strtol(arg, NULL, 16));
+			if(log==1) printf("ECC set to: \"%s\"\n", arg);
+			resarg.res = CONTROL_PIPE_GENERIC_SET;
 		} else if(fifo[0] == 'P' && fifo[1] == 'W' && fifo[2] == 'R') {
 			int power_level = atoi(arg);
 			resarg.arg_int = power_level;
