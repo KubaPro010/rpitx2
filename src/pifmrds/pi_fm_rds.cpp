@@ -277,10 +277,10 @@ int main(int argc, char **argv) {
             if(data.carrier_freq < 64e6 || data.carrier_freq > 108e6) fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 64 and 108.\n");
         } else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
-            data.pi = atoi(param);
+            data.pi = (uint16_t)strtoul(pi, NULL, 16);
         } else if(strcmp("-ecc", arg)==0 && param != NULL) {
             i++;
-            data.ecc = atoi(param);
+            data.ecc = (uint16_t)strtoul(param, NULL, 16);
         } else if(strcmp("-ps", arg)==0 && param != NULL) {
             i++;
             data.ps = param;
